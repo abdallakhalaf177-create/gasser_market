@@ -1,0 +1,569 @@
+/* ================================================================
+   MOBILE RESPONSIVE & PWA - v2.0
+   Gasser Market - Full Responsive + Camera + Bottom Sheet
+   ================================================================ */
+
+/* ===== Camera Scan Button (next to barcode input) ===== */
+.barcode-camera-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 700;
+    font-family: var(--font-ar);
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+    min-height: 44px;
+}
+
+.barcode-camera-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(6, 182, 212, 0.4);
+}
+
+.barcode-camera-btn svg {
+    width: 17px;
+    height: 17px;
+}
+
+/* Hide camera button text on very small screens to save space */
+@media (max-width: 390px) {
+    .camera-btn-text { display: none; }
+}
+
+/* ===== Camera Modal Styling ===== */
+.camera-status-bar {
+    padding: 16px;
+    text-align: center;
+    background: var(--bg-card);
+}
+
+.camera-status-text {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin: 0;
+    direction: rtl;
+}
+
+/* Scan target crosshair overlay inside camera region */
+.camera-scan-target {
+    display: none; /* Shown dynamically via JS when camera is active */
+}
+
+#camera-scanner-region video {
+    width: 100% !important;
+    max-height: 300px;
+    object-fit: cover;
+    display: block;
+}
+
+#camera-scanner-region canvas {
+    display: none; /* Hide the canvas used for analysis */
+}
+
+/* ===== Mobile Floating Cart FAB ===== */
+.mobile-cart-fab {
+    /* Hidden by default; shown on mobile when cart has items via JS */
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 990;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 14px 24px;
+    font-family: var(--font-ar);
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 8px 30px rgba(99, 102, 241, 0.5);
+    align-items: center;
+    gap: 12px;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    white-space: nowrap;
+}
+
+.mobile-cart-fab:hover,
+.mobile-cart-fab:active {
+    transform: translateX(-50%) translateY(-3px);
+    box-shadow: 0 12px 36px rgba(99, 102, 241, 0.6);
+}
+
+.mobile-cart-fab svg {
+    width: 22px;
+    height: 22px;
+}
+
+.fab-badge {
+    background: var(--danger);
+    color: white;
+    font-size: 0.72rem;
+    font-weight: 900;
+    min-width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    border: 2px solid rgba(255,255,255,0.3);
+    animation: badgePop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.fab-total {
+    font-size: 1rem;
+    font-weight: 800;
+}
+
+/* ===== Mobile Cart Backdrop ===== */
+.mobile-cart-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(2px);
+    z-index: 991;
+    animation: fadeIn 0.2s ease;
+}
+
+.mobile-cart-backdrop.visible {
+    display: block;
+}
+
+/* ===== Mobile Inventory Cards ===== */
+.mobile-inventory-cards {
+    display: none; /* Shown via media query on mobile */
+    flex-direction: column;
+    gap: 10px;
+    padding: 0;
+}
+
+.inv-mobile-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: box-shadow 0.2s ease;
+}
+
+.inv-mobile-card:active {
+    box-shadow: 0 0 0 2px var(--primary);
+}
+
+.inv-mobile-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.inv-mobile-card-name {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    flex: 1;
+    line-height: 1.4;
+}
+
+.inv-mobile-card-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 12px;
+}
+
+.inv-mobile-card-field {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.inv-mobile-card-field label {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.inv-mobile-card-field span {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.inv-mobile-card-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.inv-mobile-card-actions .btn {
+    min-height: 42px;
+    font-size: 0.85rem;
+}
+
+/* ===== WhatsApp Share Button ===== */
+.btn-whatsapp {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, #25D366 0%, #128C7E 100%);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 8px 14px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: var(--font-ar);
+    white-space: nowrap;
+}
+
+.btn-whatsapp:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(37, 211, 102, 0.4);
+}
+
+.btn-whatsapp svg {
+    width: 15px;
+    height: 15px;
+}
+
+/* ===== Cart Sheet Drag Handle ===== */
+.cart-drag-handle {
+    display: none; /* shown on mobile */
+    width: 44px;
+    height: 5px;
+    background: var(--border-color);
+    border-radius: 3px;
+    margin: 10px auto 4px;
+    cursor: grab;
+}
+
+/* ================================================================
+   MEDIA QUERIES — Mobile Breakpoints
+   ================================================================ */
+
+/* --- Tablet & Mobile (≤ 900px): Collapse sidebar to icons --- */
+@media (max-width: 900px) {
+    :root {
+        --sidebar-width: 64px;
+    }
+
+    /* Sidebar becomes icon-only strip */
+    .sidebar {
+        width: 64px !important;
+        overflow: hidden;
+    }
+
+    .menu-text,
+    .sidebar-footer .user-info,
+    .sidebar-logo-text {
+        display: none !important;
+    }
+
+    .sidebar-logo {
+        justify-content: center;
+        padding: 16px 0;
+        gap: 0;
+    }
+
+    .logo-icon {
+        margin: 0;
+    }
+
+    .menu-item {
+        justify-content: center !important;
+        padding: 14px 0 !important;
+        gap: 0 !important;
+    }
+
+    .menu-item svg {
+        width: 22px;
+        height: 22px;
+    }
+
+    /* Shortage badge position adjustment */
+    .shortage-badge {
+        left: 6px;
+        top: 8px;
+        transform: none;
+    }
+
+    /* Header: smaller padding */
+    .top-header {
+        padding: 12px 16px;
+    }
+
+    .lang-btn span {
+        display: none;
+    }
+
+    /* POS: 60/40 split on tablet */
+    .pos-container {
+        grid-template-columns: 60% 40% !important;
+    }
+}
+
+/* --- Mobile only (≤ 768px): Bottom sheet cart + cards --- */
+@media (max-width: 768px) {
+
+    /* === Layout === */
+    .main-content {
+        overflow-x: hidden;
+    }
+
+    /* POS: Full width catalog, cart becomes bottom sheet */
+    .pos-container {
+        grid-template-columns: 1fr !important;
+        height: auto !important;
+        gap: 0;
+    }
+
+    /* -------- CART BOTTOM SHEET -------- */
+    .pos-cart-panel {
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        top: auto !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        height: 82vh !important;
+        max-height: 82vh !important;
+        border-radius: 22px 22px 0 0 !important;
+        box-shadow: 0 -8px 48px rgba(0, 0, 0, 0.4) !important;
+        z-index: 992;
+        transform: translateY(100%);
+        transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1) !important;
+        overflow-y: auto;
+    }
+
+    .pos-cart-panel.mobile-open {
+        transform: translateY(0) !important;
+    }
+
+    /* Show drag handle on cart */
+    .cart-drag-handle {
+        display: block;
+    }
+
+    /* FAB button: shown by JS when cart is non-empty */
+    .mobile-cart-fab {
+        display: inline-flex; /* controlled by JS */
+    }
+
+    /* === Header === */
+    .top-header {
+        padding: 10px 12px;
+    }
+
+    #current-view-title {
+        font-size: 1rem;
+    }
+
+    #current-view-subtitle {
+        display: none;
+    }
+
+    .time-display {
+        display: none;
+    }
+
+    /* === POS Catalog === */
+    .pos-products-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px;
+        padding-bottom: 100px; /* room for FAB */
+    }
+
+    .product-card {
+        padding: 12px 10px !important;
+        min-height: 75px;
+    }
+
+    .product-card-name {
+        font-size: 0.82rem;
+        -webkit-line-clamp: 2;
+    }
+
+    .product-card-price {
+        font-size: 0.9rem;
+    }
+
+    /* Barcode scanner field: full width */
+    .barcode-scanner-row {
+        flex-wrap: nowrap;
+        gap: 8px;
+    }
+
+    .barcode-scanner-field {
+        font-size: 0.9rem !important;
+    }
+
+    /* === Inventory: Show cards, hide table === */
+    .table-responsive {
+        display: none !important;
+    }
+
+    .mobile-inventory-cards {
+        display: flex !important;
+    }
+
+    /* === Touch-friendly minimum tap target 44px === */
+    .btn {
+        min-height: 44px;
+        font-size: 0.9rem;
+    }
+
+    .btn-sm {
+        min-height: 38px;
+    }
+
+    .qty-btn {
+        width: 38px !important;
+        height: 38px !important;
+        font-size: 1.1rem !important;
+    }
+
+    /* Cart item card: bigger tap targets */
+    .cart-item-card {
+        padding: 12px !important;
+    }
+
+    /* === Stats grid: 2 columns on mobile === */
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px;
+    }
+
+    .stat-card {
+        padding: 14px 12px;
+    }
+
+    .stat-value {
+        font-size: 1.2rem;
+    }
+
+    /* === Shortages: WhatsApp + Export buttons wrap === */
+    .shortage-supplier-actions {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    /* === Modals: full width on mobile === */
+    .modal-container {
+        width: 95vw !important;
+        max-width: 95vw !important;
+        margin: 16px auto;
+    }
+
+    .modal-container.modal-sm {
+        width: 96vw !important;
+    }
+
+    /* === Reports: hide sidebar, expand content === */
+    .reports-content {
+        grid-template-columns: 1fr !important;
+    }
+
+    .reports-charts-grid {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* --- Small phones (≤ 480px) --- */
+@media (max-width: 480px) {
+
+    .pos-products-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 8px;
+    }
+
+    .product-card {
+        padding: 10px 8px !important;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr 1fr !important;
+        gap: 8px;
+    }
+
+    /* Sidebar even thinner on tiny screens */
+    :root { --sidebar-width: 56px; }
+    .sidebar { width: 56px !important; }
+    .menu-item { padding: 12px 0 !important; }
+
+    /* Category filter pills: scrollable horizontally */
+    .pos-categories {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        flex-wrap: nowrap;
+        scrollbar-width: none;
+        padding-bottom: 4px;
+    }
+
+    .pos-categories::-webkit-scrollbar { display: none; }
+
+    /* Shortage supplier header stacks */
+    .shortage-supplier-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .shortage-supplier-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .btn-export-shortage,
+    .btn-whatsapp {
+        flex: 1;
+        justify-content: center;
+    }
+}
+
+/* ================================================================
+   PWA SAFE AREAS (iPhone notch / home indicator)
+   ================================================================ */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+    .mobile-cart-fab {
+        bottom: calc(24px + env(safe-area-inset-bottom));
+    }
+
+    .pos-cart-panel {
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .sidebar {
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+}
+
+/* ================================================================
+   DARK MODE REFINEMENTS FOR MOBILE
+   ================================================================ */
+@media (max-width: 768px) {
+    .dark-mode .pos-cart-panel {
+        background: var(--bg-card);
+        border-top: 1px solid var(--border-color);
+    }
+
+    .dark-mode .inv-mobile-card {
+        background: var(--bg-secondary);
+    }
+}

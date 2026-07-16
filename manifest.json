@@ -1,0 +1,49 @@
+{
+  "name": "جاسر ماركت - نظام السوبرماركت",
+  "short_name": "جاسر ماركت",
+  "description": "نظام إدارة السوبرماركت المتكامل - كاشير، مخزون، تقارير",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#080b11",
+  "theme_color": "#6366f1",
+  "orientation": "any",
+  "lang": "ar",
+  "dir": "rtl",
+  "categories": ["business", "shopping"],
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "نقطة البيع",
+      "short_name": "كاشير",
+      "description": "فتح شاشة الكاشير مباشرة",
+      "url": "/?view=pos",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "قائمة النواقص",
+      "short_name": "النواقص",
+      "description": "عرض قائمة المنتجات الناقصة",
+      "url": "/?view=shortages",
+      "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}
