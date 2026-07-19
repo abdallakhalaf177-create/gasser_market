@@ -317,6 +317,7 @@ function switchView(viewName) {
 
     lucide.createIcons();
 }
+window.switchView = switchView;
 
 // Global Event Listeners & Modals
 function setupEventListeners() {
