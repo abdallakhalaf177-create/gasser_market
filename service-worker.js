@@ -5,12 +5,12 @@
 
 const CACHE_NAME = 'gasser-market-v1.2';
 const STATIC_ASSETS = [
-    '/',
-    '/index.html',
-    '/style.css',
-    '/js/app-bundle.js',
-    '/manifest.json',
-    '/icons/icon.svg',
+    './',
+    'index.html',
+    'style.css',
+    'js/app-bundle.js',
+    'manifest.json',
+    'icons/icon.svg',
     'https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap',
     'https://unpkg.com/lucide@latest',
     'https://cdn.jsdelivr.net/npm/chart.js'
@@ -68,7 +68,7 @@ self.addEventListener('fetch', (event) => {
                     caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
                     return response;
                 })
-                .catch(() => caches.match('/index.html'))
+                .catch(() => caches.match('index.html'))
         );
         return;
     }

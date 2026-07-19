@@ -1340,7 +1340,7 @@ window.refreshCurrentView = () => switchView(state.currentView);
 // ================================================================
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/service-worker.js')
+        navigator.serviceWorker.register('service-worker.js')
             .then(reg => {
                 console.log('[PWA] Service Worker registered:', reg.scope);
                 // Check for updates
