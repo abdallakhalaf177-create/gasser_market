@@ -147,7 +147,6 @@ html[lang="en"] * {
    ========================================================================== */
 .app-container {
     display: none;
-    /* تم إزالة !important لمنع تضارب فتح التطبيق */
     height: 100vh;
     width: 100vw;
 }
@@ -1031,7 +1030,7 @@ html[lang="en"] .product-card-badge {
     right: 8px;
 }
 
-/* POS Cart Panel (تم إكمال الكود المقطوع وتقفيله بشكل سليم) */
+/* POS Cart Panel */
 .pos-cart-panel {
     background-color: var(--bg-card);
     border: 1px solid var(--border-color);
@@ -1044,18 +1043,29 @@ html[lang="en"] .product-card-badge {
 }
 
 /* ==========================================================================
-   3. GENERAL MODALS & OVERLAYS SYSTEM (إضافة لإصلاح تداخل شاشات المستخدمين والمنتجات)
+   3. GENERAL MODALS & OVERLAYS SYSTEM (التقفيل النهائي الآمن)
    ========================================================================== */
 .modal-backdrop,
 .modal-overlay {
     position: fixed;
     inset: 0;
-    background-color: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(4px);
-    z-index: 1500;
-    display: flex;
+    background-color: rgba(8, 11, 17, 0.85);
+    backdrop-filter: blur(8px);
+    z-index: 99999 !important;
+    display: none;
+    /* تبدأ مخفية افتراضياً */
     align-items: center;
     justify-content: center;
+}
+
+/* الاستدعاء النشط من الـ JS لإظهار الشاشة بشكل سليم */
+.modal-backdrop.active,
+.modal-overlay.active,
+.modal-backdrop.show,
+.modal-overlay.show,
+[style*="display: block"].modal-backdrop,
+[style*="display: block"].modal-overlay {
+    display: flex !important;
 }
 
 .modal-container,
@@ -1069,7 +1079,26 @@ html[lang="en"] .product-card-badge {
     max-height: 85vh;
     overflow-y: auto;
     box-shadow: var(--shadow-lg);
-    z-index: 1600;
+    z-index: 100000 !important;
     display: flex;
     flex-direction: column;
+    position: relative;
+}
+
+/* ==========================================================================
+   4. MOBILE RESPONSIVENESS (تجاوب الموبايل للـ POS والـ Modals)
+   ========================================================================== */
+@media (max-width: 768px) {
+    .pos-container {
+        grid-template-columns: 1fr;
+        height: auto;
+        overflow-y: auto;
+    }
+
+    .modal-container,
+    .modal-content,
+    .custom-modal {
+        width: 95vw;
+        max-height: 90vh;
+    }
 }
