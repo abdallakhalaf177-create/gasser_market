@@ -26,7 +26,8 @@ export function initAuth() {
         const username = document.getElementById('login-username').value.trim();
         const password = document.getElementById('login-password').value.trim();
 
-        const user = state.users.find(u => u.username === username && u.password === password);
+        // Match by username OR email
+        const user = state.users.find(u => (u.username === username || u.email === username) && u.password === password);
         
         if (user) {
             loginError.style.display = 'none';
@@ -52,65 +53,84 @@ function login(user) {
     document.getElementById('login-overlay').classList.remove('active');
     document.body.setAttribute('data-role', user.role);
 
+    const isSuperAdmin = user.email === 'abdallakhalaf177@gmail.com';
+    document.body.setAttribute('data-superadmin', isSuperAdmin ? 'true' : 'false');
+
     // Update profile UI
     const nameEl = document.getElementById('current-user-name');
     const roleEl = document.getElementById('current-user-role');
     const avatarEl = document.getElementById('current-user-avatar');
     
     if (nameEl) nameEl.textContent = user.name;
-    if (roleEl) roleEl.textContent = user.role === 'admin' ? 'المدير العام' : 'كاشير';
+    if (roleEl) roleEl.textContent = isSuperAdmin ? 'المدير الرئيسي' : (user.role === 'admin' ? 'مدير' : 'كاشير');
     if (avatarEl) avatarEl.textContent = user.name.substring(0, 4);
 
-    // Routing
+    // Routing Logic:
     if (user.role === 'cashier') {
-        if (window.switchView) {
-            window.switchView('pos');
-        }
+        if (window.switchView) window.switchView('pos');
     } else {
-        if (window.switchView) {
-            window.switchView('dashboard');
-        }
+        // Admin
+        if (window.switchView) window.switchView('dashboard');
+    }
+
+    // Intercept switchView if they try to view users without being super admin
+    if (window.switchView) {
+        const originalSwitch = window.switchView;
+        window.switchView = function(viewName) {
+            if (viewName === 'users' && state.currentUser?.email !== 'abdallakhalaf177@gmail.com') {
+                if (window.showToast) window.showToast("عذراً، هذه الصفحة للمدير الرئيسي فقط!", "danger");
+                originalSwitch('pos'); // Force redirect to cashier
+                return;
+            }
+            originalSwitch(viewName);
+        };
     }
 }
 
 // User Management Logic
 export function renderUsers() {
-    const tbody = document.querySelector('#users-table tbody');
-    if (!tbody) return;
+    // Only allow Super Admin to render this
+    if (state.currentUser?.email !== 'abdallakhalaf177@gmail.com') return;
+
+    const gridContainer = document.getElementById('users-grid-container');
+    if (!gridContainer) return;
     
-    tbody.innerHTML = '';
+    gridContainer.innerHTML = '';
     
     const searchTerm = (document.getElementById('users-search')?.value || '').toLowerCase();
     
     const filtered = state.users.filter(u => 
         u.name.toLowerCase().includes(searchTerm) || 
-        u.username.toLowerCase().includes(searchTerm)
+        u.username.toLowerCase().includes(searchTerm) ||
+        (u.email && u.email.toLowerCase().includes(searchTerm))
     );
     
     filtered.forEach(user => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>
-                <div class="user-info-cell">
-                    <div class="user-avatar" style="width: 32px; height: 32px; border-radius: 50%; background: var(--primary); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 12px;">${user.name.substring(0,2)}</div>
-                    <div>${user.name}</div>
+        const card = document.createElement('div');
+        card.className = 'user-card-item';
+        card.innerHTML = `
+            <div class="user-card-header">
+                <div class="user-avatar">${user.name.substring(0,2)}</div>
+                <div class="user-main-info">
+                    <h4>${user.name}</h4>
+                    <span class="badge ${user.role === 'admin' ? 'badge-primary' : 'badge-success'}">${user.role === 'admin' ? 'مدير' : 'كاشير'}</span>
                 </div>
-            </td>
-            <td><span class="badge badge-outline">${user.username}</span></td>
-            <td><span class="badge ${user.role === 'admin' ? 'badge-primary' : 'badge-success'}">${user.role === 'admin' ? 'مدير' : 'كاشير'}</span></td>
-            <td><span class="password-mask" style="letter-spacing: 2px;">••••••••</span></td>
-            <td>
-                <div class="action-buttons-cell" style="display: flex; gap: 5px;">
-                    <button class="btn btn-icon btn-secondary" onclick="window.editUser('${user.id}')" title="تعديل">
-                        <i data-lucide="edit-2"></i>
-                    </button>
-                    <button class="btn btn-icon btn-danger" onclick="window.deleteUser('${user.id}')" title="حذف" ${user.id === 'u1' ? 'disabled' : ''}>
-                        <i data-lucide="trash-2"></i>
-                    </button>
-                </div>
-            </td>
+            </div>
+            <div class="user-card-body">
+                <p><strong>الإيميل:</strong> ${user.email || '—'}</p>
+                <p><strong>اسم المستخدم:</strong> ${user.username}</p>
+                <p><strong>الباسورد:</strong> <span class="password-mask">••••••••</span></p>
+            </div>
+            <div class="user-card-actions">
+                <button class="btn btn-secondary btn-full" onclick="window.editUser('${user.id}')">
+                    <i data-lucide="edit-2"></i> تعديل
+                </button>
+                <button class="btn btn-danger btn-full" onclick="window.deleteUser('${user.id}')" ${user.email === 'abdallakhalaf177@gmail.com' ? 'disabled' : ''}>
+                    <i data-lucide="trash-2"></i> حذف
+                </button>
+            </div>
         `;
-        tbody.appendChild(tr);
+        gridContainer.appendChild(card);
     });
     
     if (window.lucide) {
@@ -122,6 +142,7 @@ export function handleUserFormSubmit(e) {
     e.preventDefault();
     const id = document.getElementById('user-id').value;
     const name = document.getElementById('user-name').value;
+    const email = document.getElementById('user-email').value;
     const username = document.getElementById('user-username').value;
     const password = document.getElementById('user-password').value;
     const role = document.getElementById('user-role').value;
@@ -131,15 +152,20 @@ export function handleUserFormSubmit(e) {
         const user = state.users.find(u => u.id === id);
         if (user) {
             user.name = name;
+            user.email = email;
             user.username = username;
             user.password = password;
             user.role = role;
             if (window.showToast) window.showToast("تم تحديث بيانات المستخدم", "success");
         }
     } else {
-        // Check if username exists
+        // Check if username or email exists
         if (state.users.some(u => u.username === username)) {
             if (window.showToast) window.showToast("اسم المستخدم موجود بالفعل!", "danger");
+            return;
+        }
+        if (state.users.some(u => u.email === email)) {
+            if (window.showToast) window.showToast("هذا الإيميل مسجل بالفعل!", "danger");
             return;
         }
         
@@ -147,6 +173,7 @@ export function handleUserFormSubmit(e) {
         const newUser = {
             id: 'u_' + Date.now(),
             name,
+            email,
             username,
             password,
             role
@@ -167,6 +194,7 @@ export function editUser(id) {
     document.getElementById('user-modal-title').textContent = "تعديل بيانات المستخدم";
     document.getElementById('user-id').value = user.id;
     document.getElementById('user-name').value = user.name;
+    document.getElementById('user-email').value = user.email || '';
     document.getElementById('user-username').value = user.username;
     document.getElementById('user-password').value = user.password;
     document.getElementById('user-role').value = user.role;
@@ -175,8 +203,11 @@ export function editUser(id) {
 }
 
 export function deleteUser(id) {
-    if (id === 'u1') {
-        if (window.showToast) window.showToast("لا يمكن حذف المدير الرئيسي!", "danger");
+    const user = state.users.find(u => u.id === id);
+    if (!user) return;
+    
+    if (user.email === 'abdallakhalaf177@gmail.com') {
+        if (window.showToast) window.showToast("لا يمكن حذف حساب المدير الرئيسي!", "danger");
         return;
     }
     if (state.currentUser && state.currentUser.id === id) {

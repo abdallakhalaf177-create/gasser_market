@@ -45,8 +45,8 @@
             </div>
             <form id="login-form">
                 <div class="form-group">
-                    <label>اسم المستخدم</label>
-                    <input type="text" id="login-username" class="form-control" required placeholder="admin أو cashier" autocomplete="username">
+                    <label>الإيميل أو اسم المستخدم</label>
+                    <input type="text" id="login-username" class="form-control" required placeholder="example@gmail.com أو admin" autocomplete="username">
                 </div>
                 <div class="form-group">
                     <label>كلمة المرور</label>
@@ -179,22 +179,9 @@
                             </button>
                         </div>
                     </div>
-                    <div class="card table-card">
-                        <div class="table-responsive">
-                            <table class="data-table" id="users-table">
-                                <thead>
-                                    <tr>
-                                        <th data-en="Name">الاسم</th>
-                                        <th data-en="Username">اسم المستخدم</th>
-                                        <th data-en="Role">الصلاحية</th>
-                                        <th data-en="Password">الباسورد</th>
-                                        <th data-en="Actions" class="actions-col">العمليات</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <!-- Users injected via JS -->
-                                </tbody>
-                            </table>
+                    <div class="card table-card" style="background: transparent; border: none; padding: 0;">
+                        <div id="users-grid-container" class="users-grid">
+                            <!-- Users injected via JS -->
                         </div>
                     </div>
                 </section>
@@ -1254,9 +1241,16 @@
                     
                     <div class="form-row">
                         <div class="form-group">
+                            <label data-en="Email">الإيميل <span class="text-danger">*</span></label>
+                            <input type="email" id="user-email" class="form-control" required>
+                        </div>
+                        <div class="form-group">
                             <label data-en="Password">كلمة المرور <span class="text-danger">*</span></label>
                             <input type="text" id="user-password" class="form-control" required>
                         </div>
+                    </div>
+                    
+                    <div class="form-row">
                         <div class="form-group">
                             <label data-en="Role">الصلاحية <span class="text-danger">*</span></label>
                             <select id="user-role" class="form-control" required>
