@@ -33,19 +33,9 @@ function notifyCartChange() {
     }
 }
 
+// ✅ تم التعديل: يعتمد الآن على الـ LocalStorage فقط بدون طلبات سيرفر معطلة
 export async function loadState() {
-    try {
-        const response = await fetch('/api/data');
-        if (response.ok) {
-            const data = await response.json();
-            Object.assign(state, data);
-            console.log("State loaded from API database.");
-            return;
-        }
-    } catch (err) {
-        console.warn("Could not load state from API, trying LocalStorage fallback...", err);
-    }
-    
+    console.log("Loading state locally via LocalStorage...");
     const savedState = localStorage.getItem("supermarket_pro_state");
     if (savedState) {
         try {
@@ -60,9 +50,10 @@ export async function loadState() {
     }
 }
 
+// ✅ تم التعديل: إزالة الـ POST Request الذي يسبب خطأ 405 على GitHub Pages
 export async function saveState() {
     localStorage.setItem("supermarket_pro_state", JSON.stringify(state));
-    
+
     const syncStatus = document.getElementById("sync-status");
     if (syncStatus) {
         syncStatus.classList.add("saving");
@@ -72,33 +63,18 @@ export async function saveState() {
             syncText.textContent = state.language === "ar" ? "جاري الحفظ..." : "Saving...";
         }
     }
-    
-    try {
-        const response = await fetch('/api/data', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(state)
-        });
-        
+
+    // محاكاة سريعة للنجاح المحلي بدون استدعاء سيرفر
+    setTimeout(() => {
         if (syncStatus) {
             syncStatus.classList.remove("saving");
             syncStatus.classList.remove("error");
             const syncText = syncStatus.querySelector(".sync-text");
             if (syncText) {
-                syncText.textContent = state.language === "ar" ? "محفوظ" : "Saved";
+                syncText.textContent = state.language === "ar" ? "محفوظ محلياً" : "Saved Locally";
             }
         }
-    } catch (err) {
-        console.error("Failed to save state to API database:", err);
-        if (syncStatus) {
-            syncStatus.classList.remove("saving");
-            syncStatus.classList.add("error");
-            const syncText = syncStatus.querySelector(".sync-text");
-            if (syncText) {
-                syncText.textContent = state.language === "ar" ? "وضع محلي" : "Local Mode";
-            }
-        }
-    }
+    }, 200);
 }
 
 export function resetToDefault() {
@@ -187,16 +163,14 @@ export function cancelTransaction(transactionId) {
         return;
     }
 
-    const confirmMsg = state.language === "ar" 
+    const confirmMsg = state.language === "ar"
         ? `هل أنت متأكد من إلغاء عملية البيع #${transactionId}؟ سيتم إرجاع المنتجات إلى المخزن وخصم النقاط.`
         : `Are you sure you want to cancel sale #${transactionId}? Items will be returned to stock and loyalty points deducted.`;
 
     if (!confirm(confirmMsg)) return;
 
-    // Mark as cancelled
     t.status = "cancelled";
 
-    // Return items to stock
     t.items.forEach(item => {
         const prod = state.products.find(p => p.id === item.productId);
         if (prod) {
@@ -204,7 +178,6 @@ export function cancelTransaction(transactionId) {
         }
     });
 
-    // Deduct customer points
     if (t.customerId !== "walkin") {
         const customer = state.customers.find(c => c.id === t.customerId);
         if (customer) {
@@ -216,11 +189,11 @@ export function cancelTransaction(transactionId) {
     }
 
     saveState();
-    
+
     if (window.showToast) {
         window.showToast(state.language === "ar" ? `تم إلغاء الفاتورة #${transactionId} بنجاح` : `Invoice #${transactionId} cancelled successfully`, "success");
     }
-    
+
     if (window.refreshCurrentView) {
         window.refreshCurrentView();
     }

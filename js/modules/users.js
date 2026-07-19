@@ -58,13 +58,22 @@ export function initAuth() {
         const username = document.getElementById('login-username').value.trim();
         const password = document.getElementById('login-password').value.trim();
 
+        console.log('[Auth] Checking credentials...');
+        console.log('[Auth] Email/Username entered:', username);
+        console.log('[Auth] Password entered:', password);
+        console.log('[Auth] All users in state:', state.users);
+
         // Match by username OR email
         const user = state.users.find(u => (u.username === username || u.email === username) && u.password === password);
         
+        console.log('[Auth] Matched user:', user);
+
         if (user) {
+            console.log('[Auth] Login successful! Proceeding...');
             loginError.style.display = 'none';
             login(user);
         } else {
+            console.warn('[Auth] Login failed - no matching user found.');
             loginError.style.display = 'block';
         }
     };
@@ -146,6 +155,8 @@ export function initAuth() {
 }
 
 function login(user) {
+    console.log('[Login] login() called with:', user);
+
     state.currentUser = user;
     localStorage.setItem('supermarket_current_user', JSON.stringify(user));
     
@@ -154,10 +165,12 @@ function login(user) {
     document.body.setAttribute('data-role', user.role);
 
     const appContainer = document.querySelector('.app-container');
+    console.log('[Login] appContainer found:', appContainer);
     if (appContainer) appContainer.style.setProperty('display', 'flex', 'important');
 
     const isSuperAdmin = user.email === 'abdallakhalaf177@gmail.com';
     document.body.setAttribute('data-superadmin', isSuperAdmin ? 'true' : 'false');
+    console.log('[Login] isSuperAdmin:', isSuperAdmin);
 
     // Update profile UI
     const nameEl = document.getElementById('current-user-name');
@@ -168,28 +181,33 @@ function login(user) {
     if (roleEl) roleEl.textContent = isSuperAdmin ? 'المدير الرئيسي' : (user.role === 'admin' ? 'مدير' : 'كاشير');
     if (avatarEl) avatarEl.textContent = user.name.substring(0, 4);
 
-    // Routing Logic:
-    if (isSuperAdmin) {
-        if (window.switchView) window.switchView('users');
-    } else if (user.role === 'cashier') {
-        if (window.switchView) window.switchView('pos');
-    } else {
-        // Admin
-        if (window.switchView) window.switchView('dashboard');
-    }
-
-    // Intercept switchView if they try to view users without being super admin
+    // Setup view guard BEFORE routing (prevent overwrite race condition)
     if (window.switchView) {
         const originalSwitch = window.switchView;
         window.switchView = function(viewName) {
             if (viewName === 'users' && state.currentUser?.email !== 'abdallakhalaf177@gmail.com') {
                 if (window.showToast) window.showToast("عذراً، هذه الصفحة للمدير الرئيسي فقط!", "danger");
-                originalSwitch('pos'); // Force redirect to cashier
+                originalSwitch('pos');
                 return;
             }
             originalSwitch(viewName);
         };
     }
+
+    // Routing Logic:
+    console.log('[Login] window.switchView available:', !!window.switchView);
+    if (isSuperAdmin) {
+        console.log('[Login] Routing to: users');
+        if (window.switchView) window.switchView('users');
+    } else if (user.role === 'cashier') {
+        console.log('[Login] Routing to: pos');
+        if (window.switchView) window.switchView('pos');
+    } else {
+        console.log('[Login] Routing to: dashboard');
+        if (window.switchView) window.switchView('dashboard');
+    }
+
+    console.log('[Login] Login flow complete.');
 }
 
 // User Management Logic
