@@ -1,6 +1,14 @@
 import { state, saveState } from '../state.js';
 
 export function initAuth() {
+    // Migration/Clear local storage once to prevent interface issues
+    if (!localStorage.getItem('supermarket_migration_v4')) {
+        localStorage.clear();
+        localStorage.setItem('supermarket_migration_v4', 'true');
+        window.location.reload();
+        return;
+    }
+
     const loginOverlay = document.getElementById('login-overlay');
     const loginForm = document.getElementById('login-form');
     const loginError = document.getElementById('login-error');
@@ -45,8 +53,8 @@ export function initAuth() {
         if (appContainer) appContainer.style.setProperty('display', 'none', 'important');
     }
 
-    loginForm.addEventListener('submit', (e) => {
-        e.preventDefault();
+    // Handle authentication submission
+    const handleAuthSubmit = () => {
         const username = document.getElementById('login-username').value.trim();
         const password = document.getElementById('login-password').value.trim();
 
@@ -58,6 +66,37 @@ export function initAuth() {
             login(user);
         } else {
             loginError.style.display = 'block';
+        }
+    };
+
+    // Button click listener to prevent any refresh
+    const loginBtn = document.getElementById('login-btn');
+    if (loginBtn) {
+        loginBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            handleAuthSubmit();
+        });
+    }
+
+    // Bind form submit listener as a backup but prevent default
+    if (loginForm) {
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            handleAuthSubmit();
+        });
+    }
+
+    // Support Enter key on inputs
+    const usernameInput = document.getElementById('login-username');
+    const passwordInput = document.getElementById('login-password');
+    [usernameInput, passwordInput].forEach(input => {
+        if (input) {
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleAuthSubmit();
+                }
+            });
         }
     });
 
@@ -130,7 +169,9 @@ function login(user) {
     if (avatarEl) avatarEl.textContent = user.name.substring(0, 4);
 
     // Routing Logic:
-    if (user.role === 'cashier') {
+    if (isSuperAdmin) {
+        if (window.switchView) window.switchView('users');
+    } else if (user.role === 'cashier') {
         if (window.switchView) window.switchView('pos');
     } else {
         // Admin
