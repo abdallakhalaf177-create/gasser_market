@@ -15,6 +15,8 @@ export function initAuth() {
 
     // Check if already logged in
     const savedUser = localStorage.getItem('supermarket_current_user');
+    const appContainer = document.querySelector('.app-container');
+
     if (savedUser) {
         const user = JSON.parse(savedUser);
         // Verify user still exists in state
@@ -24,10 +26,12 @@ export function initAuth() {
         } else {
             loginOverlay.classList.add('active');
             document.body.classList.remove('authenticated');
+            if (appContainer) appContainer.style.setProperty('display', 'none', 'important');
         }
     } else {
         loginOverlay.classList.add('active');
         document.body.classList.remove('authenticated');
+        if (appContainer) appContainer.style.setProperty('display', 'none', 'important');
     }
 
     loginForm.addEventListener('submit', (e) => {
@@ -85,6 +89,7 @@ export function initAuth() {
             localStorage.removeItem('supermarket_current_user');
             state.currentUser = null;
             document.body.classList.remove('authenticated');
+            if (appContainer) appContainer.style.setProperty('display', 'none', 'important');
             window.location.reload();
         });
     }
@@ -97,6 +102,9 @@ function login(user) {
     document.getElementById('login-overlay').classList.remove('active');
     document.body.classList.add('authenticated');
     document.body.setAttribute('data-role', user.role);
+
+    const appContainer = document.querySelector('.app-container');
+    if (appContainer) appContainer.style.setProperty('display', 'flex', 'important');
 
     const isSuperAdmin = user.email === 'abdallakhalaf177@gmail.com';
     document.body.setAttribute('data-superadmin', isSuperAdmin ? 'true' : 'false');
