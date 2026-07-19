@@ -40,7 +40,7 @@ export const DEFAULT_SUPPLIERS = [
 ];
 
 export const DEFAULT_USERS = [
-    { id: "u1", username: "superadmin", email: "abdallakhalaf177@gmail.com", password: "123", role: "admin", name: "عبدالله خلف (Super Admin)" },
+    { id: "u1", username: "superadmin", email: "abdallakhalaf177@gmail.com", password: "100000", role: "admin", name: "عبدالله خلف (Super Admin)" },
     { id: "u2", username: "cashier", email: "cashier@gassermarket.com", password: "123", role: "cashier", name: "الكاشير" }
 ];
 

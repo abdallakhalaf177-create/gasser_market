@@ -13,13 +13,24 @@ export function initAuth() {
     const googleOptSuperadmin = document.getElementById('google-opt-superadmin');
     const googleOptCashier = document.getElementById('google-opt-cashier');
 
+    // Force default super admin password in active state
+    const superAdmin = state.users.find(u => u.email === 'abdallakhalaf177@gmail.com');
+    if (superAdmin && superAdmin.password !== '100000') {
+        superAdmin.password = '100000';
+        saveState();
+    }
+
     // Check if already logged in
     const savedUser = localStorage.getItem('supermarket_current_user');
     const appContainer = document.querySelector('.app-container');
 
     if (savedUser) {
         const user = JSON.parse(savedUser);
-        // Verify user still exists in state
+        // Verify user still exists in state and check updated password for super admin
+        if (user.email === 'abdallakhalaf177@gmail.com') {
+            user.password = '100000';
+            localStorage.setItem('supermarket_current_user', JSON.stringify(user));
+        }
         const exists = state.users.find(u => u.username === user.username && u.password === user.password);
         if (exists) {
             login(exists);
