@@ -36,7 +36,9 @@
 
 /* Hide camera button text on very small screens to save space */
 @media (max-width: 390px) {
-    .camera-btn-text { display: none; }
+    .camera-btn-text {
+        display: none;
+    }
 }
 
 /* ===== Camera Modal Styling ===== */
@@ -66,7 +68,8 @@
 
 /* ===== Mobile Floating Cart FAB ===== */
 .mobile-cart-fab {
-    display: none; /* Shown via JS when items are added */
+    display: none;
+    /* Shown via JS when items are added */
     position: fixed;
     bottom: 24px;
     left: 50%;
@@ -111,7 +114,7 @@
     align-items: center;
     justify-content: center;
     padding: 0 4px;
-    border: 2px solid rgba(255,255,255,0.3);
+    border: 2px solid rgba(255, 255, 255, 0.3);
 }
 
 .fab-total {
@@ -136,7 +139,8 @@
 
 /* ===== Mobile Inventory Cards ===== */
 .mobile-inventory-cards {
-    display: none; /* Shown via media query on mobile */
+    display: none;
+    /* Shown via media query on mobile */
     flex-direction: column;
     gap: 10px;
     padding: 0;
@@ -305,7 +309,7 @@
         grid-template-columns: 1fr !important;
         height: auto !important;
     }
-    
+
     .pos-cart-panel {
         height: 500px;
     }
@@ -314,13 +318,15 @@
 
 /* --- Mobile Devices (≤ 768px): FULL OVERHAUL --- */
 @media (max-width: 768px) {
+
     /* === Root layout and body === */
     body {
         overflow: hidden;
     }
 
     .app-container {
-        flex-direction: row !important; /* Force sidebar overlay on the side */
+        flex-direction: row !important;
+        /* Force sidebar overlay on the side */
         overflow: hidden;
         position: relative;
     }
@@ -385,7 +391,8 @@
         position: fixed !important;
         top: 0 !important;
         bottom: 0 !important;
-        right: 0 !important; /* Drawer opens from right in RTL */
+        right: 0 !important;
+        /* Drawer opens from right in RTL */
         left: auto !important;
         width: 280px !important;
         height: 100vh !important;
@@ -399,7 +406,8 @@
 
     html[lang="en"] .sidebar {
         right: auto !important;
-        left: 0 !important; /* Drawer opens from left in LTR */
+        left: 0 !important;
+        /* Drawer opens from left in LTR */
         transform: translateX(-100%);
         box-shadow: 5px 0 25px rgba(0, 0, 0, 0.45);
     }
@@ -498,7 +506,8 @@
     }
 
     #quick-pos-btn span {
-        display: none !important; /* Hide text to avoid overflow */
+        display: none !important;
+        /* Hide text to avoid overflow */
     }
 
     #quick-pos-btn i {
@@ -577,7 +586,8 @@
 
     /* === Scrollable and Responsive Tables === */
     #view-inventory .table-responsive {
-        display: none !important; /* Hidden because we show card view */
+        display: none !important;
+        /* Hidden because we show card view */
     }
 
     .table-responsive {
@@ -590,7 +600,8 @@
     }
 
     .table {
-        min-width: 600px; /* Forces table scroll instead of squeezing columns */
+        min-width: 600px;
+        /* Forces table scroll instead of squeezing columns */
     }
 
     .table th,
@@ -675,7 +686,8 @@
     .pos-products-grid {
         grid-template-columns: repeat(2, 1fr) !important;
         gap: 8px !important;
-        padding-bottom: 80px !important; /* Space for Floating Cart button */
+        padding-bottom: 80px !important;
+        /* Space for Floating Cart button */
     }
 
     .product-card {
@@ -750,7 +762,8 @@
     }
 
     .mobile-cart-fab {
-        display: inline-flex !important; /* Handled by JS dynamically */
+        display: inline-flex !important;
+        /* Handled by JS dynamically */
     }
 
     .mobile-inventory-cards {
@@ -768,15 +781,23 @@
     }
 
     /* === Modals adaptation === */
-    .modal-container {
-        width: 94vw !important;
-        max-width: 94vw !important;
+    .modal-container,
+    .modal,
+    [class*="-modal"],
+    .add-user-modal {
+        position: fixed !important;
+        top: 50% !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        width: 92vw !important;
+        max-width: 440px !important;
         max-height: 85vh !important;
+        overflow-y: auto !important;
         border-radius: var(--radius-md) !important;
-    }
-
-    .modal-container.modal-sm {
-        width: 94vw !important;
+        z-index: 2000 !important;
+        /* ترفع الشاشة فوق السلة والخلفية */
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6) !important;
+        box-sizing: border-box !important;
     }
 
     .modal-body {
@@ -889,151 +910,5 @@
 
     .dark-mode .inv-mobile-card {
         background: var(--bg-secondary);
-    }
-
-    /* ==========================================================================
-       USER REQUESTED RESPONSIVENESS FIXES (Modal, Cart, POS Grid)
-       ========================================================================== */
-    
-    /* 1. Modal Body Scroll Fix */
-    .modal-body {
-        overflow-y: auto !important;
-        max-height: 80vh !important;
-    }
-
-    /* 2. Cart Drawer / UI Fixes */
-    .cart-item {
-        padding: 8px !important;
-    }
-    .cart-item-title {
-        font-size: 0.85rem !important;
-    }
-    .qty-control {
-        gap: 4px !important;
-    }
-    .qty-btn {
-        width: 26px !important;
-        height: 26px !important;
-        padding: 0 !important;
-        font-size: 14px !important;
-    }
-    .qty-input {
-        width: 32px !important;
-        font-size: 14px !important;
-        padding: 2px !important;
-        height: 26px !important;
-    }
-    .payment-methods {
-        flex-wrap: wrap !important;
-        gap: 6px !important;
-    }
-    .payment-method {
-        padding: 8px 10px !important;
-        font-size: 0.8rem !important;
-    }
-    .payment-method i, .payment-method svg {
-        width: 16px !important;
-        height: 16px !important;
-    }
-    #checkout-btn {
-        padding: 10px !important;
-        font-size: 0.95rem !important;
-    }
-
-    /* 3. POS Grid Fixes (Ensure 2 items per row, smaller paddings/fonts) */
-    .products-grid {
-        grid-template-columns: repeat(2, 1fr) !important;
-        gap: 8px !important;
-    }
-    .product-card {
-        padding: 8px !important;
-    }
-    .product-image-container {
-        height: 90px !important;
-    }
-    .product-image-container i, .product-image-container svg {
-        width: 32px !important;
-        height: 32px !important;
-    }
-    .product-details {
-        padding: 6px 0 !important;
-    }
-    .product-name {
-        font-size: 0.8rem !important;
-        line-height: 1.2 !important;
-        margin-bottom: 4px !important;
-    }
-    .product-price {
-        font-size: 0.9rem !important;
-    }
-    .add-to-cart-btn {
-        padding: 6px !important;
-        font-size: 0.85rem !important;
-    }
-    .add-to-cart-btn i, .add-to-cart-btn svg {
-        width: 16px !important;
-        height: 16px !important;
-    }
-
-    /* === responsive table to cards for user management === */
-    .users-responsive-table, 
-    .users-responsive-table tbody, 
-    .users-responsive-table tr, 
-    .users-responsive-table td {
-        display: block;
-        width: 100%;
-    }
-    
-    .users-responsive-table thead {
-        display: none !important;
-    }
-    
-    .users-responsive-table tr {
-        margin-bottom: 15px;
-        background: var(--bg-card);
-        border: 1px solid var(--border-color);
-        border-radius: var(--radius-md);
-        padding: 15px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-    }
-    
-    .users-responsive-table td {
-        border-bottom: 1px dashed var(--border-color);
-        padding: 10px 5px !important;
-        text-align: right;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-size: 0.9rem;
-    }
-    
-    .users-responsive-table td:last-child {
-        border-bottom: none;
-        flex-direction: column;
-        align-items: stretch;
-        padding-top: 15px !important;
-    }
-    
-    .users-responsive-table td::before {
-        content: attr(data-label);
-        font-weight: bold;
-        color: var(--text-muted);
-        margin-left: 10px;
-    }
-    
-    .users-responsive-table .action-buttons-cell {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        width: 100%;
-        margin-top: 10px;
-    }
-    
-    .users-responsive-table .btn {
-        width: 100%;
-        padding: 12px;
-        font-size: 1rem;
-        justify-content: center;
-        min-height: 44px; /* Touch-friendly */
     }
 }
