@@ -124,17 +124,12 @@ function setupKeyboardShortcuts() {
             switchView("pos");
             showToast(state.language === "ar" ? "تم الانتقال إلى الكاشير" : "Switched to POS", "info");
         }
-        // F2 -> Checkout if in POS
+        // F2 -> Refresh current view
         if (e.key === "F2") {
-                renderSuppliersTable();
-                break;
-            case "settings":
-                renderSettings();
-                break;
-            case "users":
-                renderUsers();
-                break;
-        }// F3 -> Switch to Dashboard
+            e.preventDefault();
+            switchView(state.currentView);
+        }
+        // F3 -> Switch to Dashboard
         if (e.key === "F3") {
             e.preventDefault();
             switchView("dashboard");
