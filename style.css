@@ -146,9 +146,13 @@ html[lang="en"] * {
    LAYOUT STRUCTURE
    ========================================================================== */
 .app-container {
-    display: flex;
+    display: none !important;
     height: 100vh;
     width: 100vw;
+}
+
+body.authenticated .app-container {
+    display: flex !important;
 }
 
 /* Sidebar Styling */
@@ -2324,4 +2328,36 @@ body[data-role="cashier"] .sidebar-menu .menu-item:not([data-view="pos"]):not([d
 }
 body[data-role="cashier"] .header-actions #quick-pos-btn {
     display: none !important;
+}
+
+/* ==========================================================================
+   USERS RESPONSIVE TABLE & SUPER ADMIN
+   ========================================================================== */
+.users-responsive-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.users-responsive-table th, 
+.users-responsive-table td {
+    padding: 12px 15px;
+    text-align: right;
+    border-bottom: 1px solid var(--border-color);
+}
+.users-responsive-table th {
+    background-color: var(--bg-body);
+    font-weight: bold;
+    color: var(--text-muted);
+}
+.users-responsive-table .action-buttons-cell {
+    display: flex;
+    gap: 8px;
+}
+
+/* Super Admin Guard */
+body[data-superadmin="false"] #nav-users-link {
+    display: none !important;
+}
+
+.google-account-option:hover {
+    background-color: #f7f8f8 !important;
 }

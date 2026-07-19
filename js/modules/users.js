@@ -6,6 +6,13 @@ export function initAuth() {
     const loginError = document.getElementById('login-error');
     const logoutBtn = document.getElementById('logout-btn');
 
+    // Google Login button & overlay elements
+    const googleLoginBtn = document.getElementById('google-login-btn');
+    const googleMockOverlay = document.getElementById('google-mock-overlay');
+    const closeGoogleMockBtn = document.getElementById('close-google-mock-btn');
+    const googleOptSuperadmin = document.getElementById('google-opt-superadmin');
+    const googleOptCashier = document.getElementById('google-opt-cashier');
+
     // Check if already logged in
     const savedUser = localStorage.getItem('supermarket_current_user');
     if (savedUser) {
@@ -16,9 +23,11 @@ export function initAuth() {
             login(exists);
         } else {
             loginOverlay.classList.add('active');
+            document.body.classList.remove('authenticated');
         }
     } else {
         loginOverlay.classList.add('active');
+        document.body.classList.remove('authenticated');
     }
 
     loginForm.addEventListener('submit', (e) => {
@@ -37,10 +46,45 @@ export function initAuth() {
         }
     });
 
+    if (googleLoginBtn && googleMockOverlay) {
+        googleLoginBtn.addEventListener('click', () => {
+            googleMockOverlay.style.display = 'flex';
+        });
+    }
+
+    if (closeGoogleMockBtn && googleMockOverlay) {
+        closeGoogleMockBtn.addEventListener('click', () => {
+            googleMockOverlay.style.display = 'none';
+        });
+    }
+
+    if (googleOptSuperadmin) {
+        googleOptSuperadmin.addEventListener('click', () => {
+            googleMockOverlay.style.display = 'none';
+            const superAdminUser = state.users.find(u => u.email === 'abdallakhalaf177@gmail.com');
+            if (superAdminUser) {
+                login(superAdminUser);
+                if (window.showToast) window.showToast("تم تسجيل الدخول بواسطة Google بنجاح!", "success");
+            }
+        });
+    }
+
+    if (googleOptCashier) {
+        googleOptCashier.addEventListener('click', () => {
+            googleMockOverlay.style.display = 'none';
+            const cashierUser = state.users.find(u => u.username === 'cashier');
+            if (cashierUser) {
+                login(cashierUser);
+                if (window.showToast) window.showToast("تم تسجيل الدخول بواسطة Google بنجاح!", "success");
+            }
+        });
+    }
+
     if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
             localStorage.removeItem('supermarket_current_user');
             state.currentUser = null;
+            document.body.classList.remove('authenticated');
             window.location.reload();
         });
     }
@@ -51,6 +95,7 @@ function login(user) {
     localStorage.setItem('supermarket_current_user', JSON.stringify(user));
     
     document.getElementById('login-overlay').classList.remove('active');
+    document.body.classList.add('authenticated');
     document.body.setAttribute('data-role', user.role);
 
     const isSuperAdmin = user.email === 'abdallakhalaf177@gmail.com';
@@ -95,7 +140,23 @@ export function renderUsers() {
     const gridContainer = document.getElementById('users-grid-container');
     if (!gridContainer) return;
     
-    gridContainer.innerHTML = '';
+    gridContainer.innerHTML = `
+        <table class="users-responsive-table">
+            <thead>
+                <tr>
+                    <th>الاسم</th>
+                    <th>الإيميل</th>
+                    <th>اسم المستخدم</th>
+                    <th>الصلاحية</th>
+                    <th>العمليات</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    `;
+    
+    const tbody = gridContainer.querySelector('tbody');
     
     const searchTerm = (document.getElementById('users-search')?.value || '').toLowerCase();
     
@@ -106,31 +167,29 @@ export function renderUsers() {
     );
     
     filtered.forEach(user => {
-        const card = document.createElement('div');
-        card.className = 'user-card-item';
-        card.innerHTML = `
-            <div class="user-card-header">
-                <div class="user-avatar">${user.name.substring(0,2)}</div>
-                <div class="user-main-info">
-                    <h4>${user.name}</h4>
-                    <span class="badge ${user.role === 'admin' ? 'badge-primary' : 'badge-success'}">${user.role === 'admin' ? 'مدير' : 'كاشير'}</span>
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td data-label="الاسم">
+                <div class="user-info-cell">
+                    <div class="user-avatar">${user.name.substring(0,2)}</div>
+                    <div><strong>${user.name}</strong></div>
                 </div>
-            </div>
-            <div class="user-card-body">
-                <p><strong>الإيميل:</strong> ${user.email || '—'}</p>
-                <p><strong>اسم المستخدم:</strong> ${user.username}</p>
-                <p><strong>الباسورد:</strong> <span class="password-mask">••••••••</span></p>
-            </div>
-            <div class="user-card-actions">
-                <button class="btn btn-secondary btn-full" onclick="window.editUser('${user.id}')">
-                    <i data-lucide="edit-2"></i> تعديل
-                </button>
-                <button class="btn btn-danger btn-full" onclick="window.deleteUser('${user.id}')" ${user.email === 'abdallakhalaf177@gmail.com' ? 'disabled' : ''}>
-                    <i data-lucide="trash-2"></i> حذف
-                </button>
-            </div>
+            </td>
+            <td data-label="الإيميل">${user.email || '—'}</td>
+            <td data-label="اسم المستخدم"><span class="badge badge-outline">${user.username}</span></td>
+            <td data-label="الصلاحية"><span class="badge ${user.role === 'admin' ? 'badge-primary' : 'badge-success'}">${user.role === 'admin' ? 'مدير' : 'كاشير'}</span></td>
+            <td data-label="العمليات">
+                <div class="action-buttons-cell">
+                    <button class="btn btn-secondary btn-sm" onclick="window.editUser('${user.id}')">
+                        <i data-lucide="edit-2"></i> تعديل
+                    </button>
+                    <button class="btn btn-danger btn-sm" onclick="window.deleteUser('${user.id}')" ${user.email === 'abdallakhalaf177@gmail.com' ? 'disabled' : ''}>
+                        <i data-lucide="trash-2"></i> حذف
+                    </button>
+                </div>
+            </td>
         `;
-        gridContainer.appendChild(card);
+        tbody.appendChild(tr);
     });
     
     if (window.lucide) {
