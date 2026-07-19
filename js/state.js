@@ -1,4 +1,4 @@
-import { DEFAULT_PRODUCTS, DEFAULT_CATEGORIES, DEFAULT_CUSTOMERS, DEFAULT_SUPPLIERS } from './constants.js';
+import { DEFAULT_PRODUCTS, DEFAULT_CATEGORIES, DEFAULT_CUSTOMERS, DEFAULT_SUPPLIERS, DEFAULT_USERS } from './constants.js';
 
 export let state = {
     products: [],
@@ -8,6 +8,8 @@ export let state = {
     purchaseInvoices: [],
     transactions: [],
     cart: [],
+    users: [],
+    currentUser: null,
     settings: {
         storeName: "جاسر ماركت",
         currency: "ج.م",
@@ -107,6 +109,8 @@ export function resetToDefault() {
     state.purchaseInvoices = [];
     state.transactions = [];
     state.cart = [];
+    state.users = [...DEFAULT_USERS];
+    state.currentUser = null;
     state.settings = {
         storeName: "جاسر ماركت",
         currency: "ج.م",

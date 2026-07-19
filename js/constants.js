@@ -39,6 +39,11 @@ export const DEFAULT_SUPPLIERS = [
     { id: "s2", company: "الشركة المصرية للأغذية (بسكو مصر)", name: "أ. محمد سليم", phone: "19234", balance: 0.00, totalPurchases: 18400.00, lastUpdated: "2026-07-08" }
 ];
 
+export const DEFAULT_USERS = [
+    { id: "u1", username: "admin", password: "123", role: "admin", name: "المدير العام" },
+    { id: "u2", username: "cashier", password: "123", role: "cashier", name: "الكاشير" }
+];
+
 // Smart Barcode Auto-Fill Database
 export const SMART_BARCODE_DATABASE = {
     // Dairy (ألبان)

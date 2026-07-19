@@ -8,6 +8,11 @@ import { renderReports, renderReportsData } from './modules/reports.js';
 import { renderCustomers, handleCustomerFormSubmit, editCustomer, deleteCustomer } from './modules/customers.js';
 import { renderSuppliers, renderSuppliersTable, handleSupplierFormSubmit, editSupplier, deleteSupplier, handlePurchaseFormSubmit, openSettleModal, handleSettleFormSubmit } from './modules/suppliers.js';
 import { renderSettings } from './modules/settings.js';
+import { initAuth, renderUsers, handleUserFormSubmit, editUser, deleteUser } from './modules/users.js';
+
+// Expose user functions globally so inline onclick events work
+window.editUser = editUser;
+window.deleteUser = deleteUser;
 
 // Audio Feedback Synthesizer using Web Audio API (works offline)
 export function playBeep(frequency = 440, duration = 0.1) {
@@ -86,6 +91,7 @@ window.refreshCurrentView = () => {
 
 document.addEventListener("DOMContentLoaded", async () => {
     await loadState();
+    initAuth();
     applyTheme();
     applyLanguage();
     setupNavigation();
@@ -120,12 +126,15 @@ function setupKeyboardShortcuts() {
         }
         // F2 -> Checkout if in POS
         if (e.key === "F2") {
-            if (state.currentView === "pos") {
-                e.preventDefault();
-                handleCheckout();
-            }
-        }
-        // F3 -> Switch to Dashboard
+                renderSuppliersTable();
+                break;
+            case "settings":
+                renderSettings();
+                break;
+            case "users":
+                renderUsers();
+                break;
+        }// F3 -> Switch to Dashboard
         if (e.key === "F3") {
             e.preventDefault();
             switchView("dashboard");
@@ -302,6 +311,8 @@ function switchView(viewName) {
     } else if (viewName === "settings") {
         if (subtitleEl) subtitleEl.textContent = state.language === "ar" ? "تخصيص إعدادات النظام والنسخ الاحتياطي." : "Customize system settings and backups.";
         renderSettings();
+    } else if (viewName === "users") {
+        renderUsers();
     }
 
     lucide.createIcons();
@@ -321,6 +332,11 @@ function setupEventListeners() {
         state.language = state.language === "ar" ? "en" : "ar";
         const langBtn = document.getElementById("lang-toggle-btn");
         if (langBtn) langBtn.textContent = state.language === "ar" ? "EN" : "AR";
+        // Global setup
+        updateCartSummary();
+        renderCategoriesList(); // Initial render for lists
+        
+        // Final UI Updates
         saveState();
         applyLanguage();
         switchView(state.currentView);
@@ -345,6 +361,7 @@ function setupEventListeners() {
     setupModal("supplier-modal", "add-supplier-trigger-btn", "close-supplier-modal", "cancel-supplier-modal");
     setupModal("purchase-modal", "add-purchase-invoice-btn", "close-purchase-modal", "cancel-purchase-modal");
     setupModal("settle-modal", null, "close-settle-modal", "cancel-settle-modal");
+    setupModal("user-modal", null, "close-user-modal", "cancel-user-modal");
 
     // Form resets when clicking "Add New" buttons
     addListenerSafe("add-product-btn", "click", () => {
@@ -435,7 +452,6 @@ function setupEventListeners() {
     addListenerSafe("customer-form", "submit", handleCustomerFormSubmit);
     addListenerSafe("supplier-form", "submit", handleSupplierFormSubmit);
     addListenerSafe("purchase-form", "submit", handlePurchaseFormSubmit);
-    addListenerSafe("settle-form", "submit", handleSettleFormSubmit);
     addListenerSafe("add-category-form", "submit", handleCategoryFormSubmit);
 
     // Generate Barcode Button
@@ -509,6 +525,30 @@ function setupEventListeners() {
     // Settings Form Submit
     const settingsForm = document.getElementById("settings-form");
     if (settingsForm) {
+        if (document.getElementById('settle-form')) {
+            document.getElementById('settle-form').addEventListener('submit', handleSettleFormSubmit);
+        }
+
+        // --- User Management Events ---
+        const addUserBtn = document.getElementById('add-user-btn');
+        if (addUserBtn) {
+            addUserBtn.addEventListener('click', () => {
+                document.getElementById('user-modal-title').textContent = "إضافة مستخدم جديد";
+                document.getElementById('user-id').value = "";
+                document.getElementById('user-form').reset();
+                document.getElementById('user-modal').classList.add('active');
+            });
+        }
+        
+        if (document.getElementById('user-form')) {
+            document.getElementById('user-form').addEventListener('submit', handleUserFormSubmit);
+        }
+        
+        const usersSearch = document.getElementById('users-search');
+        if (usersSearch) {
+            usersSearch.addEventListener('input', renderUsers);
+        }
+
         settingsForm.addEventListener("submit", (e) => {
             e.preventDefault();
             state.settings.storeName = document.getElementById("settings-store-name").value;

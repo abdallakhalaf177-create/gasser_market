@@ -890,4 +890,88 @@
     .dark-mode .inv-mobile-card {
         background: var(--bg-secondary);
     }
+
+    /* ==========================================================================
+       USER REQUESTED RESPONSIVENESS FIXES (Modal, Cart, POS Grid)
+       ========================================================================== */
+    
+    /* 1. Modal Body Scroll Fix */
+    .modal-body {
+        overflow-y: auto !important;
+        max-height: 80vh !important;
+    }
+
+    /* 2. Cart Drawer / UI Fixes */
+    .cart-item {
+        padding: 8px !important;
+    }
+    .cart-item-title {
+        font-size: 0.85rem !important;
+    }
+    .qty-control {
+        gap: 4px !important;
+    }
+    .qty-btn {
+        width: 26px !important;
+        height: 26px !important;
+        padding: 0 !important;
+        font-size: 14px !important;
+    }
+    .qty-input {
+        width: 32px !important;
+        font-size: 14px !important;
+        padding: 2px !important;
+        height: 26px !important;
+    }
+    .payment-methods {
+        flex-wrap: wrap !important;
+        gap: 6px !important;
+    }
+    .payment-method {
+        padding: 8px 10px !important;
+        font-size: 0.8rem !important;
+    }
+    .payment-method i, .payment-method svg {
+        width: 16px !important;
+        height: 16px !important;
+    }
+    #checkout-btn {
+        padding: 10px !important;
+        font-size: 0.95rem !important;
+    }
+
+    /* 3. POS Grid Fixes (Ensure 2 items per row, smaller paddings/fonts) */
+    .products-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 8px !important;
+    }
+    .product-card {
+        padding: 8px !important;
+    }
+    .product-image-container {
+        height: 90px !important;
+    }
+    .product-image-container i, .product-image-container svg {
+        width: 32px !important;
+        height: 32px !important;
+    }
+    .product-details {
+        padding: 6px 0 !important;
+    }
+    .product-name {
+        font-size: 0.8rem !important;
+        line-height: 1.2 !important;
+        margin-bottom: 4px !important;
+    }
+    .product-price {
+        font-size: 0.9rem !important;
+    }
+    .add-to-cart-btn {
+        padding: 6px !important;
+        font-size: 0.85rem !important;
+    }
+    .add-to-cart-btn i, .add-to-cart-btn svg {
+        width: 16px !important;
+        height: 16px !important;
+    }
 }

@@ -35,6 +35,31 @@
 </head>
 
 <body class="dark-mode">
+    <!-- Login Overlay -->
+    <div id="login-overlay" class="login-overlay active">
+        <div class="login-card card">
+            <div class="login-header">
+                <i data-lucide="shield-check" class="login-icon"></i>
+                <h2>تسجيل الدخول</h2>
+                <p>مرحباً بك في جاسر ماركت، يرجى إدخال بيانات الدخول</p>
+            </div>
+            <form id="login-form">
+                <div class="form-group">
+                    <label>اسم المستخدم</label>
+                    <input type="text" id="login-username" class="form-control" required placeholder="admin أو cashier" autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label>كلمة المرور</label>
+                    <input type="password" id="login-password" class="form-control" required placeholder="***" autocomplete="current-password">
+                </div>
+                <div id="login-error" class="text-danger" style="display:none; text-align:center; margin-bottom:15px; font-weight:bold;">
+                    بيانات الدخول غير صحيحة!
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">دخول</button>
+            </form>
+        </div>
+    </div>
+
     <div class="app-container">
         <!-- Sidebar Navigation -->
         <aside class="sidebar">
@@ -80,6 +105,10 @@
                     <i data-lucide="settings"></i>
                     <span class="menu-text" data-en="Settings">الإعدادات العامة</span>
                 </a>
+                <a href="#" class="menu-item" data-view="users" id="nav-users-link">
+                    <i data-lucide="users-cog"></i>
+                    <span class="menu-text" data-en="User Management">إدارة المستخدمين</span>
+                </a>
             </nav>
 
             <div class="sidebar-footer">
@@ -93,11 +122,14 @@
                     </button>
                 </div>
                 <div class="user-profile">
-                    <div class="avatar">مدير</div>
+                    <div class="avatar" id="current-user-avatar">مدير</div>
                     <div class="user-info">
-                        <span class="user-name">عبد الله</span>
-                        <span class="user-role">المدير العام</span>
+                        <span class="user-name" id="current-user-name">عبد الله</span>
+                        <span class="user-role" id="current-user-role">المدير العام</span>
                     </div>
+                    <button id="logout-btn" class="btn btn-danger btn-sm" title="تسجيل الخروج" style="margin-right: auto; padding: 5px;">
+                        <i data-lucide="log-out"></i>
+                    </button>
                 </div>
             </div>
         </aside>
@@ -132,6 +164,40 @@
 
             <!-- Views Container -->
             <div class="views-container">
+
+                <!-- USER MANAGEMENT VIEW -->
+                <section id="view-users" class="view-section">
+                    <div class="action-bar">
+                        <div class="search-box">
+                            <i data-lucide="search"></i>
+                            <input type="text" id="users-search" class="form-control" placeholder="بحث عن مستخدم..." data-en-placeholder="Search users...">
+                        </div>
+                        <div class="action-buttons">
+                            <button class="btn btn-primary" id="add-user-btn">
+                                <i data-lucide="plus"></i>
+                                <span data-en="Add New User">إضافة مستخدم جديد</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card table-card">
+                        <div class="table-responsive">
+                            <table class="data-table" id="users-table">
+                                <thead>
+                                    <tr>
+                                        <th data-en="Name">الاسم</th>
+                                        <th data-en="Username">اسم المستخدم</th>
+                                        <th data-en="Role">الصلاحية</th>
+                                        <th data-en="Password">الباسورد</th>
+                                        <th data-en="Actions" class="actions-col">العمليات</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Users injected via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
 
                 <!-- 1. DASHBOARD VIEW -->
                 <section id="view-dashboard" class="view-section active">
@@ -1164,8 +1230,55 @@
         </div>
     </div>
 
-    <!-- Bundled Script (no ES modules - works with file:// and any HTTP server) -->
-    <script src="js/app-bundle.js"></script>
+    <!-- User Form Modal -->
+    <div id="user-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="user-modal-title" data-en="Add New User">إضافة مستخدم جديد</h3>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="user-form">
+                    <input type="hidden" id="user-id">
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label data-en="Full Name">الاسم الكامل <span class="text-danger">*</span></label>
+                            <input type="text" id="user-name" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label data-en="Username">اسم الدخول <span class="text-danger">*</span></label>
+                            <input type="text" id="user-username" class="form-control" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label data-en="Password">كلمة المرور <span class="text-danger">*</span></label>
+                            <input type="text" id="user-password" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label data-en="Role">الصلاحية <span class="text-danger">*</span></label>
+                            <select id="user-role" class="form-control" required>
+                                <option value="admin">مدير (Admin)</option>
+                                <option value="cashier">كاشير (Cashier)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="modal-actions">
+                        <button type="button" class="btn btn-secondary close-modal" data-en="Cancel">إلغاء</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i data-lucide="save"></i> <span data-en="Save">حفظ البيانات</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App Script -->
+    <script type="module" src="js/app.js"></script>
 
     <!-- Mobile Sidebar Controller Script -->
     <script>

@@ -2243,4 +2243,85 @@ tr.stock-warning:hover {
     box-shadow: 0 4px 20px rgba(99, 102, 241, 0.15);
     transform: translateY(-2px);
 }
-
+
+/* ==========================================================================
+   Login Overlay & Auth Styles
+   ========================================================================== */
+.login-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: var(--bg-dark);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.login-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 400px;
+    padding: 2rem;
+    background: var(--surface-dark);
+    border: 1px solid var(--border-dark);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    text-align: center;
+}
+
+.login-header {
+    margin-bottom: 2rem;
+}
+
+.login-icon {
+    width: 48px;
+    height: 48px;
+    color: var(--primary);
+    margin-bottom: 1rem;
+}
+
+.login-header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--text-dark);
+}
+
+.login-header p {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+.login-card .form-group {
+    text-align: right;
+    margin-bottom: 1.5rem;
+}
+
+.login-card .form-control {
+    background: var(--bg-dark);
+    border: 1px solid var(--border-dark);
+    color: var(--text-dark);
+}
+
+.login-card .form-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+}
+
+/* Hide elements based on role */
+body[data-role="cashier"] .sidebar-menu .menu-item:not([data-view="pos"]):not([data-view="customers"]) {
+    display: none !important;
+}
+body[data-role="cashier"] .header-actions #quick-pos-btn {
+    display: none !important;
+}
