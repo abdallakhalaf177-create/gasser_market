@@ -21,9 +21,25 @@ export function initAuth() {
     const googleOptSuperadmin = document.getElementById('google-opt-superadmin');
     const googleOptCashier = document.getElementById('google-opt-cashier');
 
-    // Force default super admin password in active state
-    const superAdmin = state.users.find(u => u.email === 'abdallakhalaf177@gmail.com');
-    if (superAdmin && superAdmin.password !== '100000') {
+    // التأكد من وجود حساب السوبر أدمين الافتراضي بكافة الحالات
+    if (!state.users || !Array.isArray(state.users)) {
+        state.users = [];
+    }
+
+    let superAdmin = state.users.find(u => u.email === 'abdallakhalaf177@gmail.com');
+    if (!superAdmin) {
+        superAdmin = {
+            id: 'u_superadmin',
+            name: 'عبد الله محمد',
+            email: 'abdallakhalaf177@gmail.com',
+            username: 'abdallah',
+            password: '100000',
+            role: 'admin'
+        };
+        state.users.push(superAdmin);
+        saveState();
+    } else {
+        // تأكيد كلمة سر الحساب الافتراضي
         superAdmin.password = '100000';
         saveState();
     }
@@ -33,52 +49,52 @@ export function initAuth() {
     const appContainer = document.querySelector('.app-container');
 
     if (savedUser) {
-        const user = JSON.parse(savedUser);
-        // Verify user still exists in state and check updated password for super admin
-        if (user.email === 'abdallakhalaf177@gmail.com') {
-            user.password = '100000';
-            localStorage.setItem('supermarket_current_user', JSON.stringify(user));
-        }
-        const exists = state.users.find(u => u.username === user.username && u.password === user.password);
-        if (exists) {
-            login(exists);
-        } else {
-            loginOverlay.classList.add('active');
-            document.body.classList.remove('authenticated');
-            if (appContainer) appContainer.style.setProperty('display', 'none', 'important');
+        try {
+            const user = JSON.parse(savedUser);
+            if (user.email === 'abdallakhalaf177@gmail.com') {
+                user.password = '100000';
+                localStorage.setItem('supermarket_current_user', JSON.stringify(user));
+            }
+            const exists = state.users.find(u => (u.username === user.username || u.email === user.email) && u.password === user.password);
+            if (exists) {
+                login(exists);
+            } else {
+                if (loginOverlay) loginOverlay.classList.add('active');
+                document.body.classList.remove('authenticated');
+                if (appContainer) appContainer.style.setProperty('display', 'none', 'important');
+            }
+        } catch (e) {
+            localStorage.removeItem('supermarket_current_user');
         }
     } else {
-        loginOverlay.classList.add('active');
+        if (loginOverlay) loginOverlay.classList.add('active');
         document.body.classList.remove('authenticated');
         if (appContainer) appContainer.style.setProperty('display', 'none', 'important');
     }
 
     // Handle authentication submission
     const handleAuthSubmit = () => {
-        const username = document.getElementById('login-username').value.trim();
-        const password = document.getElementById('login-password').value.trim();
+        const usernameEl = document.getElementById('login-username');
+        const passwordEl = document.getElementById('login-password');
 
-        console.log('[Auth] Checking credentials...');
-        console.log('[Auth] Email/Username entered:', username);
-        console.log('[Auth] Password entered:', password);
-        console.log('[Auth] All users in state:', state.users);
+        if (!usernameEl || !passwordEl) return;
+
+        const username = usernameEl.value.trim();
+        const password = passwordEl.value.trim();
 
         // Match by username OR email
         const user = state.users.find(u => (u.username === username || u.email === username) && u.password === password);
-        
-        console.log('[Auth] Matched user:', user);
 
         if (user) {
-            console.log('[Auth] Login successful! Proceeding...');
-            loginError.style.display = 'none';
+            if (loginError) loginError.style.display = 'none';
             login(user);
         } else {
-            console.warn('[Auth] Login failed - no matching user found.');
-            loginError.style.display = 'block';
+            if (loginError) loginError.style.display = 'block';
+            if (window.showToast) window.showToast("بيانات الدخول غير صحيحة!", "danger");
         }
     };
 
-    // Button click listener to prevent any refresh
+    // Button click listener
     const loginBtn = document.getElementById('login-btn');
     if (loginBtn) {
         loginBtn.addEventListener('click', (e) => {
@@ -87,7 +103,6 @@ export function initAuth() {
         });
     }
 
-    // Bind form submit listener as a backup but prevent default
     if (loginForm) {
         loginForm.addEventListener('submit', (e) => {
             e.preventDefault();
@@ -135,11 +150,14 @@ export function initAuth() {
     if (googleOptCashier) {
         googleOptCashier.addEventListener('click', () => {
             googleMockOverlay.style.display = 'none';
-            const cashierUser = state.users.find(u => u.username === 'cashier');
-            if (cashierUser) {
-                login(cashierUser);
-                if (window.showToast) window.showToast("تم تسجيل الدخول بواسطة Google بنجاح!", "success");
+            let cashierUser = state.users.find(u => u.username === 'cashier');
+            if (!cashierUser) {
+                cashierUser = { id: 'u_cashier', name: 'كاشير الفرع', username: 'cashier', password: '123', role: 'cashier' };
+                state.users.push(cashierUser);
+                saveState();
             }
+            login(cashierUser);
+            if (window.showToast) window.showToast("تم تسجيل الدخول بواسطة Google بنجاح!", "success");
         });
     }
 
@@ -155,69 +173,49 @@ export function initAuth() {
 }
 
 function login(user) {
-    console.log('[Login] login() called with:', user);
-
     state.currentUser = user;
     localStorage.setItem('supermarket_current_user', JSON.stringify(user));
-    
-    document.getElementById('login-overlay').classList.remove('active');
+
+    const loginOverlay = document.getElementById('login-overlay');
+    if (loginOverlay) loginOverlay.classList.remove('active');
+
     document.body.classList.add('authenticated');
     document.body.setAttribute('data-role', user.role);
 
     const appContainer = document.querySelector('.app-container');
-    console.log('[Login] appContainer found:', appContainer);
     if (appContainer) appContainer.style.setProperty('display', 'flex', 'important');
 
     const isSuperAdmin = user.email === 'abdallakhalaf177@gmail.com';
     document.body.setAttribute('data-superadmin', isSuperAdmin ? 'true' : 'false');
-    console.log('[Login] isSuperAdmin:', isSuperAdmin);
 
     // Update profile UI
     const nameEl = document.getElementById('current-user-name');
     const roleEl = document.getElementById('current-user-role');
     const avatarEl = document.getElementById('current-user-avatar');
-    
+
     if (nameEl) nameEl.textContent = user.name;
     if (roleEl) roleEl.textContent = isSuperAdmin ? 'المدير الرئيسي' : (user.role === 'admin' ? 'مدير' : 'كاشير');
-    if (avatarEl) avatarEl.textContent = user.name.substring(0, 4);
+    if (avatarEl) avatarEl.textContent = user.name ? user.name.substring(0, 2) : 'م';
 
-    // Setup view guard BEFORE routing (prevent overwrite race condition)
+    // Route view
     if (window.switchView) {
-        const originalSwitch = window.switchView;
-        window.switchView = function(viewName) {
-            if (viewName === 'users' && state.currentUser?.email !== 'abdallakhalaf177@gmail.com') {
-                if (window.showToast) window.showToast("عذراً، هذه الصفحة للمدير الرئيسي فقط!", "danger");
-                originalSwitch('pos');
-                return;
-            }
-            originalSwitch(viewName);
-        };
+        if (isSuperAdmin) {
+            window.switchView('users');
+        } else if (user.role === 'cashier') {
+            window.switchView('pos');
+        } else {
+            window.switchView('dashboard');
+        }
     }
-
-    // Routing Logic:
-    console.log('[Login] window.switchView available:', !!window.switchView);
-    if (isSuperAdmin) {
-        console.log('[Login] Routing to: users');
-        if (window.switchView) window.switchView('users');
-    } else if (user.role === 'cashier') {
-        console.log('[Login] Routing to: pos');
-        if (window.switchView) window.switchView('pos');
-    } else {
-        console.log('[Login] Routing to: dashboard');
-        if (window.switchView) window.switchView('dashboard');
-    }
-
-    console.log('[Login] Login flow complete.');
 }
 
 // User Management Logic
 export function renderUsers() {
-    // Only allow Super Admin to render this
     if (state.currentUser?.email !== 'abdallakhalaf177@gmail.com') return;
 
     const gridContainer = document.getElementById('users-grid-container');
     if (!gridContainer) return;
-    
+
     gridContainer.innerHTML = `
         <table class="users-responsive-table">
             <thead>
@@ -233,23 +231,22 @@ export function renderUsers() {
             </tbody>
         </table>
     `;
-    
+
     const tbody = gridContainer.querySelector('tbody');
-    
     const searchTerm = (document.getElementById('users-search')?.value || '').toLowerCase();
-    
-    const filtered = state.users.filter(u => 
-        u.name.toLowerCase().includes(searchTerm) || 
-        u.username.toLowerCase().includes(searchTerm) ||
+
+    const filtered = state.users.filter(u =>
+        (u.name && u.name.toLowerCase().includes(searchTerm)) ||
+        (u.username && u.username.toLowerCase().includes(searchTerm)) ||
         (u.email && u.email.toLowerCase().includes(searchTerm))
     );
-    
+
     filtered.forEach(user => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td data-label="الاسم">
                 <div class="user-info-cell">
-                    <div class="user-avatar">${user.name.substring(0,2)}</div>
+                    <div class="user-avatar">${user.name ? user.name.substring(0, 2) : 'م'}</div>
                     <div><strong>${user.name}</strong></div>
                 </div>
             </td>
@@ -269,7 +266,7 @@ export function renderUsers() {
         `;
         tbody.appendChild(tr);
     });
-    
+
     if (window.lucide) {
         window.lucide.createIcons();
     }
@@ -277,36 +274,38 @@ export function renderUsers() {
 
 export function handleUserFormSubmit(e) {
     e.preventDefault();
-    const id = document.getElementById('user-id').value;
-    const name = document.getElementById('user-name').value;
-    const email = document.getElementById('user-email').value;
-    const username = document.getElementById('user-username').value;
-    const password = document.getElementById('user-password').value;
-    const role = document.getElementById('user-role').value;
-    
+    const id = document.getElementById('user-id')?.value;
+
+    // دعم مسميات الأقسام في HTML
+    const nameEl = document.getElementById('user-name-input') || document.getElementById('user-name');
+    const usernameEl = document.getElementById('user-username-input') || document.getElementById('user-username');
+    const passwordEl = document.getElementById('user-password-input') || document.getElementById('user-password');
+    const roleEl = document.getElementById('user-role-select') || document.getElementById('user-role');
+    const emailEl = document.getElementById('user-email');
+
+    const name = nameEl?.value;
+    const username = usernameEl?.value;
+    const password = passwordEl?.value;
+    const role = roleEl?.value;
+    const email = emailEl ? emailEl.value : '';
+
     if (id) {
         // Edit
         const user = state.users.find(u => u.id === id);
         if (user) {
             user.name = name;
-            user.email = email;
+            if (email) user.email = email;
             user.username = username;
-            user.password = password;
+            if (password) user.password = password;
             user.role = role;
             if (window.showToast) window.showToast("تم تحديث بيانات المستخدم", "success");
         }
     } else {
-        // Check if username or email exists
         if (state.users.some(u => u.username === username)) {
             if (window.showToast) window.showToast("اسم المستخدم موجود بالفعل!", "danger");
             return;
         }
-        if (state.users.some(u => u.email === email)) {
-            if (window.showToast) window.showToast("هذا الإيميل مسجل بالفعل!", "danger");
-            return;
-        }
-        
-        // Add
+
         const newUser = {
             id: 'u_' + Date.now(),
             name,
@@ -318,31 +317,43 @@ export function handleUserFormSubmit(e) {
         state.users.push(newUser);
         if (window.showToast) window.showToast("تمت إضافة المستخدم بنجاح", "success");
     }
-    
+
     saveState();
     renderUsers();
-    document.getElementById('user-modal').classList.remove('active');
+
+    const userModal = document.getElementById('user-modal');
+    if (userModal) userModal.classList.remove('active');
 }
 
 export function editUser(id) {
     const user = state.users.find(u => u.id === id);
     if (!user) return;
-    
-    document.getElementById('user-modal-title').textContent = "تعديل بيانات المستخدم";
+
+    const modalTitle = document.getElementById('user-modal-title');
+    if (modalTitle) modalTitle.textContent = "تعديل بيانات المستخدم";
+
     document.getElementById('user-id').value = user.id;
-    document.getElementById('user-name').value = user.name;
-    document.getElementById('user-email').value = user.email || '';
-    document.getElementById('user-username').value = user.username;
-    document.getElementById('user-password').value = user.password;
-    document.getElementById('user-role').value = user.role;
-    
-    document.getElementById('user-modal').classList.add('active');
+
+    const nameEl = document.getElementById('user-name-input') || document.getElementById('user-name');
+    const usernameEl = document.getElementById('user-username-input') || document.getElementById('user-username');
+    const passwordEl = document.getElementById('user-password-input') || document.getElementById('user-password');
+    const roleEl = document.getElementById('user-role-select') || document.getElementById('user-role');
+    const emailEl = document.getElementById('user-email');
+
+    if (nameEl) nameEl.value = user.name;
+    if (usernameEl) usernameEl.value = user.username;
+    if (passwordEl) passwordEl.value = user.password;
+    if (roleEl) roleEl.value = user.role;
+    if (emailEl) emailEl.value = user.email || '';
+
+    const userModal = document.getElementById('user-modal');
+    if (userModal) userModal.classList.add('active');
 }
 
 export function deleteUser(id) {
     const user = state.users.find(u => u.id === id);
     if (!user) return;
-    
+
     if (user.email === 'abdallakhalaf177@gmail.com') {
         if (window.showToast) window.showToast("لا يمكن حذف حساب المدير الرئيسي!", "danger");
         return;
