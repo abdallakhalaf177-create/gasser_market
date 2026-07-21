@@ -3,896 +3,209 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
-    <title>نظام إدارة السوبر ماركت | جاسر ماركت (Gasser Market)</title>
-    <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#6366f1">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="جاسر ماركت">
-    <meta name="application-name" content="جاسر ماركت">
-    <meta name="description" content="نظام إدارة السوبرماركت المتكامل - كاشير، مخزون، تقارير">
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icons/icon-192.png">
-    <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
-    <!-- Google Fonts: Cairo for Arabic, Inter for English -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet">
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Chart.js for beautiful charts -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- html5-qrcode: Camera barcode scanner for mobile -->
-    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-    <!-- Custom Stylesheet -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إدارة السوبر ماركت والمبيعات</title>
+    <!-- Remixicons for UI Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <!-- Main CSS -->
     <link rel="stylesheet" href="style.css">
-    <!-- Mobile Responsive & PWA Styles -->
-    <link rel="stylesheet" href="css/mobile.css">
 </head>
 
-<body class="dark-mode">
-    <!-- Login Overlay -->
-    <div id="login-overlay" class="login-overlay active">
-        <div class="login-card card">
-            <div class="login-header">
-                <i data-lucide="shield-check" class="login-icon"></i>
-                <h2>تسجيل الدخول</h2>
-                <p>مرحباً بك في جاسر ماركت، يرجى إدخال بيانات الدخول</p>
-            </div>
-            <form id="login-form">
-                <div class="form-group">
-                    <label>الإيميل أو اسم المستخدم</label>
-                    <input type="text" id="login-username" class="form-control" required placeholder="example@gmail.com أو admin" autocomplete="username">
-                </div>
-                <div class="form-group">
-                    <label>كلمة المرور</label>
-                    <input type="password" id="login-password" class="form-control" required placeholder="***" autocomplete="current-password">
-                </div>
-                <div id="login-error" class="text-danger" style="display:none; text-align:center; margin-bottom:15px; font-weight:bold;">
-                    بيانات الدخول غير صحيحة!
-                </div>
-                <button type="button" id="login-btn" class="btn btn-primary" style="width: 100%; justify-content: center;">دخول</button>
-                <div style="margin: 15px 0; text-align: center; color: var(--text-muted); font-size: 0.85rem;">أو</div>
-                <button type="button" id="google-login-btn" class="btn btn-secondary" style="width: 100%; justify-content: center; background: #ffffff; color: #1f2937; border: 1px solid #d1d5db; font-weight: bold; gap: 8px;">
-                    <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                        <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                        <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
-                        <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                    </svg>
-                    <span>الدخول بواسطة Google</span>
-                </button>
-            </form>
+<body>
+
+    <!-- Main Navigation Bar -->
+    <header class="main-header">
+        <div class="logo-area">
+            <i class="ri-store-3-line logo-icon"></i>
+            <h2>سوپر ماركت</h2>
         </div>
-    </div>
-
-    <!-- Google Sign-In Mock Modal -->
-    <div id="google-mock-overlay" class="login-overlay" style="z-index: 10000; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; opacity: 1; pointer-events: auto;">
-        <div class="modal-container" style="max-width: 380px; background: #ffffff; color: #1f2937; border-radius: 12px; padding: 24px; direction: ltr; text-align: left; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
-            <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px;">
-                <svg viewBox="0 0 24 24" width="32" height="32" xmlns="http://www.w3.org/2000/svg" style="margin-bottom: 8px;">
-                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
-                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                </svg>
-                <h3 style="margin: 0; font-size: 1.25rem; font-weight: 500; color: #202124; font-family: sans-serif;">Sign in with Google</h3>
-                <p style="margin: 4px 0 0 0; font-size: 0.9rem; color: #5f6368; font-family: sans-serif;">to Gasser Market</p>
-            </div>
-            
-            <div style="border: 1px solid #dadce0; border-radius: 8px; overflow: hidden; margin-bottom: 20px;">
-                <!-- Account 1: Super Admin -->
-                <div class="google-account-option" id="google-opt-superadmin" style="display: flex; align-items: center; padding: 12px 16px; border-bottom: 1px solid #dadce0; cursor: pointer; transition: background 0.2s;">
-                    <div style="width: 36px; height: 36px; border-radius: 50%; background: #6366f1; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 12px; font-size: 1rem; flex-shrink: 0; font-family: sans-serif;">A</div>
-                    <div style="flex-grow: 1; overflow: hidden; font-family: sans-serif;">
-                        <div style="font-weight: bold; font-size: 0.9rem; color: #3c4043; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Abdalla Khalaf (Super Admin)</div>
-                        <div style="font-size: 0.8rem; color: #5f6368; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">abdallakhalaf177@gmail.com</div>
-                    </div>
-                </div>
-                <!-- Account 2: Other Cashier -->
-                <div class="google-account-option" id="google-opt-cashier" style="display: flex; align-items: center; padding: 12px 16px; cursor: pointer; transition: background 0.2s;">
-                    <div style="width: 36px; height: 36px; border-radius: 50%; background: #06b6d4; color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; margin-right: 12px; font-size: 1rem; flex-shrink: 0; font-family: sans-serif;">C</div>
-                    <div style="flex-grow: 1; overflow: hidden; font-family: sans-serif;">
-                        <div style="font-weight: bold; font-size: 0.9rem; color: #3c4043; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Shift Cashier</div>
-                        <div style="font-size: 0.8rem; color: #5f6368; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">cashier@gassermarket.com</div>
-                    </div>
-                </div>
-            </div>
-
-            <div style="display: flex; justify-content: space-between; align-items: center; font-family: sans-serif;">
-                <button type="button" id="close-google-mock-btn" style="background: none; border: none; color: #1a73e8; font-weight: bold; cursor: pointer; font-size: 0.9rem; padding: 8px 16px; border-radius: 4px; transition: background 0.2s;">Cancel</button>
-                <span style="font-size: 0.8rem; color: #70757a;">Google Accounts</span>
-            </div>
+        <nav class="nav-links">
+            <button class="nav-btn active" data-view="pos-view">
+                <i class="ri-shopping-cart-2-line"></i> الكاشير (POS)
+            </button>
+            <button class="nav-btn" data-view="inventory-view">
+                <i class="ri-archive-line"></i> إدارة المخزن
+            </button>
+            <button class="nav-btn" data-view="purchases-view">
+                <i class="ri-shopping-bag-line"></i> المشتريات
+            </button>
+            <button class="nav-btn" data-view="reports-view">
+                <i class="ri-bar-chart-box-line"></i> التقارير والوردية
+            </button>
+            <button class="nav-btn" data-view="customers-view">
+                <i class="ri-user-shared-line"></i> العملاء والديون
+            </button>
+            <button class="nav-btn" data-view="suppliers-view">
+                <i class="ri-truck-line"></i> الموردين
+            </button>
+            <button class="nav-btn" data-view="users-view">
+                <i class="ri-user-settings-line"></i> المستخدمين
+            </button>
+        </nav>
+        <div class="header-actions">
+            <span id="current-user-display" class="user-badge"><i class="ri-user-line"></i> أدمن</span>
+            <button id="logout-btn" class="btn btn-sm btn-danger"><i class="ri-logout-box-r-line"></i> خروج</button>
         </div>
-    </div>
+    </header>
 
-    <div class="app-container">
-        <!-- Sidebar Navigation -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <div class="logo-container">
-                    <i data-lucide="shopping-cart" class="logo-icon"></i>
-                    <span class="logo-text">جاسر <span class="highlight">ماركت</span></span>
-                </div>
-                <button class="sidebar-close-btn" id="sidebar-close-btn" title="إغلاق">&times;</button>
-            </div>
+    <!-- Main Content Container -->
+    <main class="main-container">
 
-            <nav class="sidebar-menu">
-                <a href="#" class="menu-item active" data-view="dashboard">
-                    <i data-lucide="layout-dashboard"></i>
-                    <span class="menu-text" data-en="Dashboard">لوحة التحكم</span>
-                </a>
-                <a href="#" class="menu-item" data-view="pos">
-                    <i data-lucide="monitor-play"></i>
-                    <span class="menu-text" data-en="POS / Cashier">نقطة البيع (الكاشير)</span>
-                </a>
-                <a href="#" class="menu-item" data-view="inventory">
-                    <i data-lucide="package"></i>
-                    <span class="menu-text" data-en="Inventory">إدارة المخزون</span>
-                </a>
-                <a href="#" class="menu-item" data-view="reports">
-                    <i data-lucide="bar-chart-3"></i>
-                    <span class="menu-text" data-en="Sales Reports">المبيعات والتقارير</span>
-                </a>
-                <a href="#" class="menu-item" data-view="customers">
-                    <i data-lucide="users"></i>
-                    <span class="menu-text" data-en="Customers">العملاء والولاء</span>
-                </a>
-                <a href="#" class="menu-item" data-view="suppliers">
-                    <i data-lucide="truck"></i>
-                    <span class="menu-text" data-en="Suppliers">الموردون والحسابات</span>
-                </a>
-                <a href="#" class="menu-item" data-view="shortages">
-                    <i data-lucide="alert-triangle"></i>
-                    <span class="menu-text" data-en="Shortages List">قائمة النواقص</span>
-                    <span class="shortage-badge" id="sidebar-shortage-badge"></span>
-                </a>
-                <a href="#" class="menu-item" data-view="settings">
-                    <i data-lucide="settings"></i>
-                    <span class="menu-text" data-en="Settings">الإعدادات العامة</span>
-                </a>
-                <a href="#" class="menu-item" data-view="users" id="nav-users-link">
-                    <i data-lucide="users-cog"></i>
-                    <span class="menu-text" data-en="User Management">إدارة المستخدمين</span>
-                </a>
-            </nav>
-
-            <div class="sidebar-footer">
-                <div class="theme-toggle-container">
-                    <button id="theme-toggle-btn" class="theme-btn" title="تغيير المظهر">
-                        <i data-lucide="sun" class="sun-icon"></i>
-                        <i data-lucide="moon" class="moon-icon"></i>
-                    </button>
-                    <button id="lang-toggle-btn" class="lang-btn" title="Change Language">
-                        EN
-                    </button>
-                </div>
-                <div class="user-profile">
-                    <div class="avatar" id="current-user-avatar">مدير</div>
-                    <div class="user-info">
-                        <span class="user-name" id="current-user-name">عبد الله</span>
-                        <span class="user-role" id="current-user-role">المدير العام</span>
+        <!-- 1. POS View (شاشة الكاشير) -->
+        <section id="pos-view" class="view-section active">
+            <div class="pos-layout">
+                <div class="pos-products-panel">
+                    <div class="search-bar-container">
+                        <i class="ri-search-line search-icon"></i>
+                        <input type="text" id="barcode-input" placeholder="امسح الباركود أو ابحث باسم المنتج..."
+                            autofocus autocomplete="off">
+                        <button id="btn-camera-scan" class="btn btn-secondary" title="مسح بالكاميرا"><i
+                                class="ri-camera-line"></i></button>
                     </div>
-                    <button id="logout-btn" class="btn btn-danger btn-sm" title="تسجيل الخروج" style="margin-right: auto; padding: 5px;">
-                        <i data-lucide="log-out"></i>
-                    </button>
+                    <div id="pos-product-grid" class="product-grid">
+                        <!-- المنتجات ستظهر هنا تلقائياً -->
+                    </div>
+                </div>
+
+                <div class="pos-cart-panel">
+                    <div class="cart-header">
+                        <h3><i class="ri-shopping-basket-line"></i> الفاتورة الحالية</h3>
+                        <button id="clear-cart-btn" class="btn btn-sm btn-outline-danger">تفريغ</button>
+                    </div>
+                    <div class="cart-table-wrapper">
+                        <table class="cart-table">
+                            <thead>
+                                <tr>
+                                    <th>المنتج</th>
+                                    <th>الكمية</th>
+                                    <th>السعر</th>
+                                    <th>الإجمالي</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="cart-items-body">
+                                <!-- عناصر السلة -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="cart-summary">
+                        <div class="summary-row">
+                            <span>الإجمالي الفرعي:</span>
+                            <span id="cart-subtotal">0.00 ج.م</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>الخصم:</span>
+                            <input type="number" id="cart-discount" value="0" min="0" step="0.5" class="input-sm">
+                        </div>
+                        <div class="summary-row total-row">
+                            <span>الصافي النهائي:</span>
+                            <span id="cart-total">0.00 ج.م</span>
+                        </div>
+                        <button id="checkout-btn" class="btn btn-success btn-block btn-lg">
+                            <i class="ri-check-double-line"></i> إنهاء وطباعة الفاتورة
+                        </button>
+                    </div>
                 </div>
             </div>
-        </aside>
+        </section>
 
-        <!-- Main Content Area -->
-        <main class="main-content">
-            <!-- Top Header -->
-            <header class="top-header">
-                <button id="sidebar-toggle-btn" class="sidebar-toggle-btn" title="القائمة">
-                    <i data-lucide="menu"></i>
-                </button>
-                <div class="header-title-area">
-                    <h1 id="current-view-title">لوحة التحكم</h1>
-                    <p id="current-view-subtitle" class="text-muted">مرحباً بك مجدداً، إليك نظرة عامة على أداء اليوم.
-                    </p>
-                </div>
-                <div class="header-actions">
-                    <div class="sync-indicator" id="sync-status">
-                        <span class="sync-dot"></span>
-                        <span class="sync-text" data-en="Saved">محفوظ</span>
-                    </div>
-                    <div class="time-display" id="live-time">
-                        <i data-lucide="clock"></i>
-                        <span>10:21:00</span>
-                    </div>
-                    <button class="btn btn-primary" id="quick-pos-btn">
-                        <i data-lucide="plus-circle"></i>
-                        <span>عملية بيع جديدة</span>
-                    </button>
-                </div>
-            </header>
-
-            <!-- Views Container -->
-            <div class="views-container">
-
-                <!-- USER MANAGEMENT VIEW -->
-                <section id="view-users" class="view-section">
-                    <div class="action-bar">
-                        <div class="search-box">
-                            <i data-lucide="search"></i>
-                            <input type="text" id="users-search" class="form-control" placeholder="بحث عن مستخدم..." data-en-placeholder="Search users...">
-                        </div>
-                        <div class="action-buttons">
-                            <button class="btn btn-primary" id="add-user-btn">
-                                <i data-lucide="plus"></i>
-                                <span data-en="Add New User">إضافة مستخدم جديد</span>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="card table-card" style="background: transparent; border: none; padding: 0;">
-                        <div id="users-grid-container" class="users-grid">
-                            <!-- Users injected via JS -->
-                        </div>
-                    </div>
-                </section>
-
-                <!-- 1. DASHBOARD VIEW -->
-                <section id="view-dashboard" class="view-section active">
-                    <!-- Stats Grid -->
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-icon-wrapper sales">
-                                <i data-lucide="dollar-sign"></i>
-                            </div>
-                            <div class="stat-details">
-                                <span class="stat-label">مبيعات اليوم</span>
-                                <h3 class="stat-value" id="stat-today-sales">0.00 ج.م</h3>
-                                <span class="stat-trend trend-up">
-                                    <i data-lucide="trending-up"></i> +12.5% مقارنة بأمس
-                                </span>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon-wrapper transactions">
-                                <i data-lucide="shopping-bag"></i>
-                            </div>
-                            <div class="stat-details">
-                                <span class="stat-label">عمليات البيع</span>
-                                <h3 class="stat-value" id="stat-today-orders">0</h3>
-                                <span class="stat-trend trend-up">
-                                    <i data-lucide="trending-up"></i> +8.2% مقارنة بأمس
-                                </span>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon-wrapper low-stock">
-                                <i data-lucide="alert-triangle"></i>
-                            </div>
-                            <div class="stat-details">
-                                <span class="stat-label">نواقص المخزون</span>
-                                <h3 class="stat-value text-warning" id="stat-low-stock">0</h3>
-                                <span class="stat-trend text-warning">تحتاج إلى إعادة طلب</span>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon-wrapper products">
-                                <i data-lucide="box"></i>
-                            </div>
-                            <div class="stat-details">
-                                <span class="stat-label">إجمالي المنتجات</span>
-                                <h3 class="stat-value" id="stat-total-products">0</h3>
-                                <span class="stat-trend text-muted">مسجلة في النظام</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Charts & Alerts Grid -->
-                    <div class="dashboard-grid">
-                        <!-- Sales Chart Card -->
-                        <div class="card chart-card">
-                            <div class="card-header">
-                                <h3>مخطط المبيعات الأسبوعي</h3>
-                                <div class="card-actions">
-                                    <span class="badge badge-success">مباشر</span>
-                                </div>
-                            </div>
-                            <div class="card-body">
-                                <canvas id="salesChart" height="220"></canvas>
-                            </div>
-                        </div>
-
-                        <!-- Low Stock & Quick Actions -->
-                        <div class="dashboard-sidebar-grid">
-                            <!-- Low Stock Alerts -->
-                            <div class="card alerts-card">
-                                <div class="card-header">
-                                    <h3>تنبيهات المخزون (النواقص)</h3>
-                                    <a href="#" class="view-all-link" data-go-to="inventory">عرض الكل</a>
-                                </div>
-                                <div class="card-body scrollable-y" id="dashboard-low-stock-list">
-                                    <!-- Dynamic alerts will go here -->
-                                    <div class="empty-state">
-                                        <i data-lucide="check-circle" class="text-success"></i>
-                                        <p>جميع المنتجات متوفرة بمخزون جيد!</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Fast Selling Categories -->
-                            <div class="card categories-card">
-                                <div class="card-header">
-                                    <h3>الفئات الأكثر مبيعاً</h3>
-                                </div>
-                                <div class="card-body">
-                                    <canvas id="categoriesChart" height="150"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Recent Transactions Table -->
-                    <div class="card table-card">
-                        <div class="card-header">
-                            <h3>آخر عمليات البيع</h3>
-                            <a href="#" class="view-all-link" data-go-to="reports">عرض جميع التقارير</a>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>رقم الفاتورة</th>
-                                            <th>التاريخ والوقت</th>
-                                            <th>العميل</th>
-                                            <th>عدد المواد</th>
-                                            <th>الإجمالي</th>
-                                            <th>طريقة الدفع</th>
-                                            <th>الحالة</th>
-                                            <th>العمليات</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="dashboard-recent-sales">
-                                        <!-- Dynamic sales rows -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- 2. POS / CASHIER VIEW -->
-                <section id="view-pos" class="view-section">
-                    <div class="pos-container">
-                        <!-- Left: Products Catalog -->
-                        <div class="pos-catalog">
-
-                            <!-- ===== BARCODE SCANNER FIELD (v2.0) ===== -->
-                            <!-- حقل الباركود المخصص - يأخذ التركيز تلقائياً -->
-                            <div class="barcode-scanner-row" id="barcode-scanner-row">
-                                <div class="barcode-icon-wrapper">
-                                    <i data-lucide="scan-barcode"></i>
-                                </div>
-                                <input
-                                    type="text"
-                                    id="barcode-scanner-input"
-                                    class="barcode-scanner-field"
-                                    placeholder="📡 امسح الباركود هنا أو اكتبه يدوياً ثم اضغط Enter..."
-                                    autocomplete="off"
-                                    spellcheck="false"
-                                    autofocus
-                                >
-                                <!-- Camera scan button (visible on all devices) -->
-                                <button id="camera-scan-btn" class="barcode-camera-btn"
-                                    onclick="openCameraScanner()" title="مسح بالكاميرا">
-                                    <i data-lucide="camera"></i>
-                                    <span class="camera-btn-text">كاميرا</span>
-                                </button>
-                                <div class="barcode-ready-badge">
-                                    <span data-en="Ready">جاهز</span>
-                                </div>
-                            </div>
-
-                            <div class="catalog-header">
-
-                                <div class="search-bar-wrapper">
-                                    <i data-lucide="search"></i>
-                                    <input type="text" id="pos-search-input"
-                                        placeholder="ابحث باسم المنتج أو الباركود...">
-                                </div>
-                                <div class="barcode-scanner-sim" id="barcode-sim-btn" title="محاكاة قارئ الباركود">
-                                    <i data-lucide="scan-barcode"></i>
-                                    <span>مسح باركود</span>
-                                </div>
-                            </div>
-
-                            <!-- Category Filter Tabs -->
-                            <div class="category-tabs-container">
-                                <div class="category-tabs" id="pos-category-tabs">
-                                    <button class="category-tab active" data-category="all">الكل</button>
-                                    <!-- Dynamic categories -->
-                                </div>
-                            </div>
-
-                            <!-- Products Grid -->
-                            <div class="products-grid scrollable-y" id="pos-products-grid">
-                                <!-- Dynamic product cards -->
-                            </div>
-                        </div>
-
-                        <!-- Right: Cart & Checkout -->
-                        <div class="pos-cart-panel" id="pos-cart-panel">
-                            <!-- Mobile: drag handle + close button (hidden on desktop) -->
-                            <div class="cart-drag-handle"></div>
-                            <div class="cart-header">
-                                <h3>سلة المبيعات الحالية</h3>
-                                <button class="btn btn-icon text-danger" id="clear-cart-btn" title="تفريغ السلة">
-                                    <i data-lucide="trash-2"></i>
-                                </button>
-                            </div>
-
-                            <!-- Cart Items List -->
-                            <div class="cart-items-list scrollable-y" id="cart-items-container">
-                                <!-- Dynamic cart items -->
-                                <div class="empty-cart-state">
-                                    <i data-lucide="shopping-cart"></i>
-                                    <p>السلة فارغة. اضغط على المنتجات لإضافتها.</p>
-                                </div>
-                            </div>
-
-                            <!-- Cart Summary -->
-                            <div class="cart-summary">
-                                <!-- Customer Selector -->
-                                <div class="cart-customer-selector">
-                                    <i data-lucide="user"></i>
-                                    <select id="cart-customer-select">
-                                        <option value="walkin">عميل سفري (نقدي)</option>
-                                        <!-- Dynamic customer list -->
-                                    </select>
-                                    <button class="btn btn-icon btn-sm" id="add-customer-quick-btn"
-                                        title="إضافة عميل جديد">
-                                        <i data-lucide="plus"></i>
-                                    </button>
-                                </div>
-
-                                <div class="summary-row">
-                                    <span>المجموع الفرعي:</span>
-                                    <span id="cart-subtotal">0.00 ج.م</span>
-                                </div>
-                                <div class="summary-row">
-                                    <span>خصم (%):</span>
-                                    <input type="number" id="cart-discount-input" min="0" max="100" value="0">
-                                </div>
-                                <div class="summary-row">
-                                    <span>الضريبة (14%):</span>
-                                    <span id="cart-tax">0.00 ج.م</span>
-                                </div>
-                                <div class="summary-row total-row">
-                                    <span>الإجمالي النهائي:</span>
-                                    <span id="cart-total">0.00 ج.م</span>
-                                </div>
-
-                                <!-- Payment Methods -->
-                                <div class="payment-methods">
-                                    <label class="payment-method active">
-                                        <input type="radio" name="payment-method" value="cash" checked>
-                                        <i data-lucide="banknote"></i>
-                                        <span>نقدي</span>
-                                    </label>
-                                    <label class="payment-method">
-                                        <input type="radio" name="payment-method" value="card">
-                                        <i data-lucide="credit-card"></i>
-                                        <span>بطاقة</span>
-                                    </label>
-                                    <label class="payment-method">
-                                        <input type="radio" name="payment-method" value="wallet">
-                                        <i data-lucide="smartphone"></i>
-                                        <span>محفظة</span>
-                                    </label>
-                                </div>
-
-                                <!-- Action Buttons -->
-                                <div class="cart-actions-grid">
-                                    <button class="btn btn-secondary" id="hold-sale-btn">تعليق الطلب</button>
-                                    <button class="btn btn-success btn-lg" id="checkout-btn">
-                                        <i data-lucide="check-circle-2"></i>
-                                        <span>دفع وتأكيد البيع</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- 3. INVENTORY VIEW -->
-                <section id="view-inventory" class="view-section">
-                    <div class="card">
-                        <div class="inventory-toolbar">
-                            <div class="toolbar-left">
-                                <div class="search-bar-wrapper">
-                                    <i data-lucide="search"></i>
-                                    <input type="text" id="inventory-search-input"
-                                        placeholder="ابحث باسم المنتج، الباركود، الفئة...">
-                                </div>
-                                <select id="inventory-category-filter">
-                                    <option value="all">كل الفئات</option>
-                                    <!-- Dynamic categories -->
-                                </select>
-                                <select id="inventory-stock-filter">
-                                    <option value="all">كل الحالات</option>
-                                    <option value="instock">متوفر</option>
-                                    <option value="lowstock">منخفض المخزون</option>
-                                    <option value="outstock">نفذ</option>
-                                </select>
-                            </div>
-                            <div class="toolbar-right">
-                                <button class="btn btn-secondary" id="manage-categories-btn">
-                                    <i data-lucide="tags"></i>
-                                    <span>إدارة الفئات</span>
-                                </button>
-                                <button class="btn btn-primary" id="add-product-btn">
-                                    <i data-lucide="plus"></i>
-                                    <span>إضافة منتج جديد</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="table-responsive">
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>الباركود</th>
-                                        <th>اسم المنتج</th>
-                                        <th>الفئة</th>
-                                        <th>سعر التكلفة</th>
-                                        <th>سعر البيع</th>
-                                        <th>الربح المتوقع</th>
-                                        <th>الكمية المتاحة</th>
-                                        <th>التاجر / المورد</th>
-                                        <th>تاريخ الصلاحية</th>
-                                        <th>حالة المخزون</th>
-                                        <th>العمليات</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="inventory-table-body">
-                                    <!-- Dynamic inventory rows -->
-                                </tbody>
-                            </table>
-                        </div>
-                        <!-- Mobile Cards View (shows on small screens via CSS) -->
-                        <div class="mobile-inventory-cards" id="mobile-inventory-cards-container">
-                            <!-- Populated by renderMobileInventoryCards() in JS -->
-                        </div>
-                    </div>
-                </section>
-
-                <!-- 4. REPORTS VIEW -->
-                <section id="view-reports" class="view-section">
-                    <!-- Reports Summary Cards -->
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-icon-wrapper sales">
-                                <i data-lucide="trending-up"></i>
-                            </div>
-                            <div class="stat-details">
-                                <span class="stat-label">إجمالي المبيعات (الفترة المحددة)</span>
-                                <h3 class="stat-value" id="report-total-sales">0.00 ج.م</h3>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon-wrapper products">
-                                <i data-lucide="percent"></i>
-                            </div>
-                            <div class="stat-details">
-                                <span class="stat-label">صافي الأرباح التقديرية</span>
-                                <h3 class="stat-value text-success" id="report-total-profit">0.00 ج.م</h3>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon-wrapper transactions">
-                                <i data-lucide="shopping-bag"></i>
-                            </div>
-                            <div class="stat-details">
-                                <span class="stat-label">عدد الفواتير الصادرة</span>
-                                <h3 class="stat-value" id="report-total-orders">0</h3>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon-wrapper customers">
-                                <i data-lucide="users"></i>
-                            </div>
-                            <div class="stat-details">
-                                <span class="stat-label">متوسط قيمة الفاتورة</span>
-                                <h3 class="stat-value" id="report-avg-order">0.00 ج.م</h3>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Filter Toolbar -->
-                    <div class="card filter-card">
-                        <div class="reports-toolbar">
-                            <div class="toolbar-left">
-                                <button class="btn btn-outline active" data-range="today">اليوم</button>
-                                <button class="btn btn-outline" data-range="week">هذا الأسبوع</button>
-                                <button class="btn btn-outline" data-range="month">هذا الشهر</button>
-                                <button class="btn btn-outline" data-range="all">الكل</button>
-                            </div>
-                            <div class="toolbar-right">
-                                <button class="btn btn-secondary" id="export-excel-btn">
-                                    <i data-lucide="download"></i>
-                                    <span>تصدير البيانات</span>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Detailed Transactions Log -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h3>سجل الفواتير والمبيعات التفصيلي</h3>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table">
-                                    <thead>
-                                        <tr>
-                                            <th>رقم الفاتورة</th>
-                                            <th>التاريخ والوقت</th>
-                                            <th>العميل</th>
-                                            <th>طريقة الدفع</th>
-                                            <th>المجموع الفرعي</th>
-                                            <th>الخصم</th>
-                                            <th>الضريبة</th>
-                                            <th>الإجمالي النهائي</th>
-                                            <th>الربح</th>
-                                            <th>العمليات</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="reports-sales-table-body">
-                                        <!-- Dynamic transactions -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- 5. CUSTOMERS VIEW -->
-                <section id="view-customers" class="view-section">
-                    <div class="card">
-                        <div class="inventory-toolbar">
-                            <div class="toolbar-left">
-                                <div class="search-bar-wrapper">
-                                    <i data-lucide="search"></i>
-                                    <input type="text" id="customer-search-input"
-                                        placeholder="ابحث باسم العميل أو رقم الهاتف...">
-                                </div>
-                            </div>
-                            <div class="toolbar-right">
-                                <button class="btn btn-primary" id="add-customer-btn">
-                                    <i data-lucide="user-plus"></i>
-                                    <span>إضافة عميل جديد</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="table-responsive">
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>الاسم</th>
-                                        <th>رقم الهاتف</th>
-                                        <th>نقاط الولاء</th>
-                                        <th>إجمالي المشتريات</th>
-                                        <th>عدد الزيارات</th>
-                                        <th>تاريخ التسجيل</th>
-                                        <th>العمليات</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="customers-table-body">
-                                    <!-- Dynamic customer rows -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- 5.5. SUPPLIERS VIEW -->
-                <section id="view-suppliers" class="view-section">
-                    <!-- Stats Grid -->
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-icon-wrapper sales">
-                                <i data-lucide="truck"></i>
-                            </div>
-                            <div class="stat-details">
-                                <span class="stat-label" data-en="Total Suppliers">إجمالي الموردين</span>
-                                <h3 class="stat-value" id="sup-stat-total">0</h3>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon-wrapper low-stock">
-                                <i data-lucide="wallet"></i>
-                            </div>
-                            <div class="stat-details">
-                                <span class="stat-label" data-en="Total Outstanding Balance">إجمالي مستحقات الدفع</span>
-                                <h3 class="stat-value text-danger" id="sup-stat-balance">0.00 ج.م</h3>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon-wrapper transactions">
-                                <i data-lucide="shopping-bag"></i>
-                            </div>
-                            <div class="stat-details">
-                                <span class="stat-label" data-en="Restock Operations">عمليات التوريد</span>
-                                <h3 class="stat-value" id="sup-stat-purchases">0</h3>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="card">
-                        <div class="inventory-toolbar">
-                            <div class="toolbar-left">
-                                <div class="search-bar-wrapper">
-                                    <i data-lucide="search"></i>
-                                    <input type="text" id="supplier-search-input"
-                                        placeholder="ابحث باسم المورد أو رقم الهاتف...">
-                                </div>
-                            </div>
-                            <div class="toolbar-right">
-                                <button class="btn btn-secondary" id="add-purchase-invoice-btn">
-                                    <i data-lucide="plus-circle"></i>
-                                    <span>فاتورة توريد (شراء)</span>
-                                </button>
-                                <button class="btn btn-primary" id="add-supplier-trigger-btn">
-                                    <i data-lucide="user-plus"></i>
-                                    <span>إضافة مورد جديد</span>
-                                </button>
-                            </div>
-                        </div>
-
-                        <div class="table-responsive">
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th>اسم المورد / الشركة</th>
-                                        <th>الشخص المسؤول</th>
-                                        <th>رقم الهاتف</th>
-                                        <th>المديونية الحالية</th>
-                                        <th>إجمالي التوريدات</th>
-                                        <th>تاريخ آخر عملية</th>
-                                        <th>العمليات</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="suppliers-table-body">
-                                    <!-- Dynamic supplier rows -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- 8. SHORTAGES VIEW - قائمة النواقص التلقائية -->
-                <section id="view-shortages" class="view-section">
-
-                    <!-- Stats bar -->
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-icon-wrapper low-stock">
-                                <i data-lucide="package-x"></i>
-                            </div>
-                            <div class="stat-details">
-                                <span class="stat-label">إجمالي المنتجات الناقصة</span>
-                                <h3 class="stat-value text-danger" id="shortage-stat-count">0</h3>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon-wrapper transactions">
-                                <i data-lucide="building-2"></i>
-                            </div>
-                            <div class="stat-details">
-                                <span class="stat-label">التجار / الموردون المتأثرون</span>
-                                <h3 class="stat-value text-warning" id="shortage-stat-suppliers">0</h3>
-                            </div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-icon-wrapper sales">
-                                <i data-lucide="trending-down"></i>
-                            </div>
-                            <div class="stat-details">
-                                <span class="stat-label">منتجات نفذت تماماً</span>
-                                <h3 class="stat-value text-danger" id="shortage-stat-zero">0</h3>
-                            </div>
-                        </div>
-                        <div class="stat-card shortages-export-card" onclick="exportAllShortages()" style="cursor:pointer">
-                            <div class="stat-icon-wrapper customers">
-                                <i data-lucide="share-2"></i>
-                            </div>
-                            <div class="stat-details">
-                                <span class="stat-label">تصدير جميع قوائم النواقص</span>
-                                <h3 class="stat-value" style="font-size:0.95rem;color:var(--primary)">اضغط للتصدير الكامل</h3>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Shortages content grouped by supplier -->
-                    <div id="shortages-content">
-                        <!-- Populated dynamically by renderShortages() -->
-                        <div class="empty-state">
-                            <i data-lucide="check-circle" style="color:var(--success)"></i>
-                            <p>جميع المنتجات متوفرة بمخزون كافٍ!</p>
-                        </div>
-                    </div>
-
-                </section>
-
-
-                <!-- 6. SETTINGS VIEW -->
-                <section id="view-settings" class="view-section">
-                    <div class="settings-grid">
-                        <!-- General Settings -->
-                        <div class="card">
-                            <div class="card-header">
-                                <h3>إعدادات المتجر العامة</h3>
-                            </div>
-                            <div class="card-body">
-                                <form id="settings-form" class="settings-form">
-                                    <div class="form-group">
-                                        <label for="settings-store-name">اسم السوبر ماركت</label>
-                                        <input type="text" id="settings-store-name" value="جاسر ماركت">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="settings-currency">العملة المستخدمة</label>
-                                        <input type="text" id="settings-currency" value="ج.م">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="settings-tax-rate">نسبة ضريبة القيمة المضافة (%)</label>
-                                        <input type="number" id="settings-tax-rate" value="14" min="0" max="100">
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="settings-low-stock">حد التنبيه لنواقص المخزون (قطع)</label>
-                                        <input type="number" id="settings-low-stock" value="10" min="1">
-                                    </div>
-                                    <button type="submit" class="btn btn-primary">حفظ التغييرات</button>
-                                </form>
-                            </div>
-                        </div>
-
-                        <!-- Data Management -->
-                        <div class="card">
-                            <div class="card-header">
-                                <h3>إدارة البيانات والنسخ الاحتياطي</h3>
-                            </div>
-                            <div class="card-body data-mgmt-body">
-                                <p class="text-muted">يمكنك تصدير كافة بيانات السوبر ماركت (المنتجات، المبيعات، العملاء)
-                                    للنسخ الاحتياطي أو استيرادها لاحقاً.</p>
-                                <div class="data-actions">
-                                    <button class="btn btn-secondary" id="backup-data-btn">
-                                        <i data-lucide="upload-cloud"></i>
-                                        <span>تصدير نسخة احتياطية (JSON)</span>
-                                    </button>
-                                    <button class="btn btn-outline" id="restore-data-trigger">
-                                        <i data-lucide="download-cloud"></i>
-                                        <span>استيراد نسخة احتياطية</span>
-                                    </button>
-                                    <input type="file" id="restore-data-file" style="display: none;" accept=".json">
-
-                                    <button class="btn btn-danger" id="reset-data-btn">
-                                        <i data-lucide="refresh-cw"></i>
-                                        <span>تهيئة النظام (مسح كل البيانات)</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
+        <!-- 2. Inventory View (إدارة المخزن) -->
+        <section id="inventory-view" class="view-section">
+            <div class="section-header">
+                <h2>إدارة بضاعة المخزن</h2>
+                <button id="add-product-btn" class="btn btn-primary"><i class="ri-add-line"></i> إضافة منتج
+                    جديد</button>
             </div>
-        </main>
-    </div>
+            <div class="table-wrapper">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>الباركود</th>
+                            <th>اسم المنتج</th>
+                            <th>التصنيف</th>
+                            <th>سعر الشراء</th>
+                            <th>سعر البيع</th>
+                            <th>الكمية المتاحة</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventory-table-body">
+                        <!-- بضاعة المخزن -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
 
-    <!-- ================= MODALS ================= -->
+        <!-- 3. Purchases View (المشتريات) -->
+        <section id="purchases-view" class="view-section">
+            <div class="section-header">
+                <h2>فاتورة مشتريات جديدة (إدخال مخزون)</h2>
+                <button id="add-purchase-btn" class="btn btn-primary"><i class="ri-file-add-line"></i> تسجيل فاتورة
+                    توريد</button>
+            </div>
+            <div class="table-wrapper">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>رقم الفاتورة</th>
+                            <th>المورد</th>
+                            <th>التاريخ</th>
+                            <th>الإجمالي</th>
+                            <th>حالة الدفع</th>
+                        </tr>
+                    </thead>
+                    <tbody id="purchases-table-body">
+                        <!-- سجل المشتريات -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
 
-    <!-- 1. Add/Edit Product Modal -->
+        <!-- 4. Reports View (التقارير) -->
+        <section id="reports-view" class="view-section">
+            <h2>تقارير المبيعات والوردية</h2>
+            <p class="text-muted">مُلخص الأرباح والخزينة والجرد اليومي.</p>
+        </section>
+
+        <!-- 5. Customers View (العملاء) -->
+        <section id="customers-view" class="view-section">
+            <h2>إدارة الحسابات والعملاء</h2>
+        </section>
+
+        <!-- 6. Suppliers View (الموردين) -->
+        <section id="suppliers-view" class="view-section">
+            <h2>سجل الموردين والشركات</h2>
+        </section>
+
+        <!-- 7. Users View (المستخدمين والصلاحيات) -->
+        <section id="users-view" class="view-section">
+            <div class="section-header">
+                <h2>إدارة مستخدمي النظام</h2>
+                <button id="add-user-btn" class="btn btn-primary"><i class="ri-user-add-line"></i> إضافة مستخدم
+                    جديد</button>
+            </div>
+            <div class="table-wrapper">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>الاسم</th>
+                            <th>اسم المستخدم</th>
+                            <th>الصلاحية</th>
+                            <th>الإجراءات</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-table-body">
+                        <!-- قائمة المستخدمين -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modals Section (النوافذ المنبثقة) -->
+
+    <!-- Add/Edit Product Modal -->
     <div class="modal-overlay" id="product-modal">
         <div class="modal-container">
             <div class="modal-header">
@@ -902,45 +215,25 @@
             <form id="product-form">
                 <input type="hidden" id="product-id">
                 <div class="modal-body">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="prod-barcode">الباركود *</label>
-                            <div class="barcode-input-wrapper">
-                                <input type="text" id="prod-barcode" required>
-                                <button type="button" class="btn btn-secondary btn-sm" id="gen-barcode-btn">توليد
-                                    تلقائي</button>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="prod-name">اسم المنتج *</label>
-                            <input type="text" id="prod-name" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="prod-category">الفئة *</label>
-                            <select id="prod-category" required>
-                                <!-- Dynamic categories -->
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="prod-cost">سعر التكلفة *</label>
-                            <input type="number" id="prod-cost" step="0.01" min="0" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="prod-price">سعر البيع للمستهلك *</label>
-                            <input type="number" id="prod-price" step="0.01" min="0" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="prod-stock">الكمية المتاحة بالمخزن *</label>
-                            <input type="number" id="prod-stock" min="0" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="prod-expiry">تاريخ الصلاحية (اختياري)</label>
-                            <input type="date" id="prod-expiry">
-                        </div>
-                        <div class="form-group">
-                            <label for="prod-image">رابط صورة المنتج (اختياري)</label>
-                            <input type="text" id="prod-image" placeholder="https://example.com/image.jpg">
-                        </div>
+                    <div class="form-group">
+                        <label for="prod-barcode">الباركود *</label>
+                        <input type="text" id="prod-barcode" required placeholder="امسح أو اكتب الباركود">
+                    </div>
+                    <div class="form-group">
+                        <label for="prod-name">اسم المنتج *</label>
+                        <input type="text" id="prod-name" required placeholder="مثال: شيبسي عائلي طماطم">
+                    </div>
+                    <div class="form-group">
+                        <label for="prod-buy-price">سعر الشراء (ج.م) *</label>
+                        <input type="number" id="prod-buy-price" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="prod-sell-price">سعر البيع (ج.م) *</label>
+                        <input type="number" id="prod-sell-price" step="0.01" min="0" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="prod-stock">الكمية الابتدائية *</label>
+                        <input type="number" id="prod-stock" min="0" value="0" required>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -951,414 +244,109 @@
         </div>
     </div>
 
-    <!-- 2. Add Customer Modal -->
-    <div class="modal-overlay" id="customer-modal">
-        <div class="modal-container modal-sm">
-            <div class="modal-header">
-                <h3 id="customer-modal-title">إضافة عميل جديد</h3>
-                <button class="btn-close-modal" id="close-customer-modal">&times;</button>
-            </div>
-            <form id="customer-form">
-                <input type="hidden" id="customer-id">
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label for="cust-name">اسم العميل *</label>
-                        <input type="text" id="cust-name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="cust-phone">رقم الهاتف *</label>
-                        <input type="text" id="cust-phone" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="cust-points">نقاط الولاء المبدئية</label>
-                        <input type="number" id="cust-points" value="0" min="0">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" id="cancel-customer-modal">إلغاء</button>
-                    <button type="submit" class="btn btn-primary">حفظ العميل</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- 3. Receipt / Checkout Success Modal -->
-    <div class="modal-overlay" id="receipt-modal">
-        <div class="modal-container modal-sm receipt-modal-container">
-            <div class="modal-header no-print">
-                <h3>تمت عملية البيع بنجاح</h3>
-                <button class="btn-close-modal" id="close-receipt-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <!-- Printable Receipt -->
-                <div class="receipt-paper" id="receipt-print-area">
-                    <div class="receipt-header">
-                        <h2 id="receipt-store-name">جاسر ماركت</h2>
-                        <p id="receipt-store-subtitle">فاتورة مبيعات مبسطة</p>
-                        <p class="receipt-divider">---------------------------------</p>
-                    </div>
-                    <div class="receipt-info">
-                        <p><strong>رقم الفاتورة:</strong> <span id="receipt-id">#1001</span></p>
-                        <p><strong>التاريخ:</strong> <span id="receipt-date">2026-07-11 10:21</span></p>
-                        <p><strong>الكاشير:</strong> <span id="receipt-cashier">عبد الله</span></p>
-                        <p><strong>العميل:</strong> <span id="receipt-customer">عميل سفري</span></p>
-                        <p class="receipt-divider">---------------------------------</p>
-                    </div>
-                    <table class="receipt-table">
-                        <thead>
-                            <tr>
-                                <th>المنتج</th>
-                                <th>الكمية</th>
-                                <th>السعر</th>
-                                <th>الإجمالي</th>
-                            </tr>
-                        </thead>
-                        <tbody id="receipt-items-body">
-                            <!-- Dynamic items -->
-                        </tbody>
-                    </table>
-                    <div class="receipt-summary">
-                        <p class="receipt-divider">---------------------------------</p>
-                        <div class="receipt-summary-row">
-                            <span>المجموع الفرعي:</span>
-                            <span id="receipt-subtotal">0.00 ج.م</span>
-                        </div>
-                        <div class="receipt-summary-row">
-                            <span>الخصم:</span>
-                            <span id="receipt-discount">0.00 ج.م</span>
-                        </div>
-                        <div class="receipt-summary-row">
-                            <span>الضريبة:</span>
-                            <span id="receipt-tax">0.00 ج.م</span>
-                        </div>
-                        <div class="receipt-summary-row receipt-total-row">
-                            <span>الإجمالي النهائي:</span>
-                            <span id="receipt-total">0.00 ج.م</span>
-                        </div>
-                        <p class="receipt-divider">---------------------------------</p>
-                    </div>
-                    <div class="receipt-footer">
-                        <p>شكراً لزيارتكم!</p>
-                        <p>يرجى الاحتفاظ بالفاتورة في حال الاسترجاع</p>
-                        <div class="receipt-barcode">
-                            <i data-lucide="barcode" class="barcode-icon"></i>
-                            <span id="receipt-barcode-text">1234567890</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer no-print">
-                <button class="btn btn-secondary" id="print-receipt-btn">
-                    <i data-lucide="printer"></i> طباعة الفاتورة
-                </button>
-                <button class="btn btn-primary" id="new-sale-btn">عملية بيع جديدة</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- 4. Barcode Simulator Modal -->
-    <div class="modal-overlay" id="barcode-modal">
-        <div class="modal-container modal-sm">
-            <div class="modal-header">
-                <h3>محاكاة قارئ الباركود</h3>
-                <button class="btn-close-modal" id="close-barcode-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <p class="text-muted">اختر منتجاً لمحاكاة مسحه باستخدام قارئ الباركود الضوئي:</p>
-                <div class="form-group">
-                    <label for="barcode-select-product">اختر المنتج</label>
-                    <select id="barcode-select-product" class="form-control">
-                        <!-- Dynamic products list -->
-                    </select>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" id="cancel-barcode-modal">إلغاء</button>
-                <button class="btn btn-primary" id="submit-barcode-sim">مسح المنتج</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- 5. Category Manager Modal -->
-    <div class="modal-overlay" id="category-modal">
-        <div class="modal-container modal-sm">
-            <div class="modal-header">
-                <h3>إدارة الفئات</h3>
-                <button class="btn-close-modal" id="close-category-modal">&times;</button>
-            </div>
-            <div class="modal-body">
-                <form id="add-category-form" class="form-inline">
-                    <div class="form-group">
-                        <label for="new-cat-name">اسم الفئة الجديدة</label>
-                        <div class="barcode-input-wrapper">
-                            <input type="text" id="new-cat-name" required placeholder="مثال: مشروبات">
-                            <button type="submit" class="btn btn-primary">إضافة</button>
-                        </div>
-                    </div>
-                </form>
-                <hr>
-                <h4>الفئات الحالية</h4>
-                <div class="categories-list-wrapper scrollable-y" style="max-height: 200px; margin-top: 10px;">
-                    <ul class="categories-list" id="categories-list-ul">
-                        <!-- Dynamic category list -->
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- 6. Supplier Modal -->
-    <div class="modal-overlay" id="supplier-modal">
-        <div class="modal-container modal-sm">
-            <div class="modal-header">
-                <h3 id="supplier-modal-title">إضافة مورد جديد</h3>
-                <button class="btn-close-modal" id="close-supplier-modal">&times;</button>
-            </div>
-            <form id="supplier-form">
-                <input type="hidden" id="supplier-id">
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label for="sup-company">اسم الشركة / المورد *</label>
-                        <input type="text" id="sup-company" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="sup-name">اسم الشخص المسؤول</label>
-                        <input type="text" id="sup-name">
-                    </div>
-                    <div class="form-group">
-                        <label for="sup-phone">رقم الهاتف *</label>
-                        <input type="text" id="sup-phone" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="sup-balance">المديونية المبدئية (ج.م)</label>
-                        <input type="number" id="sup-balance" value="0" min="0" step="0.01">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" id="cancel-supplier-modal">إلغاء</button>
-                    <button type="submit" class="btn btn-primary">حفظ المورد</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- 7. Purchase Restock Modal -->
+    <!-- Purchase Modal -->
     <div class="modal-overlay" id="purchase-modal">
         <div class="modal-container">
             <div class="modal-header">
-                <h3>فاتورة توريد وشراء جديدة</h3>
+                <h3>تسجيل فاتورة توريد (مشتريات)</h3>
                 <button class="btn-close-modal" id="close-purchase-modal">&times;</button>
             </div>
             <form id="purchase-form">
                 <div class="modal-body">
-                    <div class="form-grid">
-                        <div class="form-group">
-                            <label for="pur-supplier">اختر المورد *</label>
-                            <select id="pur-supplier" required>
-                                <!-- Dynamic supplier list -->
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="pur-product">اختر المنتج *</label>
-                            <select id="pur-product" required>
-                                <!-- Dynamic product list -->
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="pur-cost">سعر تكلفة الشراء للمستهلك (قطعة) *</label>
-                            <input type="number" id="pur-cost" step="0.01" min="0" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="pur-qty">الكمية الموردة *</label>
-                            <input type="number" id="pur-qty" min="1" required>
-                        </div>
+                    <div class="form-group">
+                        <label for="pur-supplier">المورد *</label>
+                        <select id="pur-supplier" required></select>
                     </div>
-                    <div class="form-group" style="margin-top: 16px;">
-                        <label>طريقة التوريد وحالة الدفع *</label>
-                        <div class="payment-methods" style="margin: 8px 0 0 0;">
-                            <label class="payment-method active" id="pur-pay-cash">
-                                <input type="radio" name="pur-payment" value="paid" checked>
-                                <i data-lucide="check-circle"></i>
-                                <span>مدفوع نقداً (خزينة)</span>
-                            </label>
-                            <label class="payment-method" id="pur-pay-credit">
-                                <input type="radio" name="pur-payment" value="credit">
-                                <i data-lucide="clock"></i>
-                                <span>على الحساب (مديونية)</span>
-                            </label>
-                        </div>
+                    <div class="form-group">
+                        <label for="pur-product">المنتج *</label>
+                        <select id="pur-product" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="pur-qty">الكمية الموردة *</label>
+                        <input type="number" id="pur-qty" min="1" value="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="pur-payment">حالة الدفع *</label>
+                        <select id="pur-payment">
+                            <option value="paid">نقداً (مدفوع بالكامل)</option>
+                            <option value="partial">دفع جزئي</option>
+                            <option value="credit">آجل (تسجيل على المديونية)</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="pur-paid-amount-wrapper" style="display:none;">
+                        <label for="pur-paid-amount">المبلغ المدفوع (ج.م)</label>
+                        <input type="number" id="pur-paid-amount" step="0.01" min="0" value="0">
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" id="cancel-purchase-modal">إلغاء</button>
-                    <button type="submit" class="btn btn-primary">تأكيد فاتورة التوريد</button>
+                    <button type="submit" class="btn btn-primary">تأكيد وإضافة للمخزون</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- 8. Settle Balance Modal -->
-    <div class="modal-overlay" id="settle-modal">
+    <!-- User Add/Edit Modal -->
+    <div class="modal-overlay" id="user-modal">
         <div class="modal-container modal-sm">
             <div class="modal-header">
-                <h3>سداد دفعة للمورد</h3>
-                <button class="btn-close-modal" id="close-settle-modal">&times;</button>
+                <h3 id="user-modal-title">إضافة مستخدم جديد</h3>
+                <button class="btn-close-modal" id="close-user-modal">&times;</button>
             </div>
-            <form id="settle-form">
-                <input type="hidden" id="settle-supplier-id">
+            <form id="user-form">
+                <input type="hidden" id="user-id">
                 <div class="modal-body">
-                    <p class="text-muted" style="margin-bottom: 12px;">المورد: <strong
-                            id="settle-supplier-name">-</strong></p>
-                    <p class="text-muted" style="margin-bottom: 16px;">المديونية الحالية: <strong
-                            id="settle-current-balance" class="text-danger">0.00 ج.م</strong></p>
                     <div class="form-group">
-                        <label for="settle-amount">المبلغ المدفوع (ج.م) *</label>
-                        <input type="number" id="settle-amount" step="0.01" min="0.01" required>
+                        <label for="user-name-input">الاسم الكامل *</label>
+                        <input type="text" id="user-name-input" required placeholder="مثال: أحمد محمود">
+                    </div>
+                    <div class="form-group">
+                        <label for="user-username-input">اسم المستخدم / الإيميل *</label>
+                        <input type="text" id="user-username-input" required placeholder="username أو email">
+                    </div>
+                    <div class="form-group">
+                        <label for="user-password-input">كلمة المرور *</label>
+                        <input type="password" id="user-password-input" placeholder="***">
+                    </div>
+                    <div class="form-group">
+                        <label for="user-role-select">الصلاحية / الدور *</label>
+                        <select id="user-role-select" required>
+                            <option value="cashier">كاشير (مبيعات فقط)</option>
+                            <option value="storekeeper">أمين مخزن (مخزون فقط)</option>
+                            <option value="admin">مدير عام (Super Admin)</option>
+                        </select>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" id="cancel-settle-modal">إلغاء</button>
-                    <button type="submit" class="btn btn-primary">تأكيد السداد</button>
+                    <button type="button" class="btn btn-secondary" id="cancel-user-modal">إلغاء</button>
+                    <button type="submit" class="btn btn-primary">حفظ البيانات</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Toast Container -->
-    <div id="toast-container" class="toast-container"></div>
-
-    <!-- ===== MOBILE: Cart Bottom Sheet Backdrop ===== -->
-    <div id="mobile-cart-backdrop" class="mobile-cart-backdrop" onclick="closeMobileCart()"></div>
-
-    <!-- ===== MOBILE: Floating Cart Button (FAB) ===== -->
-    <!-- Visible only on small screens when cart has items -->
-    <button id="mobile-cart-fab" class="mobile-cart-fab" onclick="toggleMobileCart()" style="display:none" aria-label="عرض الفاتورة">
-        <i data-lucide="shopping-cart"></i>
-        <span class="fab-badge" id="fab-cart-count">0</span>
-        <span class="fab-total" id="fab-cart-total">0.00</span>
-    </button>
-
-    <!-- ===== CAMERA BARCODE SCANNER MODAL ===== -->
-    <div class="modal-overlay" id="camera-scanner-modal">
+    <!-- Camera Barcode Scanner Modal -->
+    <div class="modal-overlay" id="camera-modal">
         <div class="modal-container modal-sm">
             <div class="modal-header">
-                <h3>
-                    <i data-lucide="camera" style="width:18px;height:18px;vertical-align:middle;margin-left:6px"></i>
-                    مسح الباركود بالكاميرا
-                </h3>
-                <button class="btn-close-modal" id="close-camera-modal" onclick="closeCameraScanner()">&times;</button>
-            </div>
-            <div class="modal-body" style="padding:0;overflow:hidden;">
-                <!-- html5-qrcode renders the video stream here -->
-                <div id="camera-scanner-region" style="width:100%;min-height:280px;background:#000;"></div>
-                <div class="camera-status-bar">
-                    <div class="camera-scan-target"></div>
-                    <p id="camera-scanner-status" class="camera-status-text">
-                        جاري تشغيل الكاميرا... وجّه العدسة نحو الباركود
-                    </p>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="closeCameraScanner()">
-                    <i data-lucide="x" style="width:15px;height:15px"></i>
-                    إلغاء وإغلاق الكاميرا
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- User Form Modal -->
-    <div id="user-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="user-modal-title" data-en="Add New User">إضافة مستخدم جديد</h3>
-                <button class="close-modal">&times;</button>
+                <h3>مسح الباركود بالكاميرا</h3>
+                <button class="btn-close-modal" id="close-camera-modal">&times;</button>
             </div>
             <div class="modal-body">
-                <form id="user-form">
-                    <input type="hidden" id="user-id">
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label data-en="Full Name">الاسم الكامل <span class="text-danger">*</span></label>
-                            <input type="text" id="user-name" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label data-en="Username">اسم الدخول <span class="text-danger">*</span></label>
-                            <input type="text" id="user-username" class="form-control" required>
-                        </div>
-                    </div>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label data-en="Email">الإيميل <span class="text-danger">*</span></label>
-                            <input type="email" id="user-email" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label data-en="Password">كلمة المرور <span class="text-danger">*</span></label>
-                            <input type="text" id="user-password" class="form-control" required>
-                        </div>
-                    </div>
-                    
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label data-en="Role">الصلاحية <span class="text-danger">*</span></label>
-                            <select id="user-role" class="form-control" required>
-                                <option value="admin">مدير (Admin)</option>
-                                <option value="cashier">كاشير (Cashier)</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="modal-actions">
-                        <button type="button" class="btn btn-secondary close-modal" data-en="Cancel">إلغاء</button>
-                        <button type="submit" class="btn btn-primary">
-                            <i data-lucide="save"></i> <span data-en="Save">حفظ البيانات</span>
-                        </button>
-                    </div>
-                </form>
+                <div id="interactive" class="viewport"
+                    style="width:100%; min-height:250px; background:#000; border-radius:8px; overflow:hidden;"></div>
+                <p class="text-muted text-center style-sm" style="margin-top:10px;">وجه كاميرا الهاتف نحو الباركود للمسح
+                    تلقائياً</p>
             </div>
         </div>
     </div>
 
-    <!-- Main App Script -->
+    <!-- Audio Effects for Barcode Reader -->
+    <audio id="beep-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"
+        preload="auto"></audio>
+
+    <!-- JavaScript Application Modules -->
     <script type="module" src="js/app.js"></script>
-
-    <!-- Mobile Sidebar Controller Script -->
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const toggleBtn = document.getElementById('sidebar-toggle-btn');
-            const closeBtn = document.getElementById('sidebar-close-btn');
-            
-            // Create backdrop element dynamically
-            const backdrop = document.createElement('div');
-            backdrop.className = 'sidebar-backdrop';
-            document.body.appendChild(backdrop);
-
-            const toggleSidebar = () => {
-                document.body.classList.toggle('sidebar-open');
-            };
-
-            const closeSidebar = () => {
-                document.body.classList.remove('sidebar-open');
-            };
-
-            if (toggleBtn) toggleBtn.addEventListener('click', toggleSidebar);
-            if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
-            backdrop.addEventListener('click', closeSidebar);
-
-            // Close sidebar when clicking any menu item on mobile
-            const menuItems = document.querySelectorAll('.sidebar-menu .menu-item');
-            menuItems.forEach(item => {
-                item.addEventListener('click', () => {
-                    if (window.innerWidth <= 768) {
-                        closeSidebar();
-                    }
-                });
-            });
-        });
-    </script>
 </body>
-
 
 </html>

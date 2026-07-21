@@ -26,7 +26,7 @@ export function playBeep(frequency = 440, duration = 0.1) {
 
         oscillator.type = 'sine';
         oscillator.frequency.value = frequency;
-        
+
         gainNode.gain.setValueAtTime(0.04, audioCtx.currentTime); // volume limit
         gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
 
@@ -44,7 +44,7 @@ export function showToast(message, type = 'info') {
 
     const toast = document.createElement("div");
     toast.className = `toast toast-${type}`;
-    
+
     let icon = 'info';
     if (type === 'success') icon = 'check-circle';
     else if (type === 'warning') icon = 'alert-triangle';
@@ -56,7 +56,7 @@ export function showToast(message, type = 'info') {
     `;
 
     container.appendChild(toast);
-    lucide.createIcons();
+    if (window.lucide) lucide.createIcons();
 
     // Sound effect
     if (type === 'success') {
@@ -106,7 +106,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     // Initial view rendering
     switchView(state.currentView);
-    lucide.createIcons();
+    if (window.lucide) lucide.createIcons();
 });
 
 // Safe event listener attaching helper (DOM Check Guards)
@@ -177,7 +177,7 @@ function applyLanguage() {
     document.querySelectorAll(".sidebar-menu .menu-item").forEach(item => {
         const view = item.getAttribute("data-view");
         const textSpan = item.querySelector(".menu-text");
-        if (textSpan) {
+        if (textSpan && translations[state.language] && translations[state.language][view]) {
             textSpan.textContent = translations[state.language][view];
         }
     });
@@ -193,8 +193,10 @@ function applyLanguage() {
     });
 
     // Update search inputs placeholders
-    const posSearch = document.getElementById("pos-search-input");
-    if (posSearch) posSearch.placeholder = translations[state.language].searchPlaceholder;
+    const posSearch = document.getElementById("pos-search-input") || document.getElementById("barcode-input");
+    if (posSearch && translations[state.language]) {
+        posSearch.placeholder = translations[state.language].searchPlaceholder || "امسح الباركود أو ابحث باسم المنتج...";
+    }
 
     const invSearch = document.getElementById("inventory-search-input");
     if (invSearch) invSearch.placeholder = state.language === "ar" ? "ابحث باسم المنتج، الباركود، الفئة..." : "Search by name, barcode, category...";
@@ -202,11 +204,11 @@ function applyLanguage() {
 
 // Navigation Setup
 function setupNavigation() {
-    document.querySelectorAll(".sidebar-menu .menu-item").forEach(item => {
+    document.querySelectorAll(".nav-btn, .sidebar-menu .menu-item").forEach(item => {
         item.addEventListener("click", (e) => {
             e.preventDefault();
             const view = item.getAttribute("data-view");
-            switchView(view);
+            if (view) switchView(view);
         });
     });
 
@@ -214,7 +216,7 @@ function setupNavigation() {
         el.addEventListener("click", (e) => {
             e.preventDefault();
             const targetView = el.getAttribute("data-go-to");
-            switchView(targetView);
+            if (targetView) switchView(targetView);
             // Auto filter low stock if heading to inventory from low stock alerts card
             if (targetView === "inventory" && el.closest(".alerts-card")) {
                 const filter = document.getElementById("inventory-stock-filter");
@@ -231,13 +233,8 @@ function setupNavigation() {
     // Dynamic stats cards click handling
     const statCards = document.querySelectorAll("#view-dashboard .stats-grid .stat-card");
     if (statCards.length >= 4) {
-        // Today's Sales Card
         statCards[0].addEventListener("click", () => switchView("reports"));
-        
-        // Sales Operations Card
         statCards[1].addEventListener("click", () => switchView("reports"));
-        
-        // Low Stock alerts Card -> Inventory view filtered
         statCards[2].addEventListener("click", () => {
             switchView("inventory");
             const filter = document.getElementById("inventory-stock-filter");
@@ -246,8 +243,6 @@ function setupNavigation() {
                 filter.dispatchEvent(new Event("change"));
             }
         });
-        
-        // Total Products Card -> Inventory view unfiltered
         statCards[3].addEventListener("click", () => {
             switchView("inventory");
             const filter = document.getElementById("inventory-stock-filter");
@@ -260,12 +255,17 @@ function setupNavigation() {
 }
 
 function switchView(viewName) {
-    state.currentView = viewName;
+    if (!viewName) return;
+
+    // Normalize view name (handle pos vs pos-view)
+    const cleanViewName = viewName.replace("-view", "");
+    state.currentView = cleanViewName;
     saveState();
 
-    // Update active menu item
-    document.querySelectorAll(".sidebar-menu .menu-item").forEach(item => {
-        if (item.getAttribute("data-view") === viewName) {
+    // Update active nav button
+    document.querySelectorAll(".nav-btn, .menu-item").forEach(item => {
+        const itemTarget = (item.getAttribute("data-view") || "").replace("-view", "");
+        if (itemTarget === cleanViewName) {
             item.classList.add("active");
         } else {
             item.classList.remove("active");
@@ -276,41 +276,44 @@ function switchView(viewName) {
     document.querySelectorAll(".view-section").forEach(sec => {
         sec.classList.remove("active");
     });
-    const targetSec = document.getElementById(`view-${viewName}`);
+
+    const targetSec = document.getElementById(`${cleanViewName}-view`) || document.getElementById(`view-${cleanViewName}`);
     if (targetSec) targetSec.classList.add("active");
 
     // Update header title
     const titleEl = document.getElementById("current-view-title");
     const subtitleEl = document.getElementById("current-view-subtitle");
 
-    if (titleEl) titleEl.textContent = translations[state.language][viewName];
+    if (titleEl && translations[state.language] && translations[state.language][cleanViewName]) {
+        titleEl.textContent = translations[state.language][cleanViewName];
+    }
 
-    if (viewName === "dashboard") {
+    if (cleanViewName === "dashboard") {
         if (subtitleEl) subtitleEl.textContent = state.language === "ar" ? "مرحباً بك مجدداً، إليك نظرة عامة على أداء اليوم." : "Welcome back, here is today's overview.";
         renderDashboard();
-    } else if (viewName === "pos") {
+    } else if (cleanViewName === "pos") {
         if (subtitleEl) subtitleEl.textContent = state.language === "ar" ? "شاشة الكاشير السريعة لإتمام عمليات البيع." : "Quick cashier screen to complete sales.";
         renderPOS();
-    } else if (viewName === "inventory") {
+    } else if (cleanViewName === "inventory") {
         if (subtitleEl) subtitleEl.textContent = state.language === "ar" ? "إدارة وتحديث المنتجات والأسعار والكميات المتاحة." : "Manage and update products, prices, and stock levels.";
         renderInventory();
-    } else if (viewName === "reports") {
+    } else if (cleanViewName === "reports") {
         if (subtitleEl) subtitleEl.textContent = state.language === "ar" ? "تقارير المبيعات والأرباح التفصيلية للفترات المختلفة." : "Detailed sales and profit reports for different periods.";
         renderReports();
-    } else if (viewName === "customers") {
+    } else if (cleanViewName === "customers") {
         if (subtitleEl) subtitleEl.textContent = state.language === "ar" ? "إدارة قاعدة بيانات العملاء ونقاط الولاء." : "Manage customer database and loyalty points.";
         renderCustomers();
-    } else if (viewName === "suppliers") {
+    } else if (cleanViewName === "suppliers") {
         if (subtitleEl) subtitleEl.textContent = state.language === "ar" ? "إدارة الموردين وحسابات التوريد والآجل." : "Manage suppliers, restock purchases, and credit balances.";
         renderSuppliers();
-    } else if (viewName === "settings") {
+    } else if (cleanViewName === "settings") {
         if (subtitleEl) subtitleEl.textContent = state.language === "ar" ? "تخصيص إعدادات النظام والنسخ الاحتياطي." : "Customize system settings and backups.";
         renderSettings();
-    } else if (viewName === "users") {
+    } else if (cleanViewName === "users") {
         renderUsers();
     }
 
-    lucide.createIcons();
+    if (window.lucide) lucide.createIcons();
 }
 window.switchView = switchView;
 
@@ -328,11 +331,10 @@ function setupEventListeners() {
         state.language = state.language === "ar" ? "en" : "ar";
         const langBtn = document.getElementById("lang-toggle-btn");
         if (langBtn) langBtn.textContent = state.language === "ar" ? "EN" : "AR";
-        // Global setup
+
         updateCartSummary();
-        renderCategoriesList(); // Initial render for lists
-        
-        // Final UI Updates
+        renderCategoriesList();
+
         saveState();
         applyLanguage();
         switchView(state.currentView);
@@ -345,9 +347,11 @@ function setupEventListeners() {
         const closeBtn = document.getElementById(closeBtnId);
         const cancelBtn = document.getElementById(cancelBtnId);
 
-        if (openBtn) openBtn.addEventListener("click", () => modal.classList.add("active"));
-        if (closeBtn) closeBtn.addEventListener("click", () => modal.classList.remove("active"));
-        if (cancelBtn) cancelBtn.addEventListener("click", () => modal.classList.remove("active"));
+        if (modal) {
+            if (openBtn) openBtn.addEventListener("click", () => modal.classList.add("active"));
+            if (closeBtn) closeBtn.addEventListener("click", () => modal.classList.remove("active"));
+            if (cancelBtn) cancelBtn.addEventListener("click", () => modal.classList.remove("active"));
+        }
     };
 
     setupModal("product-modal", "add-product-btn", "close-product-modal", "cancel-product-modal");
@@ -355,9 +359,10 @@ function setupEventListeners() {
     setupModal("barcode-modal", "barcode-sim-btn", "close-barcode-modal", "cancel-barcode-modal");
     setupModal("category-modal", "manage-categories-btn", "close-category-modal", null);
     setupModal("supplier-modal", "add-supplier-trigger-btn", "close-supplier-modal", "cancel-supplier-modal");
-    setupModal("purchase-modal", "add-purchase-invoice-btn", "close-purchase-modal", "cancel-purchase-modal");
+    setupModal("purchase-modal", "add-purchase-btn", "close-purchase-modal", "cancel-purchase-modal");
     setupModal("settle-modal", null, "close-settle-modal", "cancel-settle-modal");
-    setupModal("user-modal", null, "close-user-modal", "cancel-user-modal");
+    setupModal("user-modal", "add-user-btn", "close-user-modal", "cancel-user-modal");
+    setupModal("camera-modal", "btn-camera-scan", "close-camera-modal", null);
 
     // Form resets when clicking "Add New" buttons
     addListenerSafe("add-product-btn", "click", () => {
@@ -387,18 +392,6 @@ function setupEventListeners() {
         if (modalTitle) modalTitle.textContent = state.language === "ar" ? "إضافة مورد جديد" : "Add New Supplier";
     });
 
-    // Quick customer add in POS
-    addListenerSafe("add-customer-quick-btn", "click", () => {
-        const form = document.getElementById("customer-form");
-        if (form) form.reset();
-        const idField = document.getElementById("customer-id");
-        if (idField) idField.value = "";
-        const modalTitle = document.getElementById("customer-modal-title");
-        if (modalTitle) modalTitle.textContent = state.language === "ar" ? "إضافة عميل جديد" : "Add New Customer";
-        const custModal = document.getElementById("customer-modal");
-        if (custModal) custModal.classList.add("active");
-    });
-
     // Close receipt modal
     addListenerSafe("close-receipt-modal", "click", () => {
         const receiptModal = document.getElementById("receipt-modal");
@@ -418,13 +411,13 @@ function setupEventListeners() {
     // Prevent random form submit via scanner ENTER keypress glitch
     document.addEventListener("keydown", (e) => {
         if (e.key === "Enter" && e.target.tagName !== "TEXTAREA" && !e.target.classList.contains("btn-primary")) {
-            if (e.target.id === "pos-search-input") return; // Allow POS scan input enter handler to capture it
+            if (e.target.id === "pos-search-input" || e.target.id === "barcode-input") return;
             e.preventDefault();
         }
     });
 
     // Handle barcode scanner input event inside POS search input
-    const posSearch = document.getElementById("pos-search-input");
+    const posSearch = document.getElementById("pos-search-input") || document.getElementById("barcode-input");
     if (posSearch) {
         posSearch.addEventListener("keydown", (e) => {
             if (e.key === "Enter") {
@@ -434,7 +427,7 @@ function setupEventListeners() {
                 const prod = state.products.find(p => p.barcode === barcode);
                 if (prod) {
                     addToCart(prod.id);
-                    posSearch.value = ""; // Clear input immediately
+                    posSearch.value = "";
                     showToast(state.language === "ar" ? `تمت إضافة ${prod.name}` : `Added ${prod.name}`, "success");
                 } else {
                     showToast(state.language === "ar" ? "المنتج غير مسجل في المخازن!" : "Product not found!", "danger");
@@ -464,21 +457,7 @@ function setupEventListeners() {
 
     // POS Search & Filter auto filter
     addListenerSafe("pos-search-input", "input", renderPOSProducts);
-
-    // POS Barcode Simulator Submit
-    addListenerSafe("submit-barcode-sim", "click", () => {
-        const productSelect = document.getElementById("barcode-select-product");
-        if (productSelect) {
-            const prodId = productSelect.value;
-            const prod = state.products.find(p => p.id === prodId);
-            if (prod) {
-                addToCart(prod.id);
-                const barcodeModal = document.getElementById("barcode-modal");
-                if (barcodeModal) barcodeModal.classList.remove("active");
-                showToast(state.language === "ar" ? `تمت إضافة ${prod.name}` : `Added ${prod.name}`, "success");
-            }
-        }
-    });
+    addListenerSafe("barcode-input", "input", renderPOSProducts);
 
     // POS Cart Actions
     addListenerSafe("clear-cart-btn", "click", () => {
@@ -486,65 +465,30 @@ function setupEventListeners() {
         showToast(state.language === "ar" ? "تم تفريغ السلة" : "Cart cleared", "warning");
     });
     addListenerSafe("cart-discount-input", "input", updateCartSummary);
+    addListenerSafe("cart-discount", "input", updateCartSummary);
     addListenerSafe("checkout-btn", "click", handleCheckout);
 
     // Supplier search
     addListenerSafe("supplier-search-input", "input", renderSuppliersTable);
-
-    // Purchase Invoice Payment Method Selection
-    addListenerSafe("pur-pay-cash", "click", () => {
-        const cashEl = document.getElementById("pur-pay-cash");
-        const creditEl = document.getElementById("pur-pay-credit");
-        if (cashEl && creditEl) {
-            cashEl.classList.add("active");
-            creditEl.classList.remove("active");
-        }
-        const input = document.querySelector('input[name="pur-payment"][value="paid"]');
-        if (input) input.checked = true;
-    });
-    addListenerSafe("pur-pay-credit", "click", () => {
-        const cashEl = document.getElementById("pur-pay-cash");
-        const creditEl = document.getElementById("pur-pay-credit");
-        if (cashEl && creditEl) {
-            creditEl.classList.add("active");
-            cashEl.classList.remove("active");
-        }
-        const input = document.querySelector('input[name="pur-payment"][value="credit"]');
-        if (input) input.checked = true;
-    });
 
     // Inventory Search & Filters
     addListenerSafe("inventory-search-input", "input", renderInventoryTable);
     addListenerSafe("inventory-category-filter", "change", renderInventoryTable);
     addListenerSafe("inventory-stock-filter", "change", renderInventoryTable);
 
-    // Settings Form Submit
+    // Settings & Users
+    if (document.getElementById('settle-form')) {
+        document.getElementById('settle-form').addEventListener('submit', handleSettleFormSubmit);
+    }
+
+    if (document.getElementById('user-form')) {
+        document.getElementById('user-form').addEventListener('submit', handleUserFormSubmit);
+    }
+
+    addListenerSafe('users-search', 'input', renderUsers);
+
     const settingsForm = document.getElementById("settings-form");
     if (settingsForm) {
-        if (document.getElementById('settle-form')) {
-            document.getElementById('settle-form').addEventListener('submit', handleSettleFormSubmit);
-        }
-
-        // --- User Management Events ---
-        const addUserBtn = document.getElementById('add-user-btn');
-        if (addUserBtn) {
-            addUserBtn.addEventListener('click', () => {
-                document.getElementById('user-modal-title').textContent = "إضافة مستخدم جديد";
-                document.getElementById('user-id').value = "";
-                document.getElementById('user-form').reset();
-                document.getElementById('user-modal').classList.add('active');
-            });
-        }
-        
-        if (document.getElementById('user-form')) {
-            document.getElementById('user-form').addEventListener('submit', handleUserFormSubmit);
-        }
-        
-        const usersSearch = document.getElementById('users-search');
-        if (usersSearch) {
-            usersSearch.addEventListener('input', renderUsers);
-        }
-
         settingsForm.addEventListener("submit", (e) => {
             e.preventDefault();
             state.settings.storeName = document.getElementById("settings-store-name").value;
@@ -616,15 +560,6 @@ function setupEventListeners() {
         });
     });
 
-    // Reports Toolbar button setup
-    document.querySelectorAll(".reports-toolbar .btn-outline").forEach(btn => {
-        btn.addEventListener("click", () => {
-            document.querySelectorAll(".reports-toolbar .btn-outline").forEach(b => b.classList.remove("active"));
-            btn.classList.add("active");
-            renderReports();
-        });
-    });
-
     // Category Manager Modal Trigger Setup
     addListenerSafe("manage-categories-btn", "click", () => {
         renderCategoriesList();
@@ -636,13 +571,20 @@ function checkSmartBarcode() {
     const barcodeInput = document.getElementById("prod-barcode");
     if (!barcodeInput) return;
     const barcode = barcodeInput.value.trim();
+    if (!SMART_BARCODE_DATABASE) return;
+
     const match = SMART_BARCODE_DATABASE[barcode];
     if (match) {
-        document.getElementById("prod-name").value = match.name;
-        document.getElementById("prod-category").value = match.category;
-        document.getElementById("prod-cost").value = match.cost;
-        document.getElementById("prod-price").value = match.price;
-        
+        const nameEl = document.getElementById("prod-name");
+        const catEl = document.getElementById("prod-category");
+        const buyEl = document.getElementById("prod-buy-price") || document.getElementById("prod-cost");
+        const sellEl = document.getElementById("prod-sell-price") || document.getElementById("prod-price");
+
+        if (nameEl) nameEl.value = match.name;
+        if (catEl) catEl.value = match.category;
+        if (buyEl) buyEl.value = match.cost;
+        if (sellEl) sellEl.value = match.price;
+
         barcodeInput.style.borderColor = 'var(--success)';
         barcodeInput.style.boxShadow = '0 0 8px rgba(6, 182, 212, 0.3)';
     } else {

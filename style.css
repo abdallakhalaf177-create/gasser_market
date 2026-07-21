@@ -23,9 +23,17 @@
     --shadow-md: 0 8px 16px rgba(0, 0, 0, 0.1);
     --shadow-lg: 0 16px 32px rgba(0, 0, 0, 0.15);
     --shadow-glow: 0 0 15px rgba(99, 102, 241, 0.3);
+
+    /* Layering Architecture (Z-Index Scale) */
+    --z-base: 1;
+    --z-sidebar: 10;
+    --z-header: 20;
+    --z-dropdown: 30;
+    --z-overlay: 100;
+    --z-modal: 101;
 }
 
-/* Dark Mode Colors (Default) - Premium Indigo & Cyan */
+/* Dark Mode Colors (Default) */
 body.dark-mode {
     --bg-app: #080b11;
     --bg-sidebar: #0e121e;
@@ -58,7 +66,7 @@ body.dark-mode {
     --glass-border: rgba(99, 102, 241, 0.15);
 }
 
-/* Light Mode Colors - Modern Soft Slate & Indigo */
+/* Light Mode Colors */
 body.light-mode {
     --bg-app: #f8fafc;
     --bg-sidebar: #ffffff;
@@ -110,7 +118,6 @@ body {
     width: 100vw;
 }
 
-/* English Language Support Override */
 html[lang="en"] * {
     font-family: var(--font-en);
 }
@@ -152,7 +159,7 @@ html[lang="en"] * {
 }
 
 body.authenticated .app-container {
-    display: flex !important;
+    display: flex;
 }
 
 /* Sidebar Styling */
@@ -162,7 +169,7 @@ body.authenticated .app-container {
     border-left: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
-    z-index: 10;
+    z-index: var(--z-sidebar);
     flex-shrink: 0;
 }
 
@@ -353,6 +360,7 @@ body.light-mode .moon-icon {
     align-items: center;
     justify-content: space-between;
     flex-shrink: 0;
+    z-index: var(--z-header);
 }
 
 .header-title-area h1 {
@@ -416,6 +424,30 @@ body.light-mode .moon-icon {
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+/* ==========================================================================
+   ROLE & SCREEN MODES (الكاشير الشامل والمخزن)
+   ========================================================================== */
+/* وضع الكاشير ملء الشاشة */
+body.pos-fullscreen-mode .sidebar,
+body.pos-fullscreen-mode .top-header {
+    display: none;
+}
+
+body.pos-fullscreen-mode .views-container {
+    padding: 16px;
+}
+
+body.pos-fullscreen-mode .pos-container {
+    height: calc(100vh - 32px);
+    grid-template-columns: 1fr 1fr;
+    /* فاتورة أوسع وأوضح */
+}
+
+/* وضع أمين المخزن */
+body.storekeeper-mode .hide-for-storekeeper {
+    display: none;
 }
 
 /* ==========================================================================
@@ -950,6 +982,7 @@ html[lang="en"] .search-bar-wrapper input {
     padding-bottom: 20px;
 }
 
+/* Fluid Product Card Alignment */
 .product-card {
     background-color: var(--bg-card);
     border: 1px solid var(--border-color);
@@ -961,6 +994,7 @@ html[lang="en"] .search-bar-wrapper input {
     position: relative;
     overflow: hidden;
     transition: all var(--transition-fast);
+    min-height: 180px;
 }
 
 .product-card:hover {
@@ -979,6 +1013,7 @@ html[lang="en"] .search-bar-wrapper input {
     align-items: center;
     justify-content: center;
     overflow: hidden;
+    flex-shrink: 0;
 }
 
 .product-card-image img {
@@ -998,11 +1033,13 @@ html[lang="en"] .search-bar-wrapper input {
     font-size: 13px;
     margin-bottom: 4px;
     line-height: 1.4;
-    height: 36px;
+    max-height: 2.8em;
     overflow: hidden;
+    text-overflow: ellipsis;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
+    word-break: break-word;
 }
 
 .product-card-price {
@@ -1043,7 +1080,7 @@ html[lang="en"] .product-card-badge {
 }
 
 /* ==========================================================================
-   3. GENERAL MODALS & OVERLAYS SYSTEM (التقفيل النهائي الآمن)
+   3. GENERAL MODALS & OVERLAYS SYSTEM (طبقات متناسقة بدون تعارض)
    ========================================================================== */
 .modal-backdrop,
 .modal-overlay {
@@ -1051,21 +1088,17 @@ html[lang="en"] .product-card-badge {
     inset: 0;
     background-color: rgba(8, 11, 17, 0.85);
     backdrop-filter: blur(8px);
-    z-index: 99999 !important;
+    z-index: var(--z-overlay);
     display: none;
-    /* تبدأ مخفية افتراضياً */
     align-items: center;
     justify-content: center;
 }
 
-/* الاستدعاء النشط من الـ JS لإظهار الشاشة بشكل سليم */
 .modal-backdrop.active,
 .modal-overlay.active,
 .modal-backdrop.show,
-.modal-overlay.show,
-[style*="display: block"].modal-backdrop,
-[style*="display: block"].modal-overlay {
-    display: flex !important;
+.modal-overlay.show {
+    display: flex;
 }
 
 .modal-container,
@@ -1079,16 +1112,41 @@ html[lang="en"] .product-card-badge {
     max-height: 85vh;
     overflow-y: auto;
     box-shadow: var(--shadow-lg);
-    z-index: 100000 !important;
+    z-index: var(--z-modal);
     display: flex;
     flex-direction: column;
     position: relative;
 }
 
 /* ==========================================================================
-   4. MOBILE RESPONSIVENESS (تجاوب الموبايل للـ POS والـ Modals)
+   4. MOBILE RESPONSIVENESS
    ========================================================================== */
 @media (max-width: 768px) {
+    .sidebar {
+        position: fixed;
+        right: -280px;
+        height: 100vh;
+        transition: right var(--transition-normal);
+    }
+
+    html[lang="en"] .sidebar {
+        right: auto;
+        left: -280px;
+        transition: left var(--transition-normal);
+    }
+
+    .sidebar.open {
+        right: 0;
+    }
+
+    html[lang="en"] .sidebar.open {
+        left: 0;
+    }
+
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
     .pos-container {
         grid-template-columns: 1fr;
         height: auto;
