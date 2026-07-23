@@ -83,11 +83,15 @@ export function handleProductFormSubmit(e) {
     const category = document.getElementById("prod-category").value;
     const costEl = document.getElementById("prod-cost") || document.getElementById("prod-buy-price");
     const priceEl = document.getElementById("prod-price") || document.getElementById("prod-sell-price");
+    const stockEl = document.getElementById("prod-stock");
+    const minStockEl = document.getElementById("prod-min-stock");
     const expiryEl = document.getElementById("prod-expiry");
     const imageEl = document.getElementById("prod-image");
 
     const cost = costEl ? parseFloat(costEl.value) || 0 : 0;
     const price = priceEl ? parseFloat(priceEl.value) || 0 : 0;
+    const stock = stockEl ? parseInt(stockEl.value) || 0 : 0;
+    const minStock = minStockEl ? parseInt(minStockEl.value) || 5 : 5;
     const expiry = expiryEl ? expiryEl.value : "";
     const image = imageEl ? imageEl.value : "";
 
@@ -95,12 +99,12 @@ export function handleProductFormSubmit(e) {
         // Edit existing
         const index = state.products.findIndex(p => p.id === id);
         if (index !== -1) {
-            state.products[index] = { id, barcode, name, category, cost, price, stock, expiry, image };
+            state.products[index] = { id, barcode, name, category, cost, price, stock, minStock, expiry, image };
         }
     } else {
         // Add new
         const newId = (state.products.length + 1).toString();
-        state.products.push({ id: newId, barcode, name, category, cost, price, stock, expiry, image });
+        state.products.push({ id: newId, barcode, name, category, cost, price, stock, minStock, expiry, image });
     }
 
     saveState();
@@ -119,6 +123,9 @@ export function editProduct(id) {
     document.getElementById("prod-name").value = p.name;
     document.getElementById("prod-category").value = p.category;
     document.getElementById("prod-stock").value = p.stock;
+
+    const minStockEl = document.getElementById("prod-min-stock");
+    if (minStockEl) minStockEl.value = p.minStock || 5;
 
     const costEl = document.getElementById("prod-cost") || document.getElementById("prod-buy-price");
     const priceEl = document.getElementById("prod-price") || document.getElementById("prod-sell-price");

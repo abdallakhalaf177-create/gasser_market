@@ -4,7 +4,7 @@ import { renderDashboard } from './modules/dashboard.js';
 import { renderPOS, renderPOSCategoryDropdowns, renderPOSProducts, renderPOSCustomerDropdown, renderCart, updateCartSummary, handleCheckout, viewReceipt } from './modules/pos.js';
 import { renderInventory, renderInventoryTable, handleProductFormSubmit, editProduct, deleteProduct } from './modules/inventory.js';
 import { handleCategoryFormSubmit, renderCategoriesList, deleteCategory } from './modules/categories.js';
-import { renderReports, renderReportsData } from './modules/reports.js';
+import { renderReports, renderReportsData, openLowStockReport, closeLowStockModal, printLowStockReport, exportLowStockCSV, setReportRange } from './modules/reports.js';
 import { renderCustomers, handleCustomerFormSubmit, editCustomer, deleteCustomer } from './modules/customers.js';
 import { renderSuppliers, renderSuppliersTable, handleSupplierFormSubmit, editSupplier, deleteSupplier, handlePurchaseFormSubmit, openSettleModal, handleSettleFormSubmit, renderPurchases } from './modules/suppliers.js';
 import { renderSettings } from './modules/settings.js';
@@ -13,6 +13,11 @@ import { initAuth, renderUsers, handleUserFormSubmit, editUser, deleteUser } fro
 // Expose user functions globally so inline onclick events work
 window.editUser = editUser;
 window.deleteUser = deleteUser;
+window.openLowStockReport = openLowStockReport;
+window.closeLowStockModal = closeLowStockModal;
+window.printLowStockReport = printLowStockReport;
+window.exportLowStockCSV = exportLowStockCSV;
+window.setReportRange = setReportRange;
 
 // Audio Feedback Synthesizer using Web Audio API (works offline)
 export function playBeep(frequency = 440, duration = 0.1) {

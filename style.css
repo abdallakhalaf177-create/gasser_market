@@ -1,9 +1,11 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Tajawal:wght@400;500;700;800&display=swap');
+
 /* ==========================================================================
    DESIGN SYSTEM & VARIABLES
    ========================================================================== */
 :root {
     /* Fonts */
-    --font-ar: 'Cairo', sans-serif;
+    --font-ar: 'Cairo', 'Tajawal', sans-serif;
     --font-en: 'Inter', sans-serif;
 
     /* Transitions */
@@ -19,10 +21,10 @@
     --radius-full: 9999px;
 
     /* Shadows */
-    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 8px 16px rgba(0, 0, 0, 0.1);
-    --shadow-lg: 0 16px 32px rgba(0, 0, 0, 0.15);
-    --shadow-glow: 0 0 15px rgba(99, 102, 241, 0.3);
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.2);
+    --shadow-md: 0 8px 16px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 16px 32px rgba(0, 0, 0, 0.4);
+    --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.35);
 
     /* Layering Architecture (Z-Index Scale) */
     --z-base: 1;
@@ -31,39 +33,73 @@
     --z-dropdown: 30;
     --z-overlay: 100;
     --z-modal: 101;
+
+    /* Slate & Zinc Dark Theme Palette */
+    --bg-app: #0f172a;
+    --bg-sidebar: #1e293b;
+    --bg-card: #1e293b;
+    --bg-input: #334155;
+    --bg-hover: #334155;
+    --border-color: #334155;
+
+    --text-primary: #f8fafc;
+    --text-secondary: #cbd5e1;
+    --text-muted: #94a3b8;
+
+    --primary: #6366f1;
+    --primary-hover: #4f46e5;
+    --primary-glow: rgba(99, 102, 241, 0.25);
+
+    --accent-purple: #8b5cf6;
+    --accent-purple-glow: rgba(139, 92, 246, 0.25);
+
+    --success: #10b981;
+    --success-hover: #059669;
+    --success-glow: rgba(16, 185, 129, 0.2);
+
+    --warning: #f59e0b;
+    --warning-hover: #d97706;
+    --warning-glow: rgba(245, 158, 11, 0.2);
+
+    --danger: #ef4444;
+    --danger-hover: #dc2626;
+    --danger-glow: rgba(239, 68, 68, 0.2);
+
+    --glass-bg: rgba(30, 41, 59, 0.85);
+    --glass-border: rgba(99, 102, 241, 0.2);
 }
 
 /* Dark Mode Colors (Default) */
 body.dark-mode {
-    --bg-app: #080b11;
-    --bg-sidebar: #0e121e;
-    --bg-card: #131828;
-    --bg-input: #1b2137;
-    --bg-hover: #222a45;
-    --border-color: #273150;
+    --bg-app: #0f172a;
+    --bg-sidebar: #1e293b;
+    --bg-card: #1e293b;
+    --bg-input: #334155;
+    --bg-hover: #334155;
+    --border-color: #334155;
 
     --text-primary: #f8fafc;
     --text-secondary: #cbd5e1;
-    --text-muted: #64748b;
+    --text-muted: #94a3b8;
 
     --primary: #6366f1;
     --primary-hover: #4f46e5;
-    --primary-glow: rgba(99, 102, 241, 0.15);
+    --primary-glow: rgba(99, 102, 241, 0.25);
 
-    --success: #06b6d4;
-    --success-hover: #0891b2;
-    --success-glow: rgba(6, 182, 212, 0.15);
+    --success: #10b981;
+    --success-hover: #059669;
+    --success-glow: rgba(16, 185, 129, 0.2);
 
     --warning: #f59e0b;
     --warning-hover: #d97706;
-    --warning-glow: rgba(245, 158, 11, 0.15);
+    --warning-glow: rgba(245, 158, 11, 0.2);
 
-    --danger: #f43f5e;
-    --danger-hover: #e11d48;
-    --danger-glow: rgba(244, 63, 94, 0.15);
+    --danger: #ef4444;
+    --danger-hover: #dc2626;
+    --danger-glow: rgba(239, 68, 68, 0.2);
 
-    --glass-bg: rgba(19, 24, 40, 0.75);
-    --glass-border: rgba(99, 102, 241, 0.15);
+    --glass-bg: rgba(30, 41, 59, 0.85);
+    --glass-border: rgba(99, 102, 241, 0.2);
 }
 
 /* Light Mode Colors */
@@ -625,20 +661,37 @@ body.storekeeper-mode .hide-for-storekeeper {
 
 .form-group input,
 .form-group select,
-.form-group textarea {
+.form-group textarea,
+select,
+.select-dropdown {
     width: 100%;
     height: 44px;
-    padding: 0 16px;
+    padding: 0 14px;
     background-color: var(--bg-input);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
     color: var(--text-primary);
+    font-family: var(--font-ar);
     font-size: 14px;
+    font-weight: 600;
     transition: all var(--transition-fast);
+    max-height: 220px;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+select option {
+    background-color: var(--bg-card);
+    color: var(--text-primary);
+    padding: 10px 14px;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.6;
 }
 
 .form-group input:focus,
-.form-group select:focus {
+.form-group select:focus,
+select:focus {
     outline: none;
     border-color: var(--primary);
     box-shadow: 0 0 0 3px var(--primary-glow);
