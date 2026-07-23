@@ -1,12 +1,12 @@
 import { state, loadState, saveState, resetToDefault, addToCart, updateCartQty, clearCart, onCartChange, cancelTransaction } from './state.js';
 import { translations, SMART_BARCODE_DATABASE } from './constants.js';
 import { renderDashboard } from './modules/dashboard.js';
-import { renderPOS, renderPOSCategoryDropdowns, renderPOSProducts, renderPOSCustomerDropdown, renderCart, updateCartSummary, handleCheckout, viewReceipt } from './modules/pos.js';
+import { renderPOS, renderPOSCategoryDropdowns, renderPOSProducts, renderPOSCustomerDropdown, renderCart, updateCartSummary, handleCheckout, viewReceipt, closeReceiptModal, printReceipt } from './modules/pos.js';
 import { renderInventory, renderInventoryTable, handleProductFormSubmit, editProduct, deleteProduct } from './modules/inventory.js';
 import { handleCategoryFormSubmit, renderCategoriesList, deleteCategory } from './modules/categories.js';
 import { renderReports, renderReportsData, openLowStockReport, closeLowStockModal, printLowStockReport, exportLowStockCSV, setReportRange } from './modules/reports.js';
-import { renderCustomers, handleCustomerFormSubmit, editCustomer, deleteCustomer } from './modules/customers.js';
-import { renderSuppliers, renderSuppliersTable, handleSupplierFormSubmit, editSupplier, deleteSupplier, handlePurchaseFormSubmit, openSettleModal, handleSettleFormSubmit, renderPurchases } from './modules/suppliers.js';
+import { renderCustomers, handleCustomerFormSubmit, editCustomer, deleteCustomer, openCustomerModal } from './modules/customers.js';
+import { renderSuppliers, renderSuppliersTable, handleSupplierFormSubmit, editSupplier, deleteSupplier, handlePurchaseFormSubmit, openSettleModal, handleSettleFormSubmit, renderPurchases, openSupplierModal, openPurchaseModal } from './modules/suppliers.js';
 import { renderSettings } from './modules/settings.js';
 import { initAuth, renderUsers, handleUserFormSubmit, editUser, deleteUser } from './modules/users.js';
 
@@ -18,6 +18,11 @@ window.closeLowStockModal = closeLowStockModal;
 window.printLowStockReport = printLowStockReport;
 window.exportLowStockCSV = exportLowStockCSV;
 window.setReportRange = setReportRange;
+window.openCustomerModal = openCustomerModal;
+window.openSupplierModal = openSupplierModal;
+window.openPurchaseModal = openPurchaseModal;
+window.closeReceiptModal = closeReceiptModal;
+window.printReceipt = printReceipt;
 
 // Audio Feedback Synthesizer using Web Audio API (works offline)
 export function playBeep(frequency = 440, duration = 0.1) {
@@ -148,6 +153,21 @@ function setupKeyboardShortcuts() {
                 showToast(state.language === "ar" ? "تم تفريغ السلة" : "Cart cleared", "warning");
             }
         }
+        // Escape -> Close active modals
+        if (e.key === "Escape") {
+            document.querySelectorAll(".modal-overlay.active, .modal-backdrop.active").forEach(m => {
+                m.classList.remove("active", "show");
+            });
+        }
+    });
+
+    // Close modal when clicking on dark overlay backdrop
+    document.querySelectorAll(".modal-overlay").forEach(overlay => {
+        overlay.addEventListener("click", (e) => {
+            if (e.target === overlay) {
+                overlay.classList.remove("active", "show");
+            }
+        });
     });
 }
 
@@ -261,6 +281,11 @@ function setupNavigation() {
 
 function switchView(viewName) {
     if (!viewName) return;
+
+    // Auto-close any lingering modals when switching view tabs
+    document.querySelectorAll(".modal-overlay.active, .modal-backdrop.active, .modal-overlay.show, .modal-backdrop.show").forEach(m => {
+        m.classList.remove("active", "show");
+    });
 
     // Normalize view name (handle pos vs pos-view)
     const cleanViewName = viewName.replace("-view", "");

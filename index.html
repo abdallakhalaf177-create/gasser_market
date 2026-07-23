@@ -202,7 +202,7 @@
         <section id="purchases-view" class="view-section">
             <div class="section-header">
                 <h2>فاتورة مشتريات جديدة (إدخال مخزون)</h2>
-                <button id="add-purchase-btn" class="btn btn-primary"><i class="ri-file-add-line"></i> تسجيل فاتورة توريد</button>
+                <button id="add-purchase-btn" class="btn btn-primary" onclick="openPurchaseModal()"><i class="ri-file-add-line"></i> تسجيل فاتورة توريد</button>
             </div>
             <div class="table-wrapper">
                 <table class="data-table">
@@ -337,7 +337,7 @@
                 <h2>إدارة حسابات الديون والعملاء</h2>
                 <div class="header-actions-row">
                     <input type="text" id="customer-search-input" placeholder="ابحث باسم العميل أو رقم الهاتف..." class="search-input">
-                    <button id="add-customer-btn" class="btn btn-primary"><i class="ri-user-add-line"></i> إضافة عميل جديد</button>
+                    <button id="add-customer-btn" class="btn btn-primary" onclick="openCustomerModal()"><i class="ri-user-add-line"></i> إضافة عميل جديد</button>
                 </div>
             </div>
             <div class="table-wrapper">
@@ -366,7 +366,7 @@
                 <h2>سجل الموردين والشركات</h2>
                 <div class="header-actions-row">
                     <input type="text" id="supplier-search-input" placeholder="ابحث باسم الشركة أو رقم الهاتف..." class="search-input">
-                    <button id="add-supplier-trigger-btn" class="btn btn-primary"><i class="ri-truck-line"></i> إضافة مورد جديد</button>
+                    <button id="add-supplier-trigger-btn" class="btn btn-primary" onclick="openSupplierModal()"><i class="ri-truck-line"></i> إضافة مورد جديد</button>
                 </div>
             </div>
             <div class="table-wrapper">
@@ -482,6 +482,10 @@
                     <div class="form-group">
                         <label for="pur-product">المنتج *</label>
                         <select id="pur-product" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="pur-cost">سعر التكلفة / الشراء للقطعة (ج.م) *</label>
+                        <input type="number" id="pur-cost" step="0.01" min="0" required placeholder="0.00">
                     </div>
                     <div class="form-group">
                         <label for="pur-qty">الكمية الموردة *</label>
@@ -678,7 +682,8 @@
 
     <!-- Receipt Modal -->
     <div class="modal-overlay" id="receipt-modal">
-        <div class="modal-container receipt-container">
+        <div class="modal-container receipt-container" style="position: relative;">
+            <button class="btn-close-modal" onclick="closeReceiptModal()" style="position: absolute; top: 12px; left: 16px; font-size: 24px; cursor: pointer; background: transparent; border: none; color: #333; z-index: 10;">&times;</button>
             <div class="receipt-paper">
                 <div class="receipt-header">
                     <h2 id="receipt-store-name">جاسر ماركت</h2>
@@ -729,8 +734,8 @@
                 </div>
             </div>
             <div class="modal-footer receipt-modal-actions">
-                <button class="btn btn-secondary" id="close-receipt-modal">إغلاق</button>
-                <button class="btn btn-primary" id="print-receipt-btn"><i class="ri-printer-line"></i> طباعة الفاتورة</button>
+                <button class="btn btn-secondary" id="close-receipt-modal" onclick="closeReceiptModal()">إغلاق</button>
+                <button class="btn btn-primary" id="print-receipt-btn" onclick="printReceipt()"><i class="ri-printer-line"></i> طباعة الفاتورة</button>
                 <button class="btn btn-success" id="new-sale-btn"><i class="ri-add-line"></i> عملية جديدة</button>
             </div>
         </div>

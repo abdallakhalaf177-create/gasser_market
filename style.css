@@ -1913,6 +1913,156 @@ html[lang="en"] .data-table {
 
 .select-dropdown,
 select {
-    max-height: 300px;
+    max-height: 220px;
     overflow-y: auto;
+}
+
+/* ==========================================================================
+   AUDIT FIXES: INPUTS, POS COMPACT ROW, FILTERS & SCROLL
+   ========================================================================== */
+
+/* 1. Inputs & Selects Dark Theme Formatting */
+input,
+select,
+textarea,
+.search-input,
+.form-group input,
+.form-group select {
+    background-color: var(--bg-input) !important;
+    color: var(--text-primary) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: var(--radius-sm) !important;
+    padding: 10px 14px !important;
+    font-family: var(--font-ar) !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    outline: none !important;
+    transition: all var(--transition-fast) !important;
+}
+
+input:focus,
+select:focus,
+textarea:focus,
+.search-input:focus,
+.form-group input:focus,
+.form-group select:focus {
+    outline: none !important;
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 3px var(--primary-glow) !important;
+}
+
+select option {
+    background-color: var(--bg-card) !important;
+    color: var(--text-primary) !important;
+    padding: 10px 14px !important;
+}
+
+/* 2. POS Compact Row Layout */
+.pos-invoice-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    flex-wrap: wrap;
+}
+
+.pos-invoice-header .search-autocomplete-wrapper {
+    flex: 1 1 320px;
+}
+
+.search-bar-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-sm);
+    padding: 2px 10px;
+}
+
+.search-bar-container input {
+    border: none !important;
+    background: transparent !important;
+    height: 38px;
+    padding: 0 !important;
+}
+
+.invoice-header-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+}
+
+.invoice-header-controls .control-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+}
+
+.invoice-header-controls .control-group label {
+    margin: 0;
+    white-space: nowrap;
+    font-size: 12.5px;
+    font-weight: 700;
+    color: var(--text-secondary);
+}
+
+.invoice-header-controls select {
+    height: 38px !important;
+    padding: 4px 10px !important;
+    font-size: 13px !important;
+}
+
+.payment-methods-group {
+    display: flex;
+    gap: 4px;
+}
+
+.payment-method {
+    padding: 6px 12px;
+    font-size: 12px;
+    border-radius: 6px;
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.payment-method.active {
+    background-color: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.cart-table-wrapper {
+    max-height: calc(100vh - 270px) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+}
+
+/* 3. Inventory Filters Flex Row */
+.header-actions-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.header-actions-row select,
+#inventory-category-filter,
+#inventory-stock-filter {
+    max-width: 180px !important;
+    flex: 1 1 150px !important;
+}
+
+.header-actions-row .search-input {
+    flex: 2 1 220px !important;
 }

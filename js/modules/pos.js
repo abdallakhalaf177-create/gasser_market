@@ -365,3 +365,12 @@ export function viewReceipt(txnId) {
     const t = state.transactions.find(x => x.id === txnId);
     if (t) showReceipt(t);
 }
+
+export function closeReceiptModal() {
+    const modal = document.getElementById("receipt-modal");
+    if (modal) modal.classList.remove("active");
+}
+
+export function printReceipt() {
+    window.print();
+}

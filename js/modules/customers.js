@@ -39,6 +39,17 @@ export function renderCustomers() {
     lucide.createIcons();
 }
 
+export function openCustomerModal() {
+    const modal = document.getElementById("customer-modal");
+    const form = document.getElementById("customer-form");
+    if (form) form.reset();
+    const idField = document.getElementById("customer-id");
+    if (idField) idField.value = "";
+    const titleEl = document.getElementById("customer-modal-title");
+    if (titleEl) titleEl.textContent = state.language === "ar" ? "إضافة عميل جديد" : "Add New Customer";
+    if (modal) modal.classList.add("active");
+}
+
 export function handleCustomerFormSubmit(e) {
     e.preventDefault();
     const id = document.getElementById("customer-id").value;
@@ -62,8 +73,10 @@ export function handleCustomerFormSubmit(e) {
     }
 
     saveState();
-    document.getElementById("customer-modal").classList.remove("active");
-    document.getElementById("customer-form").reset();
+    const modal = document.getElementById("customer-modal");
+    if (modal) modal.classList.remove("active");
+    const form = document.getElementById("customer-form");
+    if (form) form.reset();
     document.getElementById("customer-id").value = "";
 
     if (state.currentView === "customers") {

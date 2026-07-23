@@ -71,9 +71,9 @@ function renderCategoryProfitsTable(validTxns) {
     validTxns.forEach(txn => {
         if (!txn.items || !Array.isArray(txn.items)) return;
         txn.items.forEach(item => {
-            const product = state.products.find(p => p.id === item.id || p.barcode === item.barcode);
-            const cat = item.category || (product ? product.category : "عام");
-            const qty = Number(item.quantity) || 1;
+            const product = state.products.find(p => p.id === item.id || p.id === item.productId || p.barcode === item.barcode || (p.name && item.name && p.name.trim() === item.name.trim()));
+            const cat = (product && product.category) ? product.category : (item.category || "غير تصنيف");
+            const qty = Number(item.quantity || item.qty) || 1;
             const itemPrice = Number(item.price) || 0;
             const itemCost = product ? Number(product.cost) : (itemPrice * 0.75);
 
