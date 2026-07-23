@@ -5,6 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gaser Market | نظام الكاشير وإدارة المبيعات</title>
+    <!-- PWA Manifest & Meta Tags -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1e293b">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3724/3724788.png">
     <!-- Google Fonts: Cairo & Tajawal -->
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
     <!-- Remixicons for UI Icons -->
@@ -853,6 +859,21 @@
                     <i class="ri-user-settings-line"></i> إدارة المستخدمين
                 </button>
             </div>
+        </div>
+    </div>
+
+    <!-- PWA Install Prompt Banner -->
+    <div id="pwa-install-banner" class="pwa-install-banner" style="display: none;">
+        <div class="pwa-banner-content">
+            <i class="ri-store-3-line pwa-icon"></i>
+            <div>
+                <strong>تثبيت Gaser Market</strong>
+                <p>قم بتثبيت التطبيق على الجهاز للعمل أوفلاين وبسرعة فائقة!</p>
+            </div>
+        </div>
+        <div class="pwa-banner-actions">
+            <button id="pwa-install-btn" class="btn btn-primary btn-sm"><i class="ri-download-cloud-line"></i> تثبيت الآن</button>
+            <button id="pwa-close-btn" class="btn btn-secondary btn-sm">&times;</button>
         </div>
     </div>
 

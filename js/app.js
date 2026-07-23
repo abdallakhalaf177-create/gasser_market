@@ -623,3 +623,50 @@ function checkSmartBarcode() {
         barcodeInput.style.boxShadow = '';
     }
 }
+
+// ==========================================================================
+// PWA SERVICE WORKER REGISTRATION & INSTALLATION PROMPT
+// ==========================================================================
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+            .then(reg => console.log('PWA Service Worker registered:', reg.scope))
+            .catch(err => console.warn('Service Worker registration failed:', err));
+    });
+}
+
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    const banner = document.getElementById("pwa-install-banner");
+    if (banner) banner.style.display = "flex";
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+    const installBtn = document.getElementById("pwa-install-btn");
+    const closeBtn = document.getElementById("pwa-close-btn");
+    const banner = document.getElementById("pwa-install-banner");
+
+    if (installBtn) {
+        installBtn.addEventListener("click", async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    console.log('User installed Gaser Market PWA app');
+                }
+                deferredPrompt = null;
+                if (banner) banner.style.display = "none";
+            } else {
+                alert(state.language === "ar" ? "لتثبيت التطبيق على جهازك: من خيارات المتصفح (⋮ أو 📤) اختر 'إضافة إلى الشاشة الرئيسية' أو 'تثبيت التطبيق'." : "To install app: Open browser menu (⋮) and select 'Add to Home screen' or 'Install App'.");
+            }
+        });
+    }
+
+    if (closeBtn) {
+        closeBtn.addEventListener("click", () => {
+            if (banner) banner.style.display = "none";
+        });
+    }
+});

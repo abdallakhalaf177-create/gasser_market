@@ -2383,4 +2383,62 @@ select option {
         max-width: 100% !important;
         width: 100% !important;
     }
+}
+
+/* ==========================================================================
+   PWA INSTALL PROMPT BANNER STYLES
+   ========================================================================== */
+.pwa-install-banner {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    z-index: 10000;
+    background-color: var(--bg-card);
+    border: 1px solid var(--primary);
+    border-radius: var(--radius-md);
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    max-width: 420px;
+}
+
+.pwa-banner-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.pwa-icon {
+    font-size: 28px;
+    color: var(--primary);
+}
+
+.pwa-banner-content strong {
+    display: block;
+    font-size: 14.5px;
+    color: var(--text-primary);
+}
+
+.pwa-banner-content p {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin: 2px 0 0 0;
+}
+
+.pwa-banner-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+@media (max-width: 767px) {
+    .pwa-install-banner {
+        left: 12px;
+        right: 12px;
+        bottom: 74px;
+        max-width: none;
+    }
 }
