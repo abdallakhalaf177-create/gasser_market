@@ -8,7 +8,7 @@ const STATIC_ASSETS = [
     './',
     'index.html',
     'style.css',
-    'js/app-bundle.js',
+    'js/app.js',
     'manifest.json',
     'icons/icon.svg',
     'https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap',

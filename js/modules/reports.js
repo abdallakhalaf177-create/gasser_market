@@ -11,8 +11,22 @@ export function renderReportsData(range) {
     const now = new Date();
     let filteredTxns = [...state.transactions];
 
+    // Update reports section stats cards in index.html
+    const todaySalesEl = document.getElementById("stat-today-sales");
+    const todayOrdersEl = document.getElementById("stat-today-orders");
+    const lowStockEl = document.getElementById("stat-low-stock");
+
+    const todayStr = now.toISOString().split('T')[0];
+    const todayTxns = state.transactions.filter(t => t.date.startsWith(todayStr) && t.status !== "cancelled");
+    const todaySales = todayTxns.reduce((sum, t) => sum + t.total, 0);
+    const todayOrders = todayTxns.length;
+    const lowStockCount = state.products.filter(p => p.stock <= state.settings.lowStockLimit).length;
+
+    if (todaySalesEl) todaySalesEl.textContent = `${todaySales.toFixed(2)} ${state.settings.currency}`;
+    if (todayOrdersEl) todayOrdersEl.textContent = todayOrders;
+    if (lowStockEl) lowStockEl.textContent = lowStockCount;
+
     if (range === "today") {
-        const todayStr = now.toISOString().split('T')[0];
         filteredTxns = state.transactions.filter(t => t.date.startsWith(todayStr));
     } else if (range === "week") {
         const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -29,10 +43,15 @@ export function renderReportsData(range) {
     const totalOrders = validTxns.length;
     const avgOrder = totalOrders > 0 ? totalSales / totalOrders : 0;
 
-    document.getElementById("report-total-sales").textContent = `${totalSales.toFixed(2)} ${state.settings.currency}`;
-    document.getElementById("report-total-profit").textContent = `${totalProfit.toFixed(2)} ${state.settings.currency}`;
-    document.getElementById("report-total-orders").textContent = totalOrders;
-    document.getElementById("report-avg-order").textContent = `${avgOrder.toFixed(2)} ${state.settings.currency}`;
+    const reportSalesEl = document.getElementById("report-total-sales");
+    const reportProfitEl = document.getElementById("report-total-profit");
+    const reportOrdersEl = document.getElementById("report-total-orders");
+    const reportAvgEl = document.getElementById("report-avg-order");
+
+    if (reportSalesEl) reportSalesEl.textContent = `${totalSales.toFixed(2)} ${state.settings.currency}`;
+    if (reportProfitEl) reportProfitEl.textContent = `${totalProfit.toFixed(2)} ${state.settings.currency}`;
+    if (reportOrdersEl) reportOrdersEl.textContent = totalOrders;
+    if (reportAvgEl) reportAvgEl.textContent = `${avgOrder.toFixed(2)} ${state.settings.currency}`;
 
     // Render Table
     const tbody = document.getElementById("reports-sales-table-body");

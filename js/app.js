@@ -6,7 +6,7 @@ import { renderInventory, renderInventoryTable, handleProductFormSubmit, editPro
 import { handleCategoryFormSubmit, renderCategoriesList, deleteCategory } from './modules/categories.js';
 import { renderReports, renderReportsData } from './modules/reports.js';
 import { renderCustomers, handleCustomerFormSubmit, editCustomer, deleteCustomer } from './modules/customers.js';
-import { renderSuppliers, renderSuppliersTable, handleSupplierFormSubmit, editSupplier, deleteSupplier, handlePurchaseFormSubmit, openSettleModal, handleSettleFormSubmit } from './modules/suppliers.js';
+import { renderSuppliers, renderSuppliersTable, handleSupplierFormSubmit, editSupplier, deleteSupplier, handlePurchaseFormSubmit, openSettleModal, handleSettleFormSubmit, renderPurchases } from './modules/suppliers.js';
 import { renderSettings } from './modules/settings.js';
 import { initAuth, renderUsers, handleUserFormSubmit, editUser, deleteUser } from './modules/users.js';
 
@@ -297,6 +297,9 @@ function switchView(viewName) {
     } else if (cleanViewName === "inventory") {
         if (subtitleEl) subtitleEl.textContent = state.language === "ar" ? "إدارة وتحديث المنتجات والأسعار والكميات المتاحة." : "Manage and update products, prices, and stock levels.";
         renderInventory();
+    } else if (cleanViewName === "purchases") {
+        if (subtitleEl) subtitleEl.textContent = state.language === "ar" ? "سجل فواتير الشراء والتوريد ودخول المنتجات للمخازن." : "Purchase invoice logs and stock entries.";
+        renderPurchases();
     } else if (cleanViewName === "reports") {
         if (subtitleEl) subtitleEl.textContent = state.language === "ar" ? "تقارير المبيعات والأرباح التفصيلية للفترات المختلفة." : "Detailed sales and profit reports for different periods.";
         renderReports();
@@ -416,25 +419,7 @@ function setupEventListeners() {
         }
     });
 
-    // Handle barcode scanner input event inside POS search input
-    const posSearch = document.getElementById("pos-search-input") || document.getElementById("barcode-input");
-    if (posSearch) {
-        posSearch.addEventListener("keydown", (e) => {
-            if (e.key === "Enter") {
-                e.preventDefault();
-                const barcode = posSearch.value.trim();
-                if (!barcode) return;
-                const prod = state.products.find(p => p.barcode === barcode);
-                if (prod) {
-                    addToCart(prod.id);
-                    posSearch.value = "";
-                    showToast(state.language === "ar" ? `تمت إضافة ${prod.name}` : `Added ${prod.name}`, "success");
-                } else {
-                    showToast(state.language === "ar" ? "المنتج غير مسجل في المخازن!" : "Product not found!", "danger");
-                }
-            }
-        });
-    }
+
 
     // Forms Form submits
     addListenerSafe("product-form", "submit", handleProductFormSubmit);
@@ -455,9 +440,7 @@ function setupEventListeners() {
     // Barcode auto-fill listener
     addListenerSafe("prod-barcode", "input", checkSmartBarcode);
 
-    // POS Search & Filter auto filter
-    addListenerSafe("pos-search-input", "input", renderPOSProducts);
-    addListenerSafe("barcode-input", "input", renderPOSProducts);
+
 
     // POS Cart Actions
     addListenerSafe("clear-cart-btn", "click", () => {

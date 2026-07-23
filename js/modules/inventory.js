@@ -81,11 +81,15 @@ export function handleProductFormSubmit(e) {
     const barcode = document.getElementById("prod-barcode").value;
     const name = document.getElementById("prod-name").value;
     const category = document.getElementById("prod-category").value;
-    const cost = parseFloat(document.getElementById("prod-cost").value);
-    const price = parseFloat(document.getElementById("prod-price").value);
-    const stock = parseInt(document.getElementById("prod-stock").value);
-    const expiry = document.getElementById("prod-expiry").value;
-    const image = document.getElementById("prod-image").value;
+    const costEl = document.getElementById("prod-cost") || document.getElementById("prod-buy-price");
+    const priceEl = document.getElementById("prod-price") || document.getElementById("prod-sell-price");
+    const expiryEl = document.getElementById("prod-expiry");
+    const imageEl = document.getElementById("prod-image");
+
+    const cost = costEl ? parseFloat(costEl.value) || 0 : 0;
+    const price = priceEl ? parseFloat(priceEl.value) || 0 : 0;
+    const expiry = expiryEl ? expiryEl.value : "";
+    const image = imageEl ? imageEl.value : "";
 
     if (id) {
         // Edit existing
@@ -114,11 +118,17 @@ export function editProduct(id) {
     document.getElementById("prod-barcode").value = p.barcode;
     document.getElementById("prod-name").value = p.name;
     document.getElementById("prod-category").value = p.category;
-    document.getElementById("prod-cost").value = p.cost;
-    document.getElementById("prod-price").value = p.price;
     document.getElementById("prod-stock").value = p.stock;
-    document.getElementById("prod-expiry").value = p.expiry;
-    document.getElementById("prod-image").value = p.image;
+
+    const costEl = document.getElementById("prod-cost") || document.getElementById("prod-buy-price");
+    const priceEl = document.getElementById("prod-price") || document.getElementById("prod-sell-price");
+    const expiryEl = document.getElementById("prod-expiry");
+    const imageEl = document.getElementById("prod-image");
+
+    if (costEl) costEl.value = p.cost;
+    if (priceEl) priceEl.value = p.price;
+    if (expiryEl) expiryEl.value = p.expiry || "";
+    if (imageEl) imageEl.value = p.image || "";
 
     document.getElementById("product-modal-title").textContent = state.language === "ar" ? "تعديل المنتج" : "Edit Product";
     document.getElementById("product-modal").classList.add("active");

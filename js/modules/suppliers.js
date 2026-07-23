@@ -225,3 +225,33 @@ export function handleSettleFormSubmit(e) {
     
     renderSuppliers();
 }
+
+export function renderPurchases() {
+    const tbody = document.getElementById("purchases-table-body");
+    if (!tbody) return;
+    tbody.innerHTML = "";
+
+    const invoices = state.purchaseInvoices || [];
+    if (invoices.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">${state.language === "ar" ? "لا توجد فواتير توريد مسجلة" : "No purchase invoices recorded"}</td></tr>`;
+        return;
+    }
+
+    [...invoices].reverse().forEach(inv => {
+        const row = document.createElement("tr");
+        const supplierName = state.suppliers.find(s => s.id === inv.supplierId)?.company || inv.supplierId;
+        const dateStr = inv.date.replace('T', ' ').substring(0, 16);
+        const statusBadge = inv.paymentStatus === "paid"
+            ? `<span class="badge badge-success">${state.language === "ar" ? "مدفوعة" : "Paid"}</span>`
+            : `<span class="badge badge-warning">${state.language === "ar" ? "آجل" : "Credit"}</span>`;
+
+        row.innerHTML = `
+            <td><strong>#${inv.id}</strong></td>
+            <td>${supplierName}</td>
+            <td>${dateStr}</td>
+            <td><strong>${inv.totalCost.toFixed(2)} ${state.settings.currency}</strong></td>
+            <td>${statusBadge}</td>
+        `;
+        tbody.appendChild(row);
+    });
+}

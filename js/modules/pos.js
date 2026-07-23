@@ -2,16 +2,139 @@ import { state, saveState, clearCart, addToCart, updateCartQty } from '../state.
 import { translations } from '../constants.js';
 
 export function renderPOS() {
-    renderPOSCategoryTabs();
-    renderPOSProducts();
     renderPOSCustomerDropdown();
     renderCart();
 
-    // Populate Barcode Simulator select
-    const barcodeSelect = document.getElementById("barcode-select-product");
-    if (barcodeSelect) {
-        barcodeSelect.innerHTML = state.products.map(p => `<option value="${p.id}">${p.name} (${p.barcode})</option>`).join('');
+    const posSearch = document.getElementById("barcode-input");
+    if (posSearch && !posSearch.dataset.listenerAttached) {
+        posSearch.dataset.listenerAttached = "true";
+
+        // Listen for input to show suggestions
+        posSearch.addEventListener("input", (e) => {
+            showSearchSuggestions(e.target.value);
+        });
+
+        // Listen for Enter key to add matching item
+        posSearch.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                const value = posSearch.value.trim();
+                if (!value) return;
+
+                // 1. Try to find exact barcode match
+                let prod = state.products.find(p => p.barcode === value);
+                
+                // 2. If no exact barcode, check if there is a suggestion and pick the first one
+                if (!prod) {
+                    const filtered = state.products.filter(p => 
+                        p.name.toLowerCase().includes(value.toLowerCase()) || 
+                        p.barcode.includes(value)
+                    );
+                    if (filtered.length > 0) {
+                        prod = filtered[0];
+                    }
+                }
+
+                if (prod) {
+                    if (prod.stock > 0) {
+                        addToCart(prod.id);
+                        posSearch.value = "";
+                        const suggestionsContainer = document.getElementById("search-suggestions");
+                        if (suggestionsContainer) {
+                            suggestionsContainer.style.display = "none";
+                            suggestionsContainer.innerHTML = "";
+                        }
+                        if (window.showToast) {
+                            window.showToast(state.language === "ar" ? `تمت إضافة ${prod.name}` : `Added ${prod.name}`, "success");
+                        }
+                    } else {
+                        if (window.showToast) {
+                            window.showToast(state.language === "ar" ? "المنتج منتهي من المخزن!" : "Product is out of stock!", "danger");
+                        }
+                    }
+                } else {
+                    if (window.showToast) {
+                        window.showToast(state.language === "ar" ? "المنتج غير مسجل في المخازن!" : "Product not found!", "danger");
+                    }
+                }
+            }
+        });
+
+        // Hide suggestions when clicking outside
+        document.addEventListener("click", (e) => {
+            if (!e.target.closest(".search-autocomplete-wrapper")) {
+                const suggestionsContainer = document.getElementById("search-suggestions");
+                if (suggestionsContainer) {
+                    suggestionsContainer.style.display = "none";
+                }
+            }
+        });
     }
+}
+
+export function showSearchSuggestions(query) {
+    const suggestionsContainer = document.getElementById("search-suggestions");
+    if (!suggestionsContainer) return;
+
+    const cleanedQuery = (query || "").toLowerCase().trim();
+    if (!cleanedQuery) {
+        suggestionsContainer.style.display = "none";
+        suggestionsContainer.innerHTML = "";
+        return;
+    }
+
+    // Filter products
+    const filtered = state.products.filter(p => 
+        p.name.toLowerCase().includes(cleanedQuery) || 
+        p.barcode.includes(cleanedQuery)
+    );
+
+    if (filtered.length === 0) {
+        suggestionsContainer.innerHTML = `<div class="suggestion-item empty">${state.language === "ar" ? "لا توجد نتائج مطابقة" : "No results found"}</div>`;
+        suggestionsContainer.style.display = "block";
+        return;
+    }
+
+    suggestionsContainer.innerHTML = "";
+    filtered.slice(0, 10).forEach(prod => {
+        const itemEl = document.createElement("div");
+        itemEl.className = "suggestion-item";
+        if (prod.stock <= 0) itemEl.classList.add("out-of-stock");
+        
+        itemEl.innerHTML = `
+            <div class="suggestion-info">
+                <span class="suggestion-name">${prod.name}</span>
+                <span class="suggestion-barcode">${prod.barcode}</span>
+            </div>
+            <div class="suggestion-meta">
+                <span class="suggestion-price">${prod.price.toFixed(2)} ${state.settings.currency}</span>
+                <span class="suggestion-stock ${prod.stock <= state.settings.lowStockLimit ? 'low' : ''}">
+                    ${state.language === "ar" ? "المخزون:" : "Stock:"} ${prod.stock}
+                </span>
+            </div>
+        `;
+
+        itemEl.addEventListener("click", () => {
+            if (prod.stock > 0) {
+                addToCart(prod.id);
+                const input = document.getElementById("barcode-input");
+                if (input) input.value = "";
+                suggestionsContainer.style.display = "none";
+                suggestionsContainer.innerHTML = "";
+                if (window.showToast) {
+                    window.showToast(state.language === "ar" ? `تمت إضافة ${prod.name}` : `Added ${prod.name}`, "success");
+                }
+            } else {
+                if (window.showToast) {
+                    window.showToast(state.language === "ar" ? "المنتج غير متوفر في المخزن!" : "Product is out of stock!", "danger");
+                }
+            }
+        });
+
+        suggestionsContainer.appendChild(itemEl);
+    });
+
+    suggestionsContainer.style.display = "block";
 }
 
 export function renderPOSCategoryDropdowns() {
@@ -28,91 +151,14 @@ export function renderPOSCategoryDropdowns() {
     }
 }
 
-export function renderPOSCategoryTabs() {
-    const tabsContainer = document.getElementById("pos-category-tabs");
-    const activeTab = tabsContainer.querySelector(".category-tab.active");
-    const activeCategory = activeTab ? activeTab.getAttribute("data-category") : "all";
-
-    tabsContainer.innerHTML = `<button class="category-tab ${activeCategory === 'all' ? 'active' : ''}" data-category="all">${state.language === "ar" ? "الكل" : "All"}</button>`;
-
-    state.categories.forEach(c => {
-        const cleanName = state.language === "ar" ? c.split(' ')[0] : c.includes('(') ? c.split('(')[1].replace(')', '') : c;
-        const tab = document.createElement("button");
-        tab.className = `category-tab ${activeCategory === c ? 'active' : ''}`;
-        tab.setAttribute("data-category", c);
-        tab.textContent = cleanName;
-        tab.addEventListener("click", () => {
-            tabsContainer.querySelectorAll(".category-tab").forEach(t => t.classList.remove("active"));
-            tab.classList.add("active");
-            renderPOSProducts();
-        });
-        tabsContainer.appendChild(tab);
-    });
-}
-
 export function renderPOSProducts() {
-    const grid = document.getElementById("pos-products-grid");
-    if (!grid) return;
-    grid.innerHTML = "";
-
-    const searchQueryInput = document.getElementById("pos-search-input");
-    const searchQuery = searchQueryInput ? searchQueryInput.value.toLowerCase() : "";
-    const activeTab = document.querySelector("#pos-category-tabs .category-tab.active");
-    const activeCategory = activeTab ? activeTab.getAttribute("data-category") : "all";
-
-    const filtered = state.products.filter(p => {
-        const matchesSearch = p.name.toLowerCase().includes(searchQuery) || p.barcode.includes(searchQuery);
-        const matchesCategory = activeCategory === "all" || p.category === activeCategory;
-        return matchesSearch && matchesCategory;
-    });
-
-    if (filtered.length === 0) {
-        grid.innerHTML = `<div class="empty-state" style="grid-column: 1/-1;"><i data-lucide="package-x"></i><p>${state.language === "ar" ? "لا توجد منتجات مطابقة" : "No matching products"}</p></div>`;
-        lucide.createIcons();
-        return;
-    }
-
-    filtered.forEach(p => {
-        const card = document.createElement("div");
-        card.className = "product-card";
-        if (p.stock === 0) card.style.opacity = "0.6";
-
-        let badgeHtml = "";
-        if (p.stock === 0) {
-            badgeHtml = `<span class="badge badge-danger product-card-badge">${state.language === "ar" ? "نفذ" : "Out"}</span>`;
-        } else if (p.stock <= state.settings.lowStockLimit) {
-            badgeHtml = `<span class="badge badge-warning product-card-badge">${state.language === "ar" ? "منخفض" : "Low"}</span>`;
-        }
-
-        card.innerHTML = `
-            ${badgeHtml}
-            <div class="product-card-image">
-                ${p.image ? `<img src="${p.image}" alt="${p.name}">` : `<i data-lucide="package"></i>`}
-            </div>
-            <span class="product-card-name">${p.name}</span>
-            <span class="product-card-price">${p.price.toFixed(2)} ${state.settings.currency}</span>
-            <span class="product-card-stock">${state.language === "ar" ? "المخزون:" : "Stock:"} ${p.stock}</span>
-        `;
-
-        card.addEventListener("click", () => {
-            if (p.stock > 0) {
-                addToCart(p.id);
-            } else {
-                if (window.showToast) {
-                    window.showToast(state.language === "ar" ? "هذا المنتج غير متوفر في المخزن حالياً!" : "This product is currently out of stock!", "danger");
-                }
-            }
-        });
-
-        grid.appendChild(card);
-    });
-    lucide.createIcons();
+    // Left as a dummy function to prevent import issues in app.js
 }
 
 export function renderPOSCustomerDropdown() {
     const select = document.getElementById("cart-customer-select");
     if (!select) return;
-    const currentVal = select.value;
+    const currentVal = select.value || "walkin";
     select.innerHTML = `<option value="walkin">${state.language === "ar" ? "عميل سفري (نقدي)" : "Walk-in Customer (Cash)"}</option>` +
         state.customers.map(c => `<option value="${c.id}">${c.name} (${c.phone})</option>`).join('');
     select.value = currentVal;
@@ -125,13 +171,15 @@ export function renderCart() {
 
     if (state.cart.length === 0) {
         container.innerHTML = `
-            <div class="empty-cart-state">
-                <i data-lucide="shopping-cart"></i>
-                <p>${state.language === "ar" ? "السلة فارغة. اضغط على المنتجات لإضافتها." : "Cart is empty. Click products to add them."}</p>
-            </div>
+            <tr>
+                <td colspan="5" class="empty-cart-state" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                    <i class="ri-shopping-cart-2-line" style="font-size: 3rem; display: block; margin-bottom: 10px;"></i>
+                    <span>${state.language === "ar" ? "السلة فارغة. ابحث عن المنتجات لإضافتها." : "Cart is empty. Search products to add."}</span>
+                </td>
+            </tr>
         `;
         updateCartSummary();
-        lucide.createIcons();
+        if (window.lucide) lucide.createIcons();
         return;
     }
 
@@ -139,25 +187,34 @@ export function renderCart() {
         const prod = state.products.find(p => p.id === item.productId);
         if (!prod) return;
 
-        const cartItemEl = document.createElement("div");
-        cartItemEl.className = "cart-item";
-        cartItemEl.innerHTML = `
-            <div class="cart-item-details">
-                <div class="cart-item-name">${prod.name}</div>
-                <div class="cart-item-price">${prod.price.toFixed(2)} ${state.settings.currency}</div>
-            </div>
-            <div class="cart-item-qty">
-                <button class="qty-btn" onclick="updateCartQty('${prod.id}', -1)">-</button>
-                <span class="qty-val">${item.qty}</span>
-                <button class="qty-btn" onclick="updateCartQty('${prod.id}', 1)">+</button>
-            </div>
-            <div class="cart-item-total">${(prod.price * item.qty).toFixed(2)} ${state.settings.currency}</div>
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td>
+                <div class="cart-item-info">
+                    <span class="cart-item-name">${prod.name}</span>
+                    <span class="cart-item-barcode">${prod.barcode}</span>
+                </div>
+            </td>
+            <td>${prod.price.toFixed(2)} ${state.settings.currency}</td>
+            <td style="text-align: center;">
+                <div class="cart-item-qty">
+                    <button class="qty-btn" onclick="window.updateCartQty('${prod.id}', -1)">-</button>
+                    <span class="qty-val">${item.qty}</span>
+                    <button class="qty-btn" onclick="window.updateCartQty('${prod.id}', 1)">+</button>
+                </div>
+            </td>
+            <td>${(prod.price * item.qty).toFixed(2)} ${state.settings.currency}</td>
+            <td style="text-align: center;">
+                <button class="btn btn-sm btn-danger-outline" onclick="window.updateCartQty('${prod.id}', -${item.qty})">
+                    <i class="ri-delete-bin-line"></i>
+                </button>
+            </td>
         `;
-        container.appendChild(cartItemEl);
+        container.appendChild(tr);
     });
 
     updateCartSummary();
-    lucide.createIcons();
+    if (window.lucide) lucide.createIcons();
 }
 
 export function updateCartSummary() {
@@ -178,7 +235,7 @@ export function updateCartSummary() {
     const totalEl = document.getElementById("cart-total");
 
     if (subtotalEl) subtotalEl.textContent = `${subtotal.toFixed(2)} ${state.settings.currency}`;
-    if (taxEl) taxEl.textContent = `${taxAmount.toFixed(2)} ${state.settings.currency}`;
+    if (taxEl) taxEl.textContent = `${taxAmount.toFixed(2)} ${state.settings.currency} (${state.settings.taxRate}%)`;
     if (totalEl) totalEl.textContent = `${total.toFixed(2)} ${state.settings.currency}`;
 }
 
@@ -190,9 +247,14 @@ export function handleCheckout() {
         return;
     }
 
-    const customerId = document.getElementById("cart-customer-select").value;
-    const discountPercent = parseFloat(document.getElementById("cart-discount-input").value) || 0;
-    const paymentMethod = document.querySelector('input[name="payment-method"]:checked').value;
+    const customerSelect = document.getElementById("cart-customer-select");
+    const customerId = customerSelect ? customerSelect.value : "walkin";
+
+    const discountInput = document.getElementById("cart-discount-input");
+    const discountPercent = discountInput ? (parseFloat(discountInput.value) || 0) : 0;
+
+    const checkedPaymentEl = document.querySelector('input[name="payment-method"]:checked');
+    const paymentMethod = checkedPaymentEl ? checkedPaymentEl.value : "cash";
 
     let subtotal = 0;
     let totalCost = 0;
@@ -220,7 +282,8 @@ export function handleCheckout() {
         tax: taxAmount,
         total: finalTotal,
         profit: profit,
-        paymentMethod: paymentMethod
+        paymentMethod: paymentMethod,
+        status: "completed"
     };
 
     // Deduct stock
@@ -233,7 +296,7 @@ export function handleCheckout() {
     if (customerId !== "walkin") {
         const customer = state.customers.find(c => c.id === customerId);
         if (customer) {
-            customer.points += Math.floor(finalTotal / 10); // 1 point for every 10 currency units
+            customer.points += Math.floor(finalTotal / 10);
             customer.totalSpent += finalTotal;
             customer.visits++;
         }
@@ -244,41 +307,58 @@ export function handleCheckout() {
 
     // Show Receipt Modal
     showReceipt(transaction);
+    
+    if (window.showToast) {
+        window.showToast(state.language === "ar" ? "تمت العملية بنجاح!" : "Transaction completed successfully!", "success");
+    }
 }
 
 export function showReceipt(t) {
     const modal = document.getElementById("receipt-modal");
     if (!modal) return;
 
-    document.getElementById("receipt-store-name").textContent = state.settings.storeName;
-    document.getElementById("receipt-id").textContent = `#${t.id}`;
-    document.getElementById("receipt-date").textContent = t.date.replace('T', ' ').substring(0, 16);
+    const storeNameEl = document.getElementById("receipt-store-name");
+    const idEl = document.getElementById("receipt-id");
+    const dateEl = document.getElementById("receipt-date");
+    const customerEl = document.getElementById("receipt-customer");
+    const itemsBody = document.getElementById("receipt-items-body");
+
+    if (storeNameEl) storeNameEl.textContent = state.settings.storeName;
+    if (idEl) idEl.textContent = `#${t.id}`;
+    if (dateEl) dateEl.textContent = t.date.replace('T', ' ').substring(0, 16);
 
     const customerName = t.customerId === "walkin" ? (state.language === "ar" ? "عميل سفري" : "Walk-in") : (state.customers.find(c => c.id === t.customerId)?.name || t.customerId);
-    document.getElementById("receipt-customer").textContent = customerName;
+    if (customerEl) customerEl.textContent = customerName;
 
-    const itemsBody = document.getElementById("receipt-items-body");
-    itemsBody.innerHTML = "";
-    t.items.forEach(item => {
-        const prod = state.products.find(p => p.id === item.productId);
-        const row = document.createElement("tr");
-        row.innerHTML = `
-            <td>${prod ? prod.name : "منتج غير معروف"}</td>
-            <td>${item.qty}</td>
-            <td>${item.price.toFixed(2)}</td>
-            <td>${(item.price * item.qty).toFixed(2)}</td>
-        `;
-        itemsBody.appendChild(row);
-    });
+    if (itemsBody) {
+        itemsBody.innerHTML = "";
+        t.items.forEach(item => {
+            const prod = state.products.find(p => p.id === item.productId);
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${prod ? prod.name : "منتج غير معروف"}</td>
+                <td>${item.qty}</td>
+                <td>${item.price.toFixed(2)}</td>
+                <td>${(item.price * item.qty).toFixed(2)}</td>
+            `;
+            itemsBody.appendChild(row);
+        });
+    }
 
-    document.getElementById("receipt-subtotal").textContent = `${t.subtotal.toFixed(2)} ${state.settings.currency}`;
-    document.getElementById("receipt-discount").textContent = `${t.discount.toFixed(2)} ${state.settings.currency}`;
-    document.getElementById("receipt-tax").textContent = `${t.tax.toFixed(2)} ${state.settings.currency}`;
-    document.getElementById("receipt-total").textContent = `${t.total.toFixed(2)} ${state.settings.currency}`;
-    document.getElementById("receipt-barcode-text").textContent = `TXN-${t.id}`;
+    const subtotalEl = document.getElementById("receipt-subtotal");
+    const discountEl = document.getElementById("receipt-discount");
+    const taxEl = document.getElementById("receipt-tax");
+    const totalEl = document.getElementById("receipt-total");
+    const barcodeEl = document.getElementById("receipt-barcode-text");
+
+    if (subtotalEl) subtotalEl.textContent = `${t.subtotal.toFixed(2)} ${state.settings.currency}`;
+    if (discountEl) discountEl.textContent = `${t.discount.toFixed(2)} ${state.settings.currency}`;
+    if (taxEl) taxEl.textContent = `${t.tax.toFixed(2)} ${state.settings.currency}`;
+    if (totalEl) totalEl.textContent = `${t.total.toFixed(2)} ${state.settings.currency}`;
+    if (barcodeEl) barcodeEl.textContent = `TXN-${t.id}`;
 
     modal.classList.add("active");
-    lucide.createIcons();
+    if (window.lucide) lucide.createIcons();
 }
 
 export function viewReceipt(txnId) {

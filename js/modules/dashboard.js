@@ -18,10 +18,15 @@ export function renderDashboard() {
     const totalProducts = state.products.length;
 
     // Update stats UI
-    document.getElementById("stat-today-sales").textContent = `${todaySales.toFixed(2)} ${state.settings.currency}`;
-    document.getElementById("stat-today-orders").textContent = todayOrders;
-    document.getElementById("stat-low-stock").textContent = lowStockCount;
-    document.getElementById("stat-total-products").textContent = totalProducts;
+    const salesEl = document.getElementById("stat-today-sales");
+    const ordersEl = document.getElementById("stat-today-orders");
+    const lowStockEl = document.getElementById("stat-low-stock");
+    const totalProdEl = document.getElementById("stat-total-products");
+
+    if (salesEl) salesEl.textContent = `${todaySales.toFixed(2)} ${state.settings.currency}`;
+    if (ordersEl) ordersEl.textContent = todayOrders;
+    if (lowStockEl) lowStockEl.textContent = lowStockCount;
+    if (totalProdEl) totalProdEl.textContent = totalProducts;
 
     // Render Low Stock List
     const lowStockList = document.getElementById("dashboard-low-stock-list");
