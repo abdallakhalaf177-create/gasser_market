@@ -8,7 +8,7 @@ export let state = {
     purchaseInvoices: [],
     transactions: [],
     cart: [],
-    settings: { storeName: "جاسر ماركت", currency: "ج.م", taxRate: 14, lowStockLimit: 10 },
+    settings: { storeName: "Gaser Market", currency: "ج.م", taxRate: 14, lowStockLimit: 10 },
     currentView: "pos",
     language: "ar",
     theme: "dark",
@@ -31,6 +31,9 @@ export async function loadState() {
         try {
             const parsed = JSON.parse(saved);
             Object.assign(state, parsed);
+            if (!state.settings.storeName || state.settings.storeName === "جاسر ماركت" || state.settings.storeName === "سوپر ماركت") {
+                state.settings.storeName = "Gaser Market";
+            }
         } catch (e) {
             resetToDefault();
         }
@@ -63,7 +66,7 @@ export function resetToDefault() {
     state.purchaseInvoices = [];
     state.transactions = [];
     state.cart = [];
-    state.settings = { storeName: "جاسر ماركت", currency: "ج.م", taxRate: 14, lowStockLimit: 10 };
+    state.settings = { storeName: "Gaser Market", currency: "ج.م", taxRate: 14, lowStockLimit: 10 };
     state.currentView = "pos";
     state.language = "ar";
     state.theme = "dark";
