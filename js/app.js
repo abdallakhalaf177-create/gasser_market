@@ -229,13 +229,31 @@ function applyLanguage() {
 
 // Navigation Setup
 function setupNavigation() {
-    document.querySelectorAll(".nav-btn, .sidebar-menu .menu-item").forEach(item => {
+    document.querySelectorAll(".nav-btn, .sidebar-menu .menu-item, .mobile-nav-item[data-view], .mobile-drawer-btn[data-view]").forEach(item => {
         item.addEventListener("click", (e) => {
             e.preventDefault();
             const view = item.getAttribute("data-view");
-            if (view) switchView(view);
+            if (view) {
+                switchView(view);
+                const drawer = document.getElementById("mobile-drawer");
+                if (drawer) drawer.classList.remove("active");
+            }
         });
     });
+
+    const drawer = document.getElementById("mobile-drawer");
+    const drawerToggle = document.getElementById("mobile-drawer-toggle");
+    const mobileMenuBtn = document.getElementById("mobile-menu-btn");
+    const closeDrawerBtn = document.getElementById("close-mobile-drawer");
+
+    if (drawerToggle) drawerToggle.addEventListener("click", () => drawer && drawer.classList.add("active"));
+    if (mobileMenuBtn) mobileMenuBtn.addEventListener("click", () => drawer && drawer.classList.add("active"));
+    if (closeDrawerBtn) closeDrawerBtn.addEventListener("click", () => drawer && drawer.classList.remove("active"));
+    if (drawer) {
+        drawer.addEventListener("click", (e) => {
+            if (e.target === drawer) drawer.classList.remove("active");
+        });
+    }
 
     document.querySelectorAll("[data-go-to]").forEach(el => {
         el.addEventListener("click", (e) => {
@@ -293,7 +311,7 @@ function switchView(viewName) {
     saveState();
 
     // Update active nav button
-    document.querySelectorAll(".nav-btn, .menu-item").forEach(item => {
+    document.querySelectorAll(".nav-btn, .menu-item, .mobile-nav-item, .mobile-drawer-btn").forEach(item => {
         const itemTarget = (item.getAttribute("data-view") || "").replace("-view", "");
         if (itemTarget === cleanViewName) {
             item.classList.add("active");
