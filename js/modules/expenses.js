@@ -1,17 +1,20 @@
 import { state, saveState } from '../state.js';
 
-export function renderExpenses() {
-    renderExpensesTable();
+// ============================================================
+// EXPENSES MODULE — Full CRUD + localStorage integration
+// ============================================================
 
-    // Render Stats
-    const totalExp = (state.expenses || []).reduce((sum, e) => sum + e.amount, 0);
+export function renderExpenses() {
+    // Render expense stats
+    const totalExp = (state.expenses || []).reduce((sum, e) => sum + (e.amount || 0), 0);
     const expCount = (state.expenses || []).length;
 
     const elTotal = document.getElementById("exp-stat-total");
     const elCount = document.getElementById("exp-stat-count");
-
     if (elTotal) elTotal.textContent = `${totalExp.toFixed(2)} ${state.settings.currency}`;
     if (elCount) elCount.textContent = expCount;
+
+    renderExpensesTable();
 }
 
 export function openExpenseModal() {
@@ -23,14 +26,21 @@ export function openExpenseModal() {
 
 export function handleExpenseFormSubmit(e) {
     e.preventDefault();
-    const category = document.getElementById("exp-category").value;
-    const amount = parseFloat(document.getElementById("exp-amount").value) || 0;
-    const notes = document.getElementById("exp-notes").value;
+    
+    const categoryEl = document.getElementById("exp-category");
+    const amountEl = document.getElementById("exp-amount");
+    const notesEl = document.getElementById("exp-notes");
+
+    const category = categoryEl ? categoryEl.value : "مصاريف أخرى";
+    const amount = parseFloat(amountEl?.value) || 0;
+    const notes = notesEl ? notesEl.value.trim() : "";
 
     if (amount <= 0) {
-        if (window.showToast) window.showToast("يرجى إدخال مبلغ صحيح للمصروف!", "danger");
+        if (window.showToast) window.showToast("يرجى إدخال مبلغ صحيح أكبر من صفر!", "danger");
         return;
     }
+
+    if (!state.expenses) state.expenses = [];
 
     const newExpense = {
         id: "exp_" + Date.now(),
@@ -41,19 +51,23 @@ export function handleExpenseFormSubmit(e) {
         user: state.currentUser ? state.currentUser.name : "مدير"
     };
 
-    if (!state.expenses) state.expenses = [];
     state.expenses.push(newExpense);
     saveState();
 
     const modal = document.getElementById("expense-modal");
     if (modal) modal.classList.remove("active");
+    if (document.getElementById("expense-form")) document.getElementById("expense-form").reset();
 
     if (window.showToast) {
-        window.showToast(state.language === "ar" ? "تم تسجيل المصروف بنجاح وخصمه من مجمل الربح!" : "Expense recorded successfully!", "success");
+        window.showToast(`✅ تم تسجيل مصروف "${category}" بمبلغ ${amount.toFixed(2)} ${state.settings.currency} وخصمه من الوردية الحالية!`, "success");
     }
 
     renderExpenses();
-    if (window.refreshCurrentView) window.refreshCurrentView();
+
+    // Also refresh reports if open
+    if (state.currentView === "reports" && window.refreshCurrentView) {
+        window.refreshCurrentView();
+    }
 }
 
 export function renderExpensesTable() {
@@ -61,35 +75,40 @@ export function renderExpensesTable() {
     if (!tbody) return;
     tbody.innerHTML = "";
 
-    if (!state.expenses || state.expenses.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted);">${state.language === "ar" ? "لا توجد مصروفات مسجلة" : "No expenses recorded"}</td></tr>`;
+    const expenses = state.expenses || [];
+
+    if (expenses.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 30px; color: var(--text-muted);">
+            <i class="ri-wallet-3-line" style="font-size:2rem;display:block;margin-bottom:8px;"></i>
+            ${state.language === "ar" ? "لا توجد مصروفات مسجلة" : "No expenses recorded"}
+        </td></tr>`;
         return;
     }
 
-    [...state.expenses].reverse().forEach(exp => {
+    [...expenses].reverse().forEach(exp => {
         const row = document.createElement("tr");
         row.innerHTML = `
-            <td><strong>#${exp.id.substring(4, 10)}</strong></td>
+            <td><strong style="font-family:monospace;">#${exp.id.substring(4, 10)}</strong></td>
             <td><span class="badge badge-info">${exp.category}</span></td>
-            <td><strong class="text-danger">${exp.amount.toFixed(2)} ${state.settings.currency}</strong></td>
-            <td>${exp.notes || '-'}</td>
-            <td>${exp.date ? exp.date.replace('T', ' ').substring(0, 16) : '-'}</td>
+            <td><strong class="text-danger">${(exp.amount || 0).toFixed(2)} ${state.settings.currency}</strong></td>
+            <td style="color: var(--text-muted);">${exp.notes || '—'}</td>
+            <td style="font-size:13px;">${exp.date ? new Date(exp.date).toLocaleString('ar-EG') : '—'}</td>
             <td>
-                <button class="btn btn-danger btn-sm" onclick="window.deleteExpense('${exp.id}')" title="حذف">
-                    <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
+                <button class="btn btn-danger btn-sm" onclick="window.deleteExpense('${exp.id}')" title="حذف المصروف">
+                    <i class="ri-delete-bin-line"></i>
                 </button>
             </td>
         `;
         tbody.appendChild(row);
     });
+
     if (window.lucide) window.lucide.createIcons();
 }
 
 export function deleteExpense(id) {
-    if (confirm(state.language === "ar" ? "هل أنت متأكد من حذف هذا المصروف؟" : "Are you sure you want to delete this expense?")) {
-        state.expenses = state.expenses.filter(e => e.id !== id);
-        saveState();
-        renderExpenses();
-        if (window.refreshCurrentView) window.refreshCurrentView();
-    }
+    if (!confirm(state.language === "ar" ? "هل أنت متأكد من حذف هذا المصروف؟" : "Delete this expense?")) return;
+    state.expenses = (state.expenses || []).filter(e => e.id !== id);
+    saveState();
+    renderExpenses();
+    if (window.showToast) window.showToast("تم حذف المصروف بنجاح.", "warning");
 }

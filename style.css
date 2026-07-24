@@ -2454,4 +2454,47 @@ select option {
 .bg-primary-glow { background: var(--primary-glow) !important; }
 .bg-danger-glow { background: var(--danger-glow) !important; }
 .bg-success-glow { background: var(--success-glow) !important; }
-.bg-warning-glow { background: var(--warning-glow) !important; }
+.bg-warning-glow { background: var(--warning-glow) !important; }
+
+/* Shift Status Badge in POS */
+.shift-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: var(--radius-full);
+    font-size: 13px;
+    font-weight: 700;
+    border: 2px solid transparent;
+    transition: all var(--transition-fast);
+    user-select: none;
+}
+
+.shift-badge.shift-open {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--success);
+    border-color: var(--success);
+}
+
+.shift-badge.shift-closed {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--danger);
+    border-color: var(--danger);
+    animation: pulse-danger 2s ease-in-out infinite;
+}
+
+@keyframes pulse-danger {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    50% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0.15); }
+}
+
+/* Badge info style */
+.badge-info {
+    background: rgba(99, 102, 241, 0.18);
+    color: var(--primary);
+    padding: 3px 10px;
+    border-radius: var(--radius-full);
+    font-size: 12px;
+    font-weight: 700;
+}
+

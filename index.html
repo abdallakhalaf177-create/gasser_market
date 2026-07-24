@@ -161,6 +161,9 @@
                     </div>
                     
                     <div class="invoice-actions-bar">
+                        <div id="pos-shift-status" class="shift-badge shift-closed" style="cursor:pointer;">
+                            <i class="ri-lock-line"></i> وردية مغلقة — اضغط لفتح وردية جديدة
+                        </div>
                         <button id="clear-cart-btn" class="btn btn-lg btn-danger-outline">
                             <i class="ri-delete-bin-5-line"></i> تفريغ السلة (F4)
                         </button>
@@ -172,6 +175,7 @@
 
             </div>
         </section>
+
 
         <!-- 2. Inventory View (إدارة المخزن) -->
         <section id="inventory-view" class="view-section">
@@ -476,6 +480,7 @@
                         <tr>
                             <th>الاسم الكامل</th>
                             <th>رقم الهاتف</th>
+                            <th>الدين المستحق</th>
                             <th>نقاط الولاء</th>
                             <th>إجمالي المشتريات</th>
                             <th>عدد الزيارات</th>
@@ -630,8 +635,9 @@
                         </select>
                     </div>
                     <div class="form-group" id="pur-paid-amount-wrapper" style="display:none;">
-                        <label for="pur-paid-amount">المبلغ المدفوع (ج.م)</label>
-                        <input type="number" id="pur-paid-amount" step="0.01" min="0" value="0">
+                        <label for="pur-paid-amount">المبلغ المدفوع الآن (ج.م)</label>
+                        <input type="number" id="pur-paid-amount" step="0.01" min="0" value="0" placeholder="0.00">
+                        <small class="text-muted">الفرق سيُضاف لمديونية المورد آلياً</small>
                     </div>
                 </div>
                 <div class="modal-footer">

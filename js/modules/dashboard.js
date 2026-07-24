@@ -7,15 +7,18 @@ let categoriesChartInstance = null;
 export function renderDashboard() {
     // Calculate stats (excluding cancelled transactions)
     const today = new Date().toISOString().split('T')[0];
-    const todaySales = state.transactions
-        .filter(t => t.date.startsWith(today) && t.status !== "cancelled")
-        .reduce((sum, t) => sum + t.total, 0);
+    const transactions = state.transactions || [];
+    const products = state.products || [];
 
-    const todayOrders = state.transactions
-        .filter(t => t.date.startsWith(today) && t.status !== "cancelled").length;
+    const todaySales = transactions
+        .filter(t => t.date && t.date.startsWith(today) && t.status !== "cancelled")
+        .reduce((sum, t) => sum + (t.total || 0), 0);
 
-    const lowStockCount = state.products.filter(p => p.stock <= state.settings.lowStockLimit).length;
-    const totalProducts = state.products.length;
+    const todayOrders = transactions
+        .filter(t => t.date && t.date.startsWith(today) && t.status !== "cancelled").length;
+
+    const lowStockCount = products.filter(p => p.stock <= (state.settings.lowStockLimit || 10)).length;
+    const totalProducts = products.length;
 
     // Update stats UI
     const salesEl = document.getElementById("stat-today-sales");
@@ -32,7 +35,7 @@ export function renderDashboard() {
     const lowStockList = document.getElementById("dashboard-low-stock-list");
     if (lowStockList) {
         lowStockList.innerHTML = "";
-        const lowStockProds = state.products.filter(p => p.stock <= state.settings.lowStockLimit);
+        const lowStockProds = products.filter(p => p.stock <= (state.settings.lowStockLimit || 10));
 
         if (lowStockProds.length === 0) {
             lowStockList.innerHTML = `
@@ -77,14 +80,16 @@ export function renderDashboard() {
     const recentSalesBody = document.getElementById("dashboard-recent-sales");
     if (recentSalesBody) {
         recentSalesBody.innerHTML = "";
-        const recentSales = state.transactions.slice(-5).reverse();
+        const recentSales = transactions.slice(-5).reverse();
 
         if (recentSales.length === 0) {
             recentSalesBody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted);">${state.language === "ar" ? "لا توجد عمليات بيع اليوم" : "No sales transactions today"}</td></tr>`;
         } else {
             recentSales.forEach(t => {
                 const row = document.createElement("tr");
-                const customerName = t.customerId === "walkin" ? (state.language === "ar" ? "عميل سفري" : "Walk-in") : (state.customers.find(c => c.id === t.customerId)?.name || t.customerId);
+                const customerName = t.customerId === "walkin"
+                    ? (state.language === "ar" ? "عميل سفري" : "Walk-in")
+                    : ((state.customers || []).find(c => c.id === t.customerId)?.name || t.customerId);
                 
                 const isCancelled = t.status === "cancelled";
                 const statusBadge = isCancelled 
@@ -142,10 +147,10 @@ export function renderDashboardCharts() {
     const salesData = [0, 0, 0, 0, 0, 0, 0];
 
     // Map transactions to days of the week (excluding cancelled ones)
-    state.transactions.forEach(t => {
-        if (t.status !== "cancelled") {
+    (state.transactions || []).forEach(t => {
+        if (t.status !== "cancelled" && t.date) {
             const dayIndex = new Date(t.date).getDay();
-            salesData[dayIndex] += t.total;
+            salesData[dayIndex] += (t.total || 0);
         }
     });
 
@@ -190,13 +195,13 @@ export function renderDashboardCharts() {
 
     // Category Sales Data (excluding cancelled transactions)
     const catSales = {};
-    state.categories.forEach(c => catSales[c] = 0);
-    state.transactions.forEach(t => {
-        if (t.status !== "cancelled") {
+    (state.categories || []).forEach(c => catSales[c] = 0);
+    (state.transactions || []).forEach(t => {
+        if (t.status !== "cancelled" && Array.isArray(t.items)) {
             t.items.forEach(item => {
-                const prod = state.products.find(p => p.id === item.productId);
+                const prod = (state.products || []).find(p => p.id === item.productId);
                 if (prod && catSales[prod.category] !== undefined) {
-                    catSales[prod.category] += item.price * item.qty;
+                    catSales[prod.category] += (item.price || 0) * (item.qty || 0);
                 }
             });
         }
