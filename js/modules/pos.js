@@ -256,12 +256,24 @@ export function handleCheckout() {
     const checkedPaymentEl = document.querySelector('input[name="payment-method"]:checked');
     const paymentMethod = checkedPaymentEl ? checkedPaymentEl.value : "cash";
 
+    if (paymentMethod === "credit" && customerId === "walkin") {
+        if (window.showToast) {
+            window.showToast(state.language === "ar" ? "يجب اختيار عميل مسجل لإتمام عملية البيع الآجل (الدين)!" : "Select a registered customer for credit sales!", "warning");
+        }
+        return;
+    }
+
     let subtotal = 0;
     let totalCost = 0;
-    state.cart.forEach(item => {
+    const itemsSnapshot = state.cart.map(item => {
         subtotal += item.price * item.qty;
         const prod = state.products.find(p => p.id === item.productId);
-        if (prod) totalCost += prod.cost * item.qty;
+        const itemCost = item.cost !== undefined ? item.cost : (prod ? prod.cost : 0);
+        totalCost += itemCost * item.qty;
+        return {
+            ...item,
+            cost: itemCost
+        };
     });
 
     const discountAmount = subtotal * (discountPercent / 100);
@@ -276,13 +288,15 @@ export function handleCheckout() {
         id: transactionId,
         date: new Date().toISOString(),
         customerId: customerId,
-        items: [...state.cart],
+        items: itemsSnapshot,
         subtotal: subtotal,
         discount: discountAmount,
         tax: taxAmount,
         total: finalTotal,
+        totalCost: totalCost,
         profit: profit,
         paymentMethod: paymentMethod,
+        cashierName: state.currentUser ? state.currentUser.name : "الكاشير",
         status: "completed"
     };
 
@@ -292,13 +306,16 @@ export function handleCheckout() {
         if (prod) prod.stock -= item.qty;
     });
 
-    // Award loyalty points to customer
+    // Award loyalty points & update customer debt if credit sale
     if (customerId !== "walkin") {
         const customer = state.customers.find(c => c.id === customerId);
         if (customer) {
             customer.points += Math.floor(finalTotal / 10);
             customer.totalSpent += finalTotal;
             customer.visits++;
+            if (paymentMethod === "credit") {
+                customer.balance = (customer.balance || 0) + finalTotal;
+            }
         }
     }
 
@@ -309,7 +326,7 @@ export function handleCheckout() {
     showReceipt(transaction);
     
     if (window.showToast) {
-        window.showToast(state.language === "ar" ? "تمت العملية بنجاح!" : "Transaction completed successfully!", "success");
+        window.showToast(state.language === "ar" ? `تمت العملية بنجاح! ${paymentMethod === 'credit' ? '(بيع آجل)' : ''}` : "Transaction completed successfully!", "success");
     }
 }
 

@@ -8,6 +8,12 @@ export let state = {
     purchaseInvoices: [],
     transactions: [],
     cart: [],
+    shifts: [],
+    expenses: [],
+    wastes: [],
+    customerPayments: [],
+    supplierPayments: [],
+    currentShift: null,
     settings: { storeName: "Gaser Market", currency: "ج.م", taxRate: 14, lowStockLimit: 10 },
     currentView: "pos",
     language: "ar",
@@ -41,9 +47,21 @@ export async function loadState() {
         resetToDefault();
     }
     
-    // Ensure default users exist
+    // Ensure default structures exist
     if (!state.users || state.users.length === 0) {
         state.users = [...DEFAULT_USERS];
+    }
+    if (!state.shifts) state.shifts = [];
+    if (!state.expenses) state.expenses = [];
+    if (!state.wastes) state.wastes = [];
+    if (!state.customerPayments) state.customerPayments = [];
+    if (!state.supplierPayments) state.supplierPayments = [];
+    
+    // Ensure customers have balance property
+    if (state.customers && Array.isArray(state.customers)) {
+        state.customers.forEach(c => {
+            if (c.balance === undefined) c.balance = 0;
+        });
     }
 }
 
@@ -60,12 +78,18 @@ export function saveState() {
 export function resetToDefault() {
     state.products = JSON.parse(JSON.stringify(DEFAULT_PRODUCTS));
     state.categories = [...DEFAULT_CATEGORIES];
-    state.customers = JSON.parse(JSON.stringify(DEFAULT_CUSTOMERS));
+    state.customers = JSON.parse(JSON.stringify(DEFAULT_CUSTOMERS)).map(c => ({ ...c, balance: 0 }));
     state.suppliers = JSON.parse(JSON.stringify(DEFAULT_SUPPLIERS));
     state.users = JSON.parse(JSON.stringify(DEFAULT_USERS));
     state.purchaseInvoices = [];
     state.transactions = [];
     state.cart = [];
+    state.shifts = [];
+    state.expenses = [];
+    state.wastes = [];
+    state.customerPayments = [];
+    state.supplierPayments = [];
+    state.currentShift = null;
     state.settings = { storeName: "Gaser Market", currency: "ج.م", taxRate: 14, lowStockLimit: 10 };
     state.currentView = "pos";
     state.language = "ar";
@@ -88,7 +112,7 @@ export function addToCart(productId) {
             if (window.showToast) window.showToast(state.language === "ar" ? "لا يمكن تجاوز الكمية المتاحة في المخزن!" : "Cannot exceed available stock!", "warning"); 
         }
     } else {
-        state.cart.push({ productId, qty: 1, price: prod.price });
+        state.cart.push({ productId, qty: 1, price: prod.price, cost: prod.cost });
     }
     saveState();
     notifyCartChange();
@@ -134,6 +158,9 @@ export function cancelTransaction(transactionId) {
             customer.points = Math.max(0, customer.points - Math.floor(t.total / 10));
             customer.totalSpent = Math.max(0, customer.totalSpent - t.total);
             customer.visits = Math.max(0, customer.visits - 1);
+            if (t.paymentMethod === "credit") {
+                customer.balance = Math.max(0, customer.balance - t.total);
+            }
         }
     }
     saveState();

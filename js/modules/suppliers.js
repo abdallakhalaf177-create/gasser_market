@@ -178,18 +178,29 @@ export function handlePurchaseFormSubmit(e) {
     const supplierId = document.getElementById("pur-supplier").value;
     const productId = document.getElementById("pur-product").value;
     const costInput = document.getElementById("pur-cost");
-    const cost = costInput ? (parseFloat(costInput.value) || 0) : 0;
+    const newBatchCost = costInput ? (parseFloat(costInput.value) || 0) : 0;
     const qty = parseInt(document.getElementById("pur-qty").value) || 1;
     const paymentSelect = document.getElementById("pur-payment");
     const paymentStatus = paymentSelect ? paymentSelect.value : "paid";
 
-    const totalCost = cost * qty;
+    const totalCost = newBatchCost * qty;
 
-    // Update Product Stock Level
+    // Update Product Stock & Weighted Average Cost (WAC)
     const prod = state.products.find(p => p.id === productId);
     if (prod) {
+        const currentStock = Math.max(0, prod.stock);
+        const currentCost = prod.cost || 0;
+        
+        // WAC Formula: ((Current Stock * Current Cost) + (New Qty * New Cost)) / (Current Stock + New Qty)
+        if (newBatchCost > 0) {
+            const totalStockAfter = currentStock + qty;
+            const weightedAverageCost = totalStockAfter > 0 
+                ? ((currentStock * currentCost) + (qty * newBatchCost)) / totalStockAfter
+                : newBatchCost;
+            prod.cost = parseFloat(weightedAverageCost.toFixed(2));
+        }
+        
         prod.stock += qty;
-        if (cost > 0) prod.cost = cost;
     }
 
     // Update Supplier Balance & purchases
@@ -210,7 +221,7 @@ export function handlePurchaseFormSubmit(e) {
         supplierId,
         productId,
         qty,
-        cost,
+        cost: newBatchCost,
         totalCost,
         paymentStatus
     });
@@ -222,7 +233,7 @@ export function handlePurchaseFormSubmit(e) {
     if (form) form.reset();
 
     if (window.showToast) {
-        window.showToast(state.language === "ar" ? "تم تسجيل فاتورة التوريد وتحديث المخزون بنجاح!" : "Restock invoice created and stock updated!", "success");
+        window.showToast(state.language === "ar" ? `تم تسجيل التوريد وتحديث متوسط تكلفة المخزون (${prod ? prod.cost : newBatchCost} ج.م)!` : "Restock invoice created & WAC updated!", "success");
     }
     
     renderSuppliers();
@@ -250,12 +261,24 @@ export function handleSettleFormSubmit(e) {
     if (sup && amount > 0) {
         sup.balance = Math.max(0, sup.balance - amount);
         sup.lastUpdated = new Date().toISOString().split('T')[0];
+
+        // Log payment
+        if (!state.supplierPayments) state.supplierPayments = [];
+        state.supplierPayments.push({
+            id: "spay_" + Date.now(),
+            supplierId: sup.id,
+            supplierName: sup.company,
+            amount: amount,
+            date: new Date().toISOString(),
+            paymentMethod: "cash"
+        });
+
         saveState();
         const modal = document.getElementById("settle-modal");
         if (modal) modal.classList.remove("active");
         renderSuppliers();
         if (window.showToast) {
-            window.showToast(state.language === "ar" ? "تم تسجيل سداد الدفعة بنجاح!" : "Payment recorded successfully!", "success");
+            window.showToast(state.language === "ar" ? "تم تسجيل سداد دفعة المورد وتحديث رصيد المستحق فوراً!" : "Payment recorded successfully!", "success");
         }
     }
 }

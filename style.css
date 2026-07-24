@@ -2441,4 +2441,17 @@ select option {
         bottom: 74px;
         max-width: none;
     }
-}
+}
+
+/* Financial & Status Utility Helpers */
+.font-bold { font-weight: 800 !important; }
+.text-danger { color: var(--danger) !important; }
+.text-success { color: var(--success) !important; }
+.text-warning { color: var(--warning) !important; }
+.text-primary { color: var(--primary) !important; }
+.text-muted { color: var(--text-muted) !important; }
+
+.bg-primary-glow { background: var(--primary-glow) !important; }
+.bg-danger-glow { background: var(--danger-glow) !important; }
+.bg-success-glow { background: var(--success-glow) !important; }
+.bg-warning-glow { background: var(--warning-glow) !important; }

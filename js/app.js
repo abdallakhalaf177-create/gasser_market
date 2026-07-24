@@ -4,9 +4,12 @@ import { renderDashboard } from './modules/dashboard.js';
 import { renderPOS, renderPOSCategoryDropdowns, renderPOSProducts, renderPOSCustomerDropdown, renderCart, updateCartSummary, handleCheckout, viewReceipt, closeReceiptModal, printReceipt } from './modules/pos.js';
 import { renderInventory, renderInventoryTable, handleProductFormSubmit, editProduct, deleteProduct } from './modules/inventory.js';
 import { handleCategoryFormSubmit, renderCategoriesList, deleteCategory } from './modules/categories.js';
-import { renderReports, renderReportsData, openLowStockReport, closeLowStockModal, printLowStockReport, exportLowStockCSV, setReportRange } from './modules/reports.js';
-import { renderCustomers, handleCustomerFormSubmit, editCustomer, deleteCustomer, openCustomerModal } from './modules/customers.js';
+import { renderReports, renderReportsData, openLowStockReport, closeLowStockModal, printLowStockReport, exportLowStockCSV, setReportRange, openExpiryReport, closeExpiryModal } from './modules/reports.js';
+import { renderCustomers, handleCustomerFormSubmit, editCustomer, deleteCustomer, openCustomerModal, openCustomerSettleModal, handleCustomerSettleFormSubmit } from './modules/customers.js';
 import { renderSuppliers, renderSuppliersTable, handleSupplierFormSubmit, editSupplier, deleteSupplier, handlePurchaseFormSubmit, openSettleModal, handleSettleFormSubmit, renderPurchases, openSupplierModal, openPurchaseModal } from './modules/suppliers.js';
+import { renderExpenses, openExpenseModal, handleExpenseFormSubmit, deleteExpense } from './modules/expenses.js';
+import { renderWaste, openWasteModal, handleWasteFormSubmit } from './modules/waste.js';
+import { openShiftModal, handleShiftClosingSubmit } from './modules/shifts.js';
 import { renderSettings } from './modules/settings.js';
 import { initAuth, renderUsers, handleUserFormSubmit, editUser, deleteUser } from './modules/users.js';
 
@@ -15,14 +18,28 @@ window.editUser = editUser;
 window.deleteUser = deleteUser;
 window.openLowStockReport = openLowStockReport;
 window.closeLowStockModal = closeLowStockModal;
+window.openExpiryReport = openExpiryReport;
+window.closeExpiryModal = closeExpiryModal;
 window.printLowStockReport = printLowStockReport;
 window.exportLowStockCSV = exportLowStockCSV;
 window.setReportRange = setReportRange;
 window.openCustomerModal = openCustomerModal;
+window.openCustomerSettleModal = openCustomerSettleModal;
+window.handleCustomerSettleFormSubmit = handleCustomerSettleFormSubmit;
 window.openSupplierModal = openSupplierModal;
 window.openPurchaseModal = openPurchaseModal;
 window.closeReceiptModal = closeReceiptModal;
 window.printReceipt = printReceipt;
+
+window.openExpenseModal = openExpenseModal;
+window.handleExpenseFormSubmit = handleExpenseFormSubmit;
+window.deleteExpense = deleteExpense;
+
+window.openWasteModal = openWasteModal;
+window.handleWasteFormSubmit = handleWasteFormSubmit;
+
+window.openShiftModal = openShiftModal;
+window.handleShiftClosingSubmit = handleShiftClosingSubmit;
 
 // Audio Feedback Synthesizer using Web Audio API (works offline)
 export function playBeep(frequency = 440, duration = 0.1) {
@@ -348,6 +365,12 @@ function switchView(viewName) {
     } else if (cleanViewName === "purchases") {
         if (subtitleEl) subtitleEl.textContent = state.language === "ar" ? "سجل فواتير الشراء والتوريد ودخول المنتجات للمخازن." : "Purchase invoice logs and stock entries.";
         renderPurchases();
+    } else if (cleanViewName === "expenses") {
+        if (subtitleEl) subtitleEl.textContent = state.language === "ar" ? "إدارة وتسجيل المصروفات التشغيلية اليومية والشهرية." : "Operational expenses management.";
+        renderExpenses();
+    } else if (cleanViewName === "waste") {
+        if (subtitleEl) subtitleEl.textContent = state.language === "ar" ? "إسقاط وتجميع المنتجات التالفة ومتابعة الخسائر." : "Waste and damage management.";
+        renderWaste();
     } else if (cleanViewName === "reports") {
         if (subtitleEl) subtitleEl.textContent = state.language === "ar" ? "تقارير المبيعات والأرباح التفصيلية للفترات المختلفة." : "Detailed sales and profit reports for different periods.";
         renderReports();

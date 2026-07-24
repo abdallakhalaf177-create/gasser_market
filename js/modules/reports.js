@@ -16,42 +16,75 @@ export function renderReportsData(range = "today") {
     const now = new Date();
     const todayStr = now.toISOString().split('T')[0];
 
-    // Filter transactions based on range
+    // Filter transactions, expenses, and waste based on range
     let filteredTxns = [...state.transactions];
+    let filteredExpenses = [...(state.expenses || [])];
+    let filteredWaste = [...(state.wastes || [])];
+
     if (range === "today") {
         filteredTxns = state.transactions.filter(t => t.date && t.date.startsWith(todayStr));
+        filteredExpenses = (state.expenses || []).filter(e => e.date && e.date.startsWith(todayStr));
+        filteredWaste = (state.wastes || []).filter(w => w.date && w.date.startsWith(todayStr));
     } else if (range === "week") {
         const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
         filteredTxns = state.transactions.filter(t => new Date(t.date) >= oneWeekAgo);
+        filteredExpenses = (state.expenses || []).filter(e => new Date(e.date) >= oneWeekAgo);
+        filteredWaste = (state.wastes || []).filter(w => new Date(w.date) >= oneWeekAgo);
     } else if (range === "month") {
         const oneMonthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
         filteredTxns = state.transactions.filter(t => new Date(t.date) >= oneMonthAgo);
+        filteredExpenses = (state.expenses || []).filter(e => new Date(e.date) >= oneMonthAgo);
+        filteredWaste = (state.wastes || []).filter(w => new Date(w.date) >= oneMonthAgo);
     }
 
     const validTxns = filteredTxns.filter(t => t.status !== "cancelled");
     const totalSales = validTxns.reduce((sum, t) => sum + (t.total || 0), 0);
-    const totalProfit = validTxns.reduce((sum, t) => sum + (t.profit || 0), 0);
-    const totalCogs = Math.max(0, totalSales - totalProfit);
+    
+    // Calculate total COGS strictly
+    const totalCogs = validTxns.reduce((sum, t) => {
+        if (t.totalCost !== undefined) return sum + t.totalCost;
+        return sum + Math.max(0, (t.total || 0) - (t.profit || 0));
+    }, 0);
+
+    const grossProfit = totalSales - totalCogs;
+    const totalExpenses = filteredExpenses.reduce((sum, e) => sum + (e.amount || 0), 0);
+    const totalWaste = filteredWaste.reduce((sum, w) => sum + (w.totalLoss || 0), 0);
+    const netProfit = grossProfit - (totalExpenses + totalWaste);
     const totalOrders = validTxns.length;
 
     // Low stock count calculation using product minStock or default 5
     const lowStockItems = state.products.filter(p => Number(p.stock) <= (Number(p.minStock) || 5));
     const lowStockCount = lowStockItems.length;
 
-    // Update Overview Stats Cards
+    // Near Expiration Items (within 30 days or expired)
+    const nearExpiryItems = state.products.filter(p => p.expiry && (new Date(p.expiry) <= new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)));
+    const nearExpiryCount = nearExpiryItems.length;
+
+    // Update Overview Stats & P&L Cards
     const todaySalesEl = document.getElementById("stat-today-sales");
     const todayCogsEl = document.getElementById("stat-today-cogs");
-    const reportProfitEl = document.getElementById("report-total-profit");
+    const grossProfitEl = document.getElementById("report-gross-profit") || document.getElementById("stat-today-gross-profit");
+    const expensesEl = document.getElementById("report-total-expenses");
+    const wasteEl = document.getElementById("report-total-waste");
+    const netProfitEl = document.getElementById("report-total-profit") || document.getElementById("report-net-profit");
     const todayOrdersEl = document.getElementById("stat-today-orders");
     const lowStockBadgeEl = document.getElementById("low-stock-count-badge");
     const statLowStockEl = document.getElementById("stat-low-stock");
+    const expiryBadgeEl = document.getElementById("expiry-count-badge");
 
     if (todaySalesEl) todaySalesEl.textContent = `${totalSales.toFixed(2)} ${state.settings.currency}`;
     if (todayCogsEl) todayCogsEl.textContent = `${totalCogs.toFixed(2)} ${state.settings.currency}`;
-    if (reportProfitEl) reportProfitEl.textContent = `${totalProfit.toFixed(2)} ${state.settings.currency}`;
+    if (grossProfitEl) grossProfitEl.textContent = `${grossProfit.toFixed(2)} ${state.settings.currency}`;
+    if (expensesEl) expensesEl.textContent = `${totalExpenses.toFixed(2)} ${state.settings.currency}`;
+    if (wasteEl) wasteEl.textContent = `${totalWaste.toFixed(2)} ${state.settings.currency}`;
+    if (netProfitEl) {
+        netProfitEl.textContent = `${netProfit.toFixed(2)} ${state.settings.currency}`;
+        netProfitEl.className = netProfit >= 0 ? "text-success font-bold" : "text-danger font-bold";
+    }
     if (todayOrdersEl) todayOrdersEl.textContent = totalOrders;
     if (lowStockBadgeEl) lowStockBadgeEl.textContent = lowStockCount;
     if (statLowStockEl) statLowStockEl.textContent = lowStockCount;
+    if (expiryBadgeEl) expiryBadgeEl.textContent = nearExpiryCount;
 
     // 1. Render Category Profit Breakdown Table
     renderCategoryProfitsTable(validTxns);
@@ -228,6 +261,50 @@ export function closeLowStockModal() {
     if (modal) modal.classList.remove("active");
 }
 
+export function openExpiryReport() {
+    const modal = document.getElementById("expiry-modal");
+    const tbody = document.getElementById("expiry-table-body");
+    const summaryText = document.getElementById("expiry-summary-text");
+    if (!modal || !tbody) return;
+
+    tbody.innerHTML = "";
+    const now = new Date();
+    const expiryItems = state.products.filter(p => p.expiry && (new Date(p.expiry) <= new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)));
+
+    if (expiryItems.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-success); font-weight:700;">ممتاز! لا توجد منتجات منتهية أو قريبة من انتهاء الصلاحية خلال الـ 30 يوماً القادمة.</td></tr>`;
+        if (summaryText) summaryText.textContent = "إجمالي التنبيهات: 0 منتج";
+    } else {
+        expiryItems.forEach(p => {
+            const isExp = new Date(p.expiry) < now;
+            const statusBadge = isExp
+                ? `<span class="badge badge-danger">منتهي الصلاحية</span>`
+                : `<span class="badge badge-warning">قريب الانتهاء (أقل من 30 يوم)</span>`;
+
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td><code>${p.barcode}</code></td>
+                <td><strong>${p.name}</strong></td>
+                <td><span class="badge badge-info">${p.category}</span></td>
+                <td><strong>${p.stock}</strong></td>
+                <td><strong class="${isExp ? 'text-danger' : 'text-warning'}">${p.expiry}</strong></td>
+                <td>${(p.cost || 0).toFixed(2)} ${state.settings.currency}</td>
+                <td>${statusBadge}</td>
+            `;
+            tbody.appendChild(row);
+        });
+        if (summaryText) summaryText.textContent = `إجمالي المنتجات الواجب مراجعتها: ${expiryItems.length} منتج`;
+    }
+
+    modal.classList.add("active");
+    if (window.lucide) window.lucide.createIcons();
+}
+
+export function closeExpiryModal() {
+    const modal = document.getElementById("expiry-modal");
+    if (modal) modal.classList.remove("active");
+}
+
 export function printLowStockReport() {
     window.print();
 }
@@ -240,7 +317,7 @@ export function exportLowStockCSV() {
     }
 
     let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
-    csvContent += "البارلود,اسم المنتج,التصنيف,الكمية الحالية,حد الأمان,سعر الشراء,سعر البيع\n";
+    csvContent += "الباركود,اسم المنتج,التصنيف,الكمية الحالية,حد الأمان,سعر الشراء,سعر البيع\n";
 
     lowStockItems.forEach(p => {
         csvContent += `"${p.barcode}","${p.name}","${p.category}","${p.stock}","${p.minStock || 5}","${p.cost}","${p.price}"\n`;

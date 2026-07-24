@@ -39,14 +39,23 @@
             <button class="nav-btn" data-view="purchases-view">
                 <i class="ri-shopping-bag-line"></i> المشتريات
             </button>
+            <button class="nav-btn" data-view="expenses-view">
+                <i class="ri-wallet-3-line"></i> المصروفات
+            </button>
+            <button class="nav-btn" data-view="waste-view">
+                <i class="ri-delete-bin-3-line"></i> الهالك
+            </button>
             <button class="nav-btn" data-view="reports-view">
-                <i class="ri-bar-chart-box-line"></i> التقارير والوردية
+                <i class="ri-bar-chart-box-line"></i> التقارير والربح
             </button>
             <button class="nav-btn" data-view="customers-view">
                 <i class="ri-user-shared-line"></i> العملاء والديون
             </button>
             <button class="nav-btn" data-view="suppliers-view">
                 <i class="ri-truck-line"></i> الموردين
+            </button>
+            <button class="nav-btn" id="open-shift-modal-btn" onclick="window.openShiftModal()">
+                <i class="ri-time-line"></i> تقفيل الوردية
             </button>
             <button class="nav-btn" data-view="users-view">
                 <i class="ri-user-settings-line"></i> المستخدمين
@@ -229,16 +238,116 @@
             </div>
         </section>
 
-        <!-- 4. Reports View (التقارير والجرد اليومي) -->
+        <!-- 3.1 Expenses View (المصروفات التشغيلية) -->
+        <section id="expenses-view" class="view-section">
+            <div class="section-header">
+                <div>
+                    <h2>إدارة المصروفات التشغيلية</h2>
+                    <p class="text-muted" style="margin-top: 4px;">سجل مصاريف الإيجار، الكهرباء، الأجور، النثريات والأكياس وتخصيص الفئات</p>
+                </div>
+                <div class="header-actions-row">
+                    <button class="btn btn-primary" onclick="window.openExpenseModal()"><i class="ri-add-line"></i> تسجيل مصروف جديد</button>
+                </div>
+            </div>
+
+            <div class="stats-grid" style="grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 24px;">
+                <div class="stat-card">
+                    <div class="stat-icon bg-danger-glow"><i class="ri-wallet-3-line text-danger"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-label">إجمالي المصروفات التشغيلية</span>
+                        <h3 id="exp-stat-total">0.00 ج.م</h3>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon bg-primary-glow"><i class="ri-file-list-line text-primary"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-label">عدد السجلات</span>
+                        <h3 id="exp-stat-count">0</h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-wrapper">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>رقم المعاملة</th>
+                            <th>الفئة</th>
+                            <th>المبلغ</th>
+                            <th>البيان / ملاحظات</th>
+                            <th>التاريخ والوقت</th>
+                            <th>إجراء</th>
+                        </tr>
+                    </thead>
+                    <tbody id="expenses-table-body">
+                        <!-- المصروفات المسجلة -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 3.2 Waste View (إسقاط الهالك والتوالف) -->
+        <section id="waste-view" class="view-section">
+            <div class="section-header">
+                <div>
+                    <h2>إسقاط البضاعة التالفة والهالك (Waste Management)</h2>
+                    <p class="text-muted" style="margin-top: 4px;">تسجيل البضاعة التالفة أو منتهية الصلاحية وخصم قيمتها بسعر الشراء كمصروف خسارة</p>
+                </div>
+                <div class="header-actions-row">
+                    <button class="btn btn-warning" onclick="window.openWasteModal()"><i class="ri-delete-bin-line"></i> تسجيل هالك / تالف جديد</button>
+                </div>
+            </div>
+
+            <div class="stats-grid" style="grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 24px;">
+                <div class="stat-card">
+                    <div class="stat-icon bg-warning-glow"><i class="ri-alert-line text-warning"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-label">إجمالي خسائر الهالك والتوالف</span>
+                        <h3 id="waste-stat-loss">0.00 ج.م</h3>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon bg-primary-glow"><i class="ri-archive-drawer-line text-primary"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-label">عدد الأصناف المُسقطة</span>
+                        <h3 id="waste-stat-count">0</h3>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-wrapper">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>الباركود</th>
+                            <th>اسم المنتج</th>
+                            <th>الكمية الهالكة</th>
+                            <th>سعر التكلفة (الوحدة)</th>
+                            <th>إجمالي الخسارة</th>
+                            <th>سبب الإسقاط</th>
+                            <th>التاريخ والوقت</th>
+                        </tr>
+                    </thead>
+                    <tbody id="waste-table-body">
+                        <!-- سجل الهالك -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- 4. Reports View (التقارير المالية والأرباح P&L) -->
         <section id="reports-view" class="view-section">
             <div class="section-header">
                 <div>
-                    <h2>التقارير والجرد اليومي للأرباح</h2>
-                    <p class="text-muted" style="margin-top: 4px;">مُلخص الأرباح والخزينة وجرد المبيعات مقسمة حسب الفئات والمنتجات</p>
+                    <h2>لوحة التقارير المالية وملخص الأرباح والخسائر (P&L Statement)</h2>
+                    <p class="text-muted" style="margin-top: 4px;">حساب دقيق للمبيعات، COGS، المصروفات، الهالك الوصولاً لـ صافي الربح الحقيقي</p>
                 </div>
                 <div class="header-actions-row">
-                    <button id="open-low-stock-report-btn" class="btn btn-warning" onclick="openLowStockReport()">
-                        <i class="ri-alert-line"></i> تقرير النواقص اليومي (<span id="low-stock-count-badge">0</span>)
+                    <button id="open-low-stock-report-btn" class="btn btn-warning" onclick="window.openLowStockReport()">
+                        <i class="ri-alert-line"></i> النواقص (<span id="low-stock-count-badge">0</span>)
+                    </button>
+                    <button id="open-expiry-report-btn" class="btn btn-danger" onclick="window.openExpiryReport()">
+                        <i class="ri-calendar-event-line"></i> الصلاحية (<span id="expiry-count-badge">0</span>)
                     </button>
                     <div class="reports-toolbar" style="display:flex; gap:6px;">
                         <button class="btn btn-outline btn-sm active" data-range="today" onclick="setReportRange('today', this)">اليوم</button>
@@ -248,34 +357,48 @@
                 </div>
             </div>
 
-            <!-- Stats Overview Cards Grid -->
-            <div class="stats-grid" style="grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px;">
+            <!-- Financial P&L Cards Grid -->
+            <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px;">
                 <div class="stat-card">
                     <div class="stat-icon bg-primary-glow"><i class="ri-money-dollar-circle-line text-primary"></i></div>
                     <div class="stat-info">
-                        <span class="stat-label">إجمالي المبيعات</span>
+                        <span class="stat-label">إجمالي المبيعات (Revenue)</span>
                         <h3 id="stat-today-sales">0.00 ج.م</h3>
                     </div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-icon bg-danger-glow"><i class="ri-shopping-basket-line text-danger"></i></div>
                     <div class="stat-info">
-                        <span class="stat-label">تكلفة البضاعة (COGS)</span>
+                        <span class="stat-label">تكلفة البضاعة المباعة (COGS)</span>
                         <h3 id="stat-today-cogs">0.00 ج.م</h3>
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon bg-success-glow"><i class="ri-funds-line text-success"></i></div>
+                    <div class="stat-icon bg-success-glow"><i class="ri-scales-line text-success"></i></div>
                     <div class="stat-info">
-                        <span class="stat-label">صافي الأرباح</span>
-                        <h3 id="report-total-profit">0.00 ج.م</h3>
+                        <span class="stat-label">مجمل الربح (Gross Profit)</span>
+                        <h3 id="report-gross-profit">0.00 ج.م</h3>
                     </div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-icon bg-warning-glow"><i class="ri-shopping-bag-line text-warning"></i></div>
+                    <div class="stat-icon bg-warning-glow"><i class="ri-wallet-3-line text-warning"></i></div>
                     <div class="stat-info">
-                        <span class="stat-label">عدد العمليات المباعة</span>
-                        <h3 id="stat-today-orders">0</h3>
+                        <span class="stat-label">المصروفات التشغيلية</span>
+                        <h3 id="report-total-expenses">0.00 ج.م</h3>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon bg-danger-glow"><i class="ri-delete-bin-3-line text-danger"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-label">خسائر الهالك والتوالف</span>
+                        <h3 id="report-total-waste">0.00 ج.م</h3>
+                    </div>
+                </div>
+                <div class="stat-card" style="border: 2px solid var(--primary);">
+                    <div class="stat-icon bg-success-glow"><i class="ri-funds-box-line text-success"></i></div>
+                    <div class="stat-info">
+                        <span class="stat-label">صافي الربح النهائي (Net Profit)</span>
+                        <h3 id="report-total-profit" class="text-success font-bold">0.00 ج.م</h3>
                     </div>
                 </div>
             </div>
@@ -792,6 +915,199 @@
             <div class="modal-footer" style="display:flex; justify-content:space-between; align-items:center; padding:16px 24px; border-top:1px solid var(--border-color);">
                 <span id="low-stock-summary-text" style="font-weight:700; color:var(--text-secondary);">إجمالي المنتجات المطلوبة: 0 منتج</span>
                 <button class="btn btn-secondary" onclick="closeLowStockModal()">إغلاق</button>
+        </div>
+    </div>
+
+    <!-- 1. Shift Closing Modal (تقفيل الوردية اليومية) -->
+    <div class="modal-overlay" id="shift-modal">
+        <div class="modal-container modal-sm">
+            <div class="modal-header">
+                <h3><i class="ri-time-line text-primary"></i> تقفيل الوردية اليومية للكاشير</h3>
+                <button class="btn-close-modal" onclick="document.getElementById('shift-modal').classList.remove('active')">&times;</button>
+            </div>
+            <form id="shift-form" onsubmit="window.handleShiftClosingSubmit(event)">
+                <div class="modal-body">
+                    <div style="background: var(--bg-muted); padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 13px;">
+                        <div style="display:flex; justify-content:space-between; margin-bottom: 4px;">
+                            <span>الكاشير الحالي:</span>
+                            <strong id="shift-cashier-name">-</strong>
+                        </div>
+                        <div style="display:flex; justify-content:space-between;">
+                            <span>وقت فتح الوردية:</span>
+                            <strong id="shift-start-time">-</strong>
+                        </div>
+                    </div>
+
+                    <div class="form-group-grid" style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:8px; margin-bottom:16px;">
+                        <div style="background:var(--bg-card); padding:8px; border-radius:6px; text-align:center; border:1px solid var(--border-color);">
+                            <span style="font-size:11px; color:var(--text-muted);">مبيعات الكاش</span>
+                            <div id="shift-cash-sales" style="font-weight:700; color:var(--success);">0.00 ج.م</div>
+                        </div>
+                        <div style="background:var(--bg-card); padding:8px; border-radius:6px; text-align:center; border:1px solid var(--border-color);">
+                            <span style="font-size:11px; color:var(--text-muted);">مبيعات الفيزا</span>
+                            <div id="shift-card-sales" style="font-weight:700; color:var(--primary);">0.00 ج.م</div>
+                        </div>
+                        <div style="background:var(--bg-card); padding:8px; border-radius:6px; text-align:center; border:1px solid var(--border-color);">
+                            <span style="font-size:11px; color:var(--text-muted);">مبيعات الآجل</span>
+                            <div id="shift-debt-sales" style="font-weight:700; color:var(--danger);">0.00 ج.م</div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 16px; padding: 12px; background: rgba(99, 102, 241, 0.1); border-radius: 8px; border: 1px dashed var(--primary);">
+                        <div style="font-size: 13px; color: var(--text-muted);">الكاش المتوقع وجوده في الدرج:</div>
+                        <div id="shift-expected-cash" style="font-size: 20px; font-weight: 800; color: var(--primary); margin-top: 4px;">0.00 ج.م</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="shift-actual-cash">الكاش الفعلي المُنقَد في الدرج *</label>
+                        <input type="number" id="shift-actual-cash" step="0.01" min="0" required placeholder="أدخل الكاش المجرود..." style="font-size:16px; font-weight:700;">
+                    </div>
+
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
+                        <span>فارق الوردية:</span>
+                        <span id="shift-diff-amount" class="font-bold">0.00 ج.م</span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('shift-modal').classList.remove('active')">إلغاء</button>
+                    <button type="submit" class="btn btn-primary"><i class="ri-check-double-line"></i> تقفيل الوردية الآن</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 2. Expense Modal (تسجيل مصروف جديد) -->
+    <div class="modal-overlay" id="expense-modal">
+        <div class="modal-container modal-sm">
+            <div class="modal-header">
+                <h3><i class="ri-wallet-3-line text-danger"></i> تسجيل مصروف تشغيلي جديد</h3>
+                <button class="btn-close-modal" onclick="document.getElementById('expense-modal').classList.remove('active')">&times;</button>
+            </div>
+            <form id="expense-form" onsubmit="window.handleExpenseFormSubmit(event)">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="exp-category">فئة المصروف *</label>
+                        <select id="exp-category" required>
+                            <option value="إيجار">إيجار المحل</option>
+                            <option value="كهرباء ومرافق">كهرباء ومرافق</option>
+                            <option value="أجور ومرتبات">أجور ومرتبات عمالة</option>
+                            <option value="نثريات وأكياس">نثريات وأكياس تغليف</option>
+                            <option value="صيانة ومستلزمات">صيانة ومستلزمات تشغيل</option>
+                            <option value="مصاريف أخرى">مصاريف أخرى</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="exp-amount">المبلغ (ج.م) *</label>
+                        <input type="number" id="exp-amount" step="0.01" min="0.01" required placeholder="0.00">
+                    </div>
+                    <div class="form-group">
+                        <label for="exp-notes">البيان / تفاصيل المصروف</label>
+                        <input type="text" id="exp-notes" placeholder="مثال: فاتورة كهرباء شهر 7 أو شراء 10 كجم أكياس">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('expense-modal').classList.remove('active')">إلغاء</button>
+                    <button type="submit" class="btn btn-primary">حفظ المصروف</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 3. Waste Modal (تسجيل هالك وتالف) -->
+    <div class="modal-overlay" id="waste-modal">
+        <div class="modal-container modal-sm">
+            <div class="modal-header">
+                <h3><i class="ri-delete-bin-line text-warning"></i> إخصام وإسقاط بضاعة تالفة / هالك</h3>
+                <button class="btn-close-modal" onclick="document.getElementById('waste-modal').classList.remove('active')">&times;</button>
+            </div>
+            <form id="waste-form" onsubmit="window.handleWasteFormSubmit(event)">
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="waste-product-select">المنتج المراد إخصامه *</label>
+                        <select id="waste-product-select" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="waste-qty">الكمية التالفة *</label>
+                        <input type="number" id="waste-qty" min="1" value="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="waste-reason">سبب الإسقاط *</label>
+                        <select id="waste-reason" required>
+                            <option value="تالف / منتهي الصلاحية">تالف / منتهي الصلاحية</option>
+                            <option value="كسر / سكب / عبوة تالفة">كسر / سكب / عبوة تالفة</option>
+                            <option value="عجز مخزني">عجز مخزني / مفقود</option>
+                            <option value="سبب آخر">سبب آخر</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('waste-modal').classList.remove('active')">إلغاء</button>
+                    <button type="submit" class="btn btn-warning">إسقاط البضاعة والخسارة</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 4. Customer Debt Settlement Modal (سداد دين عميل) -->
+    <div class="modal-overlay" id="customer-settle-modal">
+        <div class="modal-container modal-sm">
+            <div class="modal-header">
+                <h3><i class="ri-wallet-line text-success"></i> سداد دفعة من دين العميل</h3>
+                <button class="btn-close-modal" onclick="document.getElementById('customer-settle-modal').classList.remove('active')">&times;</button>
+            </div>
+            <form id="customer-settle-form" onsubmit="window.handleCustomerSettleFormSubmit(event)">
+                <input type="hidden" id="cust-settle-id">
+                <div class="modal-body">
+                    <div style="margin-bottom: 15px; padding: 10px; background: var(--bg-muted); border-radius: 6px;">
+                        <div>العميل: <strong id="cust-settle-name">-</strong></div>
+                        <div style="margin-top: 5px;">الدين المستحق الحالي: <strong id="cust-settle-balance" class="text-danger">0.00 ج.م</strong></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="cust-settle-amount">المبلغ المُنقَد (دفعة السداد) *</label>
+                        <input type="number" id="cust-settle-amount" step="0.01" min="0.01" required placeholder="0.00">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('customer-settle-modal').classList.remove('active')">إلغاء</button>
+                    <button type="submit" class="btn btn-success">تسجيل السداد</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 5. Expiry Alert Report Modal (تقرير الصلاحية) -->
+    <div class="modal-overlay" id="expiry-modal">
+        <div class="modal-container" style="max-width: 850px; width: 92vw;">
+            <div class="modal-header">
+                <h3 style="display:flex; align-items:center; gap:8px; color:var(--danger);">
+                    <i class="ri-calendar-event-line"></i> تقرير تنبيهات انتهاء الصلاحية
+                </h3>
+                <button class="btn-close-modal" onclick="window.closeExpiryModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted" style="margin-bottom:16px;">قائمة بالمنتجات المنتهية أو القريبة من انتهاء الصلاحية خلال 30 يوماً لاتخاذ إجراء سريع:</p>
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>الباركود</th>
+                                <th>اسم المنتج</th>
+                                <th>الفئة</th>
+                                <th>الكمية بالمخزن</th>
+                                <th>تاريخ الصلاحية</th>
+                                <th>تكلفة الشراء</th>
+                                <th>حالة الصلاحية</th>
+                            </tr>
+                        </thead>
+                        <tbody id="expiry-table-body">
+                            <!-- Expiry items dynamically populated -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer" style="display:flex; justify-content:space-between; align-items:center; padding:16px 24px; border-top:1px solid var(--border-color);">
+                <span id="expiry-summary-text" style="font-weight:700; color:var(--text-secondary);">إجمالي التنبيهات: 0 منتج</span>
+                <button class="btn btn-secondary" onclick="window.closeExpiryModal()">إغلاق</button>
             </div>
         </div>
     </div>
