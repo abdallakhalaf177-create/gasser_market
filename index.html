@@ -931,7 +931,7 @@
                 <h3><i class="ri-time-line text-primary"></i> تقفيل الوردية اليومية للكاشير</h3>
                 <button class="btn-close-modal" onclick="document.getElementById('shift-modal').classList.remove('active')">&times;</button>
             </div>
-            <form id="shift-form" onsubmit="window.handleShiftClosingSubmit(event)">
+            <form id="shift-form">
                 <div class="modal-body">
                     <div style="background: var(--bg-muted); padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 13px;">
                         <div style="display:flex; justify-content:space-between; margin-bottom: 4px;">
@@ -989,7 +989,7 @@
                 <h3><i class="ri-wallet-3-line text-danger"></i> تسجيل مصروف تشغيلي جديد</h3>
                 <button class="btn-close-modal" onclick="document.getElementById('expense-modal').classList.remove('active')">&times;</button>
             </div>
-            <form id="expense-form" onsubmit="window.handleExpenseFormSubmit(event)">
+            <form id="expense-form">
                 <div class="modal-body">
                     <div class="form-group">
                         <label for="exp-category">فئة المصروف *</label>
@@ -1026,7 +1026,7 @@
                 <h3><i class="ri-delete-bin-line text-warning"></i> إخصام وإسقاط بضاعة تالفة / هالك</h3>
                 <button class="btn-close-modal" onclick="document.getElementById('waste-modal').classList.remove('active')">&times;</button>
             </div>
-            <form id="waste-form" onsubmit="window.handleWasteFormSubmit(event)">
+            <form id="waste-form">
                 <div class="modal-body">
                     <div class="form-group">
                         <label for="waste-product-select">المنتج المراد إخصامه *</label>
@@ -1061,7 +1061,7 @@
                 <h3><i class="ri-wallet-line text-success"></i> سداد دفعة من دين العميل</h3>
                 <button class="btn-close-modal" onclick="document.getElementById('customer-settle-modal').classList.remove('active')">&times;</button>
             </div>
-            <form id="customer-settle-form" onsubmit="window.handleCustomerSettleFormSubmit(event)">
+            <form id="customer-settle-form">
                 <input type="hidden" id="cust-settle-id">
                 <div class="modal-body">
                     <div style="margin-bottom: 15px; padding: 10px; background: var(--bg-muted); border-radius: 6px;">

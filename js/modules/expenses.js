@@ -48,6 +48,7 @@ export function handleExpenseFormSubmit(e) {
         amount,
         notes,
         date: new Date().toISOString(),
+        shiftId: state.currentShift ? state.currentShift.id : null,
         user: state.currentUser ? state.currentUser.name : "مدير"
     };
 
@@ -58,14 +59,18 @@ export function handleExpenseFormSubmit(e) {
     if (modal) modal.classList.remove("active");
     if (document.getElementById("expense-form")) document.getElementById("expense-form").reset();
 
+    const shiftNotice = (state.currentShift && state.currentShift.status === "active")
+        ? ` وخصمه من خزينة الوردية الحالية!`
+        : `!`;
+
     if (window.showToast) {
-        window.showToast(`✅ تم تسجيل مصروف "${category}" بمبلغ ${amount.toFixed(2)} ${state.settings.currency} وخصمه من الوردية الحالية!`, "success");
+        window.showToast(`✅ تم تسجيل مصروف "${category}" بمبلغ ${amount.toFixed(2)} ${state.settings.currency}${shiftNotice}`, "success");
     }
 
     renderExpenses();
 
-    // Also refresh reports if open
-    if (state.currentView === "reports" && window.refreshCurrentView) {
+    // Refresh active views (reports, shifts, dashboard)
+    if (window.refreshCurrentView) {
         window.refreshCurrentView();
     }
 }
@@ -110,5 +115,7 @@ export function deleteExpense(id) {
     state.expenses = (state.expenses || []).filter(e => e.id !== id);
     saveState();
     renderExpenses();
-    if (window.showToast) window.showToast("تم حذف المصروف بنجاح.", "warning");
+    if (window.showToast) window.showToast("تم حذف المصروف بنجاح وتحديث الحسابات.", "warning");
+    if (window.refreshCurrentView) window.refreshCurrentView();
 }
+

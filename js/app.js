@@ -13,40 +13,6 @@ import { openShiftModal, handleShiftClosingSubmit } from './modules/shifts.js';
 import { renderSettings } from './modules/settings.js';
 import { initAuth, renderUsers, handleUserFormSubmit, editUser, deleteUser } from './modules/users.js';
 
-// Expose user functions globally so inline onclick events work
-window.editUser = editUser;
-window.deleteUser = deleteUser;
-window.openLowStockReport = openLowStockReport;
-window.closeLowStockModal = closeLowStockModal;
-window.openExpiryReport = openExpiryReport;
-window.closeExpiryModal = closeExpiryModal;
-window.printLowStockReport = printLowStockReport;
-window.exportLowStockCSV = exportLowStockCSV;
-window.setReportRange = setReportRange;
-window.openCustomerModal = openCustomerModal;
-window.openCustomerSettleModal = openCustomerSettleModal;
-window.handleCustomerSettleFormSubmit = handleCustomerSettleFormSubmit;
-window.openSupplierModal = openSupplierModal;
-window.openPurchaseModal = openPurchaseModal;
-window.closeReceiptModal = closeReceiptModal;
-window.printReceipt = printReceipt;
-
-window.openExpenseModal = openExpenseModal;
-window.handleExpenseFormSubmit = handleExpenseFormSubmit;
-window.deleteExpense = deleteExpense;
-
-window.openWasteModal = openWasteModal;
-window.handleWasteFormSubmit = handleWasteFormSubmit;
-
-window.openShiftModal = openShiftModal;
-window.handleShiftClosingSubmit = handleShiftClosingSubmit;
-
-// Render functions needed in some inline event callbacks
-window.renderCustomers = renderCustomers;
-window.renderSuppliers = renderSuppliers;
-window.renderPurchases = renderPurchases;
-window.cancelTransaction = cancelTransaction;
-window.viewReceipt = viewReceipt;
 
 
 // Audio Feedback Synthesizer using Web Audio API (works offline)
@@ -120,9 +86,37 @@ window.deleteSupplier = deleteSupplier;
 window.cancelTransaction = cancelTransaction;
 window.showToast = showToast;
 window.playBeep = playBeep;
-window.refreshCurrentView = () => {
-    switchView(state.currentView);
-};
+window.refreshCurrentView = () => { switchView(state.currentView); };
+
+// Expose module functions called from HTML inline onclick (without window. prefix)
+// These MUST be on window to work inside ES Module scope
+window.openCustomerModal = openCustomerModal;
+window.openSupplierModal = openSupplierModal;
+window.openPurchaseModal = openPurchaseModal;
+window.openExpenseModal = openExpenseModal;
+window.openWasteModal = openWasteModal;
+window.openShiftModal = openShiftModal;
+window.handleShiftClosingSubmit = handleShiftClosingSubmit;
+window.handleExpenseFormSubmit = handleExpenseFormSubmit;
+window.handleWasteFormSubmit = handleWasteFormSubmit;
+window.openCustomerSettleModal = openCustomerSettleModal;
+window.handleCustomerSettleFormSubmit = handleCustomerSettleFormSubmit;
+window.closeReceiptModal = closeReceiptModal;
+window.printReceipt = printReceipt;
+window.openLowStockReport = openLowStockReport;
+window.closeLowStockModal = closeLowStockModal;
+window.openExpiryReport = openExpiryReport;
+window.closeExpiryModal = closeExpiryModal;
+window.printLowStockReport = printLowStockReport;
+window.exportLowStockCSV = exportLowStockCSV;
+window.setReportRange = setReportRange;
+window.deleteExpense = deleteExpense;
+window.editUser = editUser;
+window.deleteUser = deleteUser;
+window.renderCustomers = renderCustomers;
+window.renderSuppliers = renderSuppliers;
+window.renderPurchases = renderPurchases;
+
 
 document.addEventListener("DOMContentLoaded", async () => {
     await loadState();
@@ -423,56 +417,71 @@ function setupEventListeners() {
     });
 
     // Modals Open/Close Setup Helper
-    const setupModal = (modalId, openBtnId, closeBtnId, cancelBtnId) => {
+    // ── Modal Close Buttons (all modals that have close/cancel buttons) ──────
+    const closeModalBtns = [
+        ["close-product-modal",  "product-modal"],
+        ["cancel-product-modal", "product-modal"],
+        ["close-customer-modal", "customer-modal"],
+        ["cancel-customer-modal","customer-modal"],
+        ["close-supplier-modal", "supplier-modal"],
+        ["cancel-supplier-modal","supplier-modal"],
+        ["close-purchase-modal", "purchase-modal"],
+        ["cancel-purchase-modal","purchase-modal"],
+        ["close-settle-modal",   "settle-modal"],
+        ["cancel-settle-modal",  "settle-modal"],
+        ["close-user-modal",     "user-modal"],
+        ["cancel-user-modal",    "user-modal"],
+        ["close-barcode-modal",  "barcode-modal"],
+        ["cancel-barcode-modal", "barcode-modal"],
+        ["close-category-modal", "category-modal"],
+        ["close-camera-modal",   "camera-modal"],
+    ];
+    closeModalBtns.forEach(([btnId, modalId]) => {
+        const btn = document.getElementById(btnId);
         const modal = document.getElementById(modalId);
-        const openBtn = document.getElementById(openBtnId);
-        const closeBtn = document.getElementById(closeBtnId);
-        const cancelBtn = document.getElementById(cancelBtnId);
+        if (btn && modal) btn.addEventListener("click", () => modal.classList.remove("active"));
+    });
 
-        if (modal) {
-            if (openBtn) openBtn.addEventListener("click", () => modal.classList.add("active"));
-            if (closeBtn) closeBtn.addEventListener("click", () => modal.classList.remove("active"));
-            if (cancelBtn) cancelBtn.addEventListener("click", () => modal.classList.remove("active"));
-        }
-    };
-
-    setupModal("product-modal", "add-product-btn", "close-product-modal", "cancel-product-modal");
-    setupModal("customer-modal", "add-customer-btn", "close-customer-modal", "cancel-customer-modal");
-    setupModal("barcode-modal", "barcode-sim-btn", "close-barcode-modal", "cancel-barcode-modal");
-    setupModal("category-modal", "manage-categories-btn", "close-category-modal", null);
-    setupModal("supplier-modal", "add-supplier-trigger-btn", "close-supplier-modal", "cancel-supplier-modal");
-    setupModal("purchase-modal", "add-purchase-btn", "close-purchase-modal", "cancel-purchase-modal");
-    setupModal("settle-modal", null, "close-settle-modal", "cancel-settle-modal");
-    setupModal("user-modal", "add-user-btn", "close-user-modal", "cancel-user-modal");
-    setupModal("camera-modal", "btn-camera-scan", "close-camera-modal", null);
-
-    // Form resets when clicking "Add New" buttons
+    // ── Modal Open Buttons (call proper init functions, not just show modal) ─
     addListenerSafe("add-product-btn", "click", () => {
         const form = document.getElementById("product-form");
         if (form) form.reset();
         const idField = document.getElementById("product-id");
         if (idField) idField.value = "";
-        const modalTitle = document.getElementById("product-modal-title");
-        if (modalTitle) modalTitle.textContent = state.language === "ar" ? "إضافة منتج جديد" : "Add New Product";
+        const titleEl = document.getElementById("product-modal-title");
+        if (titleEl) titleEl.textContent = state.language === "ar" ? "إضافة منتج جديد" : "Add New Product";
+        const modal = document.getElementById("product-modal");
+        if (modal) modal.classList.add("active");
     });
 
-    addListenerSafe("add-customer-btn", "click", () => {
-        const form = document.getElementById("customer-form");
-        if (form) form.reset();
-        const idField = document.getElementById("customer-id");
-        if (idField) idField.value = "";
-        const modalTitle = document.getElementById("customer-modal-title");
-        if (modalTitle) modalTitle.textContent = state.language === "ar" ? "إضافة عميل جديد" : "Add New Customer";
+    addListenerSafe("add-customer-btn", "click", () => openCustomerModal());
+
+    addListenerSafe("add-supplier-trigger-btn", "click", () => openSupplierModal());
+
+    addListenerSafe("add-purchase-btn", "click", () => openPurchaseModal());
+
+    addListenerSafe("manage-categories-btn", "click", () => {
+        renderCategoriesList();
+        const modal = document.getElementById("category-modal");
+        if (modal) modal.classList.add("active");
     });
 
-    addListenerSafe("add-supplier-trigger-btn", "click", () => {
-        const form = document.getElementById("supplier-form");
-        if (form) form.reset();
-        const idField = document.getElementById("supplier-id");
-        if (idField) idField.value = "";
-        const modalTitle = document.getElementById("supplier-modal-title");
-        if (modalTitle) modalTitle.textContent = state.language === "ar" ? "إضافة مورد جديد" : "Add New Supplier";
+    addListenerSafe("barcode-sim-btn", "click", () => {
+        const modal = document.getElementById("barcode-modal");
+        if (modal) modal.classList.add("active");
     });
+
+    addListenerSafe("add-user-btn", "click", () => {
+        const form = document.getElementById("user-form");
+        if (form) form.reset();
+        const idField = document.getElementById("user-id");
+        if (idField) idField.value = "";
+        const titleEl = document.getElementById("user-modal-title");
+        if (titleEl) titleEl.textContent = state.language === "ar" ? "إضافة مستخدم جديد" : "Add New User";
+        const modal = document.getElementById("user-modal");
+        if (modal) modal.classList.add("active");
+    });
+
 
     // Close receipt modal
     addListenerSafe("close-receipt-modal", "click", () => {
@@ -500,16 +509,18 @@ function setupEventListeners() {
 
 
 
-    // Forms Form submits
-    addListenerSafe("product-form", "submit", handleProductFormSubmit);
-    addListenerSafe("customer-form", "submit", handleCustomerFormSubmit);
-    addListenerSafe("supplier-form", "submit", handleSupplierFormSubmit);
-    addListenerSafe("purchase-form", "submit", handlePurchaseFormSubmit);
-    addListenerSafe("add-category-form", "submit", handleCategoryFormSubmit);
-    addListenerSafe("expense-form", "submit", handleExpenseFormSubmit);
-    addListenerSafe("waste-form", "submit", handleWasteFormSubmit);
-    addListenerSafe("shift-form", "submit", handleShiftClosingSubmit);
+    // ── Form Submits ────────────────────────────────────────────────────────
+    addListenerSafe("product-form",         "submit", handleProductFormSubmit);
+    addListenerSafe("customer-form",        "submit", handleCustomerFormSubmit);
+    addListenerSafe("supplier-form",        "submit", handleSupplierFormSubmit);
+    addListenerSafe("purchase-form",        "submit", handlePurchaseFormSubmit);
+    addListenerSafe("add-category-form",    "submit", handleCategoryFormSubmit);
+    addListenerSafe("expense-form",         "submit", handleExpenseFormSubmit);
+    addListenerSafe("waste-form",           "submit", handleWasteFormSubmit);
+    addListenerSafe("shift-form",           "submit", handleShiftClosingSubmit);
     addListenerSafe("customer-settle-form", "submit", handleCustomerSettleFormSubmit);
+    addListenerSafe("settle-form",          "submit", handleSettleFormSubmit);
+    addListenerSafe("user-form",            "submit", handleUserFormSubmit);
 
     // Generate Barcode Button
     addListenerSafe("gen-barcode-btn", "click", () => {
@@ -576,9 +587,6 @@ function setupEventListeners() {
     addListenerSafe("inventory-search-input", "input", renderInventoryTable);
     addListenerSafe("inventory-category-filter", "change", renderInventoryTable);
     addListenerSafe("inventory-stock-filter", "change", renderInventoryTable);
-
-    // User form submit (handled via addListenerSafe above)
-    addListenerSafe("user-form", "submit", handleUserFormSubmit);
 
     addListenerSafe('users-search', 'input', renderUsers);
 

@@ -1,10 +1,10 @@
 import { state, saveState } from '../state.js';
 
 export function initAuth() {
-    // Migration/Clear local storage once to prevent interface issues
-    if (!localStorage.getItem('supermarket_migration_v4')) {
+    // Migration v5 — clear once if schema outdated to ensure fresh start
+    if (!localStorage.getItem('supermarket_migration_v5')) {
         localStorage.clear();
-        localStorage.setItem('supermarket_migration_v4', 'true');
+        localStorage.setItem('supermarket_migration_v5', 'true');
         window.location.reload();
         return;
     }
@@ -76,7 +76,7 @@ export function renderUsers() {
     gridContainer.innerHTML = '';
 
     const searchTerm = (document.getElementById('users-search')?.value || '').toLowerCase();
-    const filtered = state.users.filter(u =>
+    const filtered = (state.users || []).filter(u =>
         (u.name && u.name.toLowerCase().includes(searchTerm)) ||
         (u.username && u.username.toLowerCase().includes(searchTerm)) ||
         (u.email && u.email.toLowerCase().includes(searchTerm))

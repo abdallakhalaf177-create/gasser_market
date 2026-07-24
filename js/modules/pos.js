@@ -327,7 +327,10 @@ export function handleCheckout() {
     if (window.showToast) {
         window.showToast(`✅ تمت العملية بنجاح! ${methodLabel}`, "success");
     }
+
+    if (window.refreshCurrentView) window.refreshCurrentView();
 }
+
 
 export function showReceipt(t) {
     const modal = document.getElementById("receipt-modal");

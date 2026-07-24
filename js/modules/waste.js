@@ -109,7 +109,7 @@ export function handleWasteFormSubmit(e) {
 
     renderWaste();
 
-    if (state.currentView === "reports" && window.refreshCurrentView) {
+    if (window.refreshCurrentView) {
         window.refreshCurrentView();
     }
 }

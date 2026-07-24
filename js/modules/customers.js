@@ -227,4 +227,6 @@ export function handleCustomerSettleFormSubmit(e) {
     }
 
     renderCustomers();
+    if (window.refreshCurrentView) window.refreshCurrentView();
 }
+

@@ -284,6 +284,7 @@ export function handlePurchaseFormSubmit(e) {
     }
 
     renderSuppliers();
+    if (window.refreshCurrentView) window.refreshCurrentView();
 }
 
 export function openSettleModal(id) {
@@ -362,7 +363,9 @@ export function handleSettleFormSubmit(e) {
     }
 
     renderSuppliers();
+    if (window.refreshCurrentView) window.refreshCurrentView();
 }
+
 
 export function renderPurchases() {
     const tbody = document.getElementById("purchases-table-body");
