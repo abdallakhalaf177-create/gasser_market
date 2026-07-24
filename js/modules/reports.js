@@ -17,7 +17,7 @@ export function renderReportsData(range = "today") {
     const todayStr = now.toISOString().split('T')[0];
 
     // Filter transactions, expenses, and waste based on range
-    let filteredTxns = [...state.transactions];
+    let filteredTxns = [...(state.transactions || [])];
     let filteredExpenses = [...(state.expenses || [])];
     let filteredWaste = [...(state.wastes || [])];
 
@@ -52,12 +52,11 @@ export function renderReportsData(range = "today") {
     const netProfit = grossProfit - (totalExpenses + totalWaste);
     const totalOrders = validTxns.length;
 
-    // Low stock count calculation using product minStock or default 5
-    const lowStockItems = state.products.filter(p => Number(p.stock) <= (Number(p.minStock) || 5));
+    const lowStockItems = (state.products || []).filter(p => Number(p.stock) <= (Number(p.minStock) || 5));
     const lowStockCount = lowStockItems.length;
 
     // Near Expiration Items (within 30 days or expired)
-    const nearExpiryItems = state.products.filter(p => p.expiry && (new Date(p.expiry) <= new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)));
+    const nearExpiryItems = (state.products || []).filter(p => p.expiry && (new Date(p.expiry) <= new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)));
     const nearExpiryCount = nearExpiryItems.length;
 
     // Update Overview Stats & P&L Cards
@@ -168,7 +167,9 @@ function renderSalesHistoryTable(filteredTxns) {
 
     [...filteredTxns].reverse().forEach(t => {
         const row = document.createElement("tr");
-        const customerName = t.customerId === "walkin" ? (state.language === "ar" ? "عميل سفري" : "Walk-in") : (state.customers.find(c => c.id === t.customerId)?.name || t.customerId);
+        const customerName = t.customerId === "walkin"
+            ? (state.language === "ar" ? "عميل سفري" : "Walk-in")
+            : ((state.customers || []).find(c => c.id === t.customerId)?.name || t.customerId);
         
         const isCancelled = t.status === "cancelled";
         const rowStyle = isCancelled ? `style="opacity: 0.65;"` : "";
@@ -223,7 +224,7 @@ export function openLowStockReport() {
     if (!modal || !tbody) return;
 
     tbody.innerHTML = "";
-    const lowStockItems = state.products.filter(p => Number(p.stock) <= (Number(p.minStock) || 5));
+    const lowStockItems = (state.products || []).filter(p => Number(p.stock) <= (Number(p.minStock) || 5));
 
     if (lowStockItems.length === 0) {
         tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-success); font-weight:700;">ممتاز! جميع المنتجات متوفرة ولا توجد نواقص بالمخزون حالياً.</td></tr>`;
@@ -269,7 +270,7 @@ export function openExpiryReport() {
 
     tbody.innerHTML = "";
     const now = new Date();
-    const expiryItems = state.products.filter(p => p.expiry && (new Date(p.expiry) <= new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)));
+    const expiryItems = (state.products || []).filter(p => p.expiry && (new Date(p.expiry) <= new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)));
 
     if (expiryItems.length === 0) {
         tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-success); font-weight:700;">ممتاز! لا توجد منتجات منتهية أو قريبة من انتهاء الصلاحية خلال الـ 30 يوماً القادمة.</td></tr>`;
@@ -310,7 +311,7 @@ export function printLowStockReport() {
 }
 
 export function exportLowStockCSV() {
-    const lowStockItems = state.products.filter(p => Number(p.stock) <= (Number(p.minStock) || 5));
+    const lowStockItems = (state.products || []).filter(p => Number(p.stock) <= (Number(p.minStock) || 5));
     if (lowStockItems.length === 0) {
         alert("لا توجد نواقص لتصديرها.");
         return;

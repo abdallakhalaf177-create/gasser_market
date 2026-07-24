@@ -11,18 +11,25 @@ export function renderInventoryTable() {
     if (!tbody) return;
     tbody.innerHTML = "";
 
-    const searchQuery = document.getElementById("inventory-search-input").value.toLowerCase();
-    const catFilter = document.getElementById("inventory-category-filter").value;
-    const stockFilter = document.getElementById("inventory-stock-filter").value;
+    const searchInput = document.getElementById("inventory-search-input");
+    const catFilterEl = document.getElementById("inventory-category-filter");
+    const stockFilterEl = document.getElementById("inventory-stock-filter");
 
-    const filtered = state.products.filter(p => {
-        const matchesSearch = p.name.toLowerCase().includes(searchQuery) || p.barcode.includes(searchQuery) || p.category.toLowerCase().includes(searchQuery);
+    const searchQuery = searchInput ? searchInput.value.toLowerCase() : "";
+    const catFilter = catFilterEl ? catFilterEl.value : "all";
+    const stockFilter = stockFilterEl ? stockFilterEl.value : "all";
+
+    const products = state.products || [];
+    const filtered = products.filter(p => {
+        const matchesSearch = (p.name || "").toLowerCase().includes(searchQuery) ||
+            (p.barcode || "").includes(searchQuery) ||
+            (p.category || "").toLowerCase().includes(searchQuery);
         const matchesCat = catFilter === "all" || p.category === catFilter;
 
         let matchesStock = true;
-        if (stockFilter === "instock") matchesStock = p.stock > state.settings.lowStockLimit;
-        else if (stockFilter === "lowstock") matchesStock = p.stock > 0 && p.stock <= state.settings.lowStockLimit;
-        else if (stockFilter === "outstock") matchesStock = p.stock === 0;
+        if (stockFilter === "instock") matchesStock = p.stock > (state.settings.lowStockLimit || 10);
+        else if (stockFilter === "lowstock") matchesStock = p.stock > 0 && p.stock <= (state.settings.lowStockLimit || 10);
+        else if (stockFilter === "outstock" || stockFilter === "outofstock") matchesStock = p.stock === 0;
 
         return matchesSearch && matchesCat && matchesStock;
     });

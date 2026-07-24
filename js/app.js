@@ -41,6 +41,14 @@ window.handleWasteFormSubmit = handleWasteFormSubmit;
 window.openShiftModal = openShiftModal;
 window.handleShiftClosingSubmit = handleShiftClosingSubmit;
 
+// Render functions needed in some inline event callbacks
+window.renderCustomers = renderCustomers;
+window.renderSuppliers = renderSuppliers;
+window.renderPurchases = renderPurchases;
+window.cancelTransaction = cancelTransaction;
+window.viewReceipt = viewReceipt;
+
+
 // Audio Feedback Synthesizer using Web Audio API (works offline)
 export function playBeep(frequency = 440, duration = 0.1) {
     try {
@@ -498,6 +506,10 @@ function setupEventListeners() {
     addListenerSafe("supplier-form", "submit", handleSupplierFormSubmit);
     addListenerSafe("purchase-form", "submit", handlePurchaseFormSubmit);
     addListenerSafe("add-category-form", "submit", handleCategoryFormSubmit);
+    addListenerSafe("expense-form", "submit", handleExpenseFormSubmit);
+    addListenerSafe("waste-form", "submit", handleWasteFormSubmit);
+    addListenerSafe("shift-form", "submit", handleShiftClosingSubmit);
+    addListenerSafe("customer-settle-form", "submit", handleCustomerSettleFormSubmit);
 
     // Generate Barcode Button
     addListenerSafe("gen-barcode-btn", "click", () => {
@@ -522,22 +534,51 @@ function setupEventListeners() {
     addListenerSafe("cart-discount", "input", updateCartSummary);
     addListenerSafe("checkout-btn", "click", handleCheckout);
 
-    // Supplier search
+    // Purchase payment type toggle (show partial paid amount field)
+    addListenerSafe("pur-payment", "change", () => {
+        const paymentSel = document.getElementById("pur-payment");
+        const wrapper = document.getElementById("pur-paid-amount-wrapper");
+        if (!paymentSel || !wrapper) return;
+        if (paymentSel.value === "partial") {
+            wrapper.style.display = "block";
+            // Auto-compute total to help user
+            const qty = parseInt(document.getElementById("pur-qty")?.value) || 1;
+            const cost = parseFloat(document.getElementById("pur-cost")?.value) || 0;
+            const totalCost = qty * cost;
+            const paidInput = document.getElementById("pur-paid-amount");
+            if (paidInput) paidInput.max = totalCost;
+        } else {
+            wrapper.style.display = "none";
+        }
+    });
+    // Also update total cap when qty or cost changes
+    ["pur-qty", "pur-cost"].forEach(id => {
+        addListenerSafe(id, "input", () => {
+            const paymentSel = document.getElementById("pur-payment");
+            if (paymentSel && paymentSel.value === "partial") {
+                const qty = parseInt(document.getElementById("pur-qty")?.value) || 1;
+                const cost = parseFloat(document.getElementById("pur-cost")?.value) || 0;
+                const paidInput = document.getElementById("pur-paid-amount");
+                if (paidInput) paidInput.max = qty * cost;
+            }
+        });
+    });
+
     addListenerSafe("supplier-search-input", "input", renderSuppliersTable);
+
+    // Settle Supplier Form (also wired via HTML onsubmit but add JS listener as safety)
+    addListenerSafe("settle-form", "submit", handleSettleFormSubmit);
+
+    // Customer search
+    addListenerSafe("customer-search-input", "input", renderCustomers);
 
     // Inventory Search & Filters
     addListenerSafe("inventory-search-input", "input", renderInventoryTable);
     addListenerSafe("inventory-category-filter", "change", renderInventoryTable);
     addListenerSafe("inventory-stock-filter", "change", renderInventoryTable);
 
-    // Settings & Users
-    if (document.getElementById('settle-form')) {
-        document.getElementById('settle-form').addEventListener('submit', handleSettleFormSubmit);
-    }
-
-    if (document.getElementById('user-form')) {
-        document.getElementById('user-form').addEventListener('submit', handleUserFormSubmit);
-    }
+    // User form submit (handled via addListenerSafe above)
+    addListenerSafe("user-form", "submit", handleUserFormSubmit);
 
     addListenerSafe('users-search', 'input', renderUsers);
 
