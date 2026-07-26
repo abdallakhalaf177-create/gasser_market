@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gaser Market | نظام الكاشير وإدارة المبيعات المتكامل</title>
+    <title>Gaser Market | نظام الكاشير</title>
     <!-- PWA Manifest & Meta Tags -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1e293b">
@@ -68,7 +68,7 @@
             <button class="nav-btn" data-view="users-view">
                 <i class="ri-user-settings-line"></i> المستخدمين
             </button>
-            <button class="nav-btn" id="open-shift-modal-btn" onclick="window.openShiftModal()" style="background: rgba(99,102,241,0.15); border:1px solid var(--primary);">
+            <button class="nav-btn" id="open-shift-modal-btn" onclick="window.openShiftModal()" style="background: rgba(99,102,241,0.2); border:1px solid var(--primary);">
                 <i class="ri-time-line"></i> الوردية
             </button>
         </nav>
@@ -79,10 +79,13 @@
             <button id="lang-toggle-btn" class="btn btn-sm btn-secondary" title="Language Toggle" style="padding: 6px 10px; font-weight:700;">
                 EN
             </button>
-            <div id="live-time" class="live-time-badge" style="display:flex; align-items:center; gap:6px; padding:6px 12px; background:var(--bg-input); border-radius:var(--radius-sm); font-size:13px; font-weight:700; color:var(--text-secondary);">
+            <div id="live-time" class="live-time-badge" style="display:flex; align-items:center; gap:6px; padding:6px 12px; background:var(--bg-input); border-radius:var(--radius-sm); font-size:13px; font-weight:700; color:#ffffff;">
                 <i class="ri-time-line text-primary"></i> <span>--:--:--</span>
             </div>
-            <span id="current-user-display" class="user-badge"><i class="ri-user-line"></i> أدمن</span>
+            <div id="header-shift-badge" class="header-shift-badge" style="display:flex; align-items:center; gap:6px; padding:6px 12px; background:rgba(16,185,129,0.15); border:1px solid var(--success); border-radius:var(--radius-sm); font-size:12px; font-weight:700; color:var(--success);">
+                <i class="ri-shield-user-line"></i> <span id="header-shift-cashier">الكاشير: أدمن</span>
+            </div>
+            <span id="current-user-display" class="user-badge" style="color:#ffffff; font-weight:800;"><i class="ri-user-line"></i> أدمن</span>
             <button id="logout-btn" class="btn btn-sm btn-danger" style="display:none;"><i class="ri-logout-box-r-line"></i> خروج</button>
             <button id="mobile-menu-btn" class="mobile-menu-btn" title="القائمة"><i class="ri-menu-3-line"></i></button>
         </div>
@@ -197,14 +200,14 @@
         <section id="pos-view" class="view-section">
             <div class="pos-invoice-container">
                 
-                <!-- Top controls: Fast Search & Settings -->
+                <!-- Top controls: Prominent Fast Barcode Search & Customer -->
                 <div class="pos-invoice-header">
                     <div class="search-autocomplete-wrapper">
-                        <div class="search-bar-container">
-                            <i class="ri-search-line search-icon"></i>
-                            <input type="text" id="barcode-input" placeholder="ابحث باسم المنتج أو امسح الباركود للإضافة الفورية للمبيعات..." autofocus autocomplete="off">
-                            <button id="btn-camera-scan" class="btn btn-secondary" title="مسح بالكاميرا">
-                                <i class="ri-camera-line"></i>
+                        <div class="search-bar-container prominent-barcode-search">
+                            <i class="ri-barcode-line search-icon"></i>
+                            <input type="text" id="barcode-input" placeholder="امسح الباركود أو ابحث باسم المنتج..." autofocus autocomplete="off">
+                            <button id="btn-camera-scan" class="btn btn-primary" title="مسح الباركود بالكاميرا">
+                                <i class="ri-camera-line"></i> مسح بالكاميرا
                             </button>
                         </div>
                         <!-- Autocomplete Suggestions Dropdown -->
@@ -219,25 +222,6 @@
                                 <option value="walkin">عميل سفري (نقدي)</option>
                             </select>
                         </div>
-                        
-                        <!-- Payment Method Selector -->
-                        <div class="control-group">
-                            <label><i class="ri-bank-card-line"></i> طريقة الدفع:</label>
-                            <div class="payment-methods-group">
-                                <label class="payment-method active">
-                                    <input type="radio" name="payment-method" value="cash" checked style="display:none;">
-                                    <span>كاش</span>
-                                </label>
-                                <label class="payment-method">
-                                    <input type="radio" name="payment-method" value="card" style="display:none;">
-                                    <span>فيزا</span>
-                                </label>
-                                <label class="payment-method">
-                                    <input type="radio" name="payment-method" value="credit" style="display:none;">
-                                    <span>آجل</span>
-                                </label>
-                            </div>
-                        </div>
                     </div>
                 </div>
 
@@ -247,7 +231,7 @@
                         <table class="cart-table">
                             <thead>
                                 <tr>
-                                    <th>المنتج</th>
+                                    <th>المنتج والباركود</th>
                                     <th>سعر الوحدة</th>
                                     <th style="width: 160px; text-align: center;">الكمية</th>
                                     <th>الإجمالي</th>
@@ -286,11 +270,31 @@
                         <div id="pos-shift-status" class="shift-badge shift-closed" style="cursor:pointer;">
                             <i class="ri-lock-line"></i> وردية مغلقة — اضغط لفتح وردية جديدة
                         </div>
+                        
+                        <!-- Payment Method Selector (Relocated to bottom action bar for logical checkout workflow) -->
+                        <div class="payment-selector-bottom">
+                            <span class="payment-label"><i class="ri-bank-card-line"></i> طريقة الدفع:</span>
+                            <div class="payment-methods-group">
+                                <label class="payment-method active">
+                                    <input type="radio" name="payment-method" value="cash" checked style="display:none;">
+                                    <span>كاش</span>
+                                </label>
+                                <label class="payment-method">
+                                    <input type="radio" name="payment-method" value="card" style="display:none;">
+                                    <span>فيزا</span>
+                                </label>
+                                <label class="payment-method">
+                                    <input type="radio" name="payment-method" value="credit" style="display:none;">
+                                    <span>آجل</span>
+                                </label>
+                            </div>
+                        </div>
+
                         <button id="clear-cart-btn" class="btn btn-lg btn-danger-outline">
                             <i class="ri-delete-bin-5-line"></i> تفريغ السلة (F4)
                         </button>
                         <button id="checkout-btn" class="btn btn-lg btn-success">
-                            <i class="ri-check-double-line"></i> إنهاء وطباعة الفاتورة
+                            <i class="ri-check-double-line"></i> إنهاء / طباعة الفاتورة
                         </button>
                     </div>
                 </div>

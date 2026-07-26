@@ -420,8 +420,10 @@ function renderPOS() {
     renderCart();
 
     const shiftBadge = document.getElementById("pos-shift-status");
+    const headerShiftCashier = document.getElementById("header-shift-cashier");
+    const headerShiftBadge = document.getElementById("header-shift-badge");
+    const isActive = state.currentShift && state.currentShift.status === "active";
     if (shiftBadge) {
-        const isActive = state.currentShift && state.currentShift.status === "active";
         if (isActive) {
             shiftBadge.innerHTML = `<i class="ri-time-line"></i> وردية مفتوحة — الكاشير: ${state.currentShift.cashierName || 'الكاشير'}`;
             shiftBadge.className = "shift-badge shift-open";
@@ -430,6 +432,15 @@ function renderPOS() {
             shiftBadge.className = "shift-badge shift-closed";
         }
         shiftBadge.onclick = () => openShiftModal();
+    }
+    if (headerShiftCashier) {
+        const cashierName = state.currentUser ? (state.currentUser.name || state.currentUser.username) : (state.currentShift ? (state.currentShift.cashierName || 'أدمن') : 'أدمن');
+        headerShiftCashier.textContent = `الكاشير: ${cashierName}`;
+    }
+    if (headerShiftBadge) {
+        headerShiftBadge.style.borderColor = isActive ? "var(--success)" : "var(--warning)";
+        headerShiftBadge.style.background = isActive ? "rgba(16,185,129,0.15)" : "rgba(245,158,11,0.15)";
+        headerShiftBadge.style.color = isActive ? "var(--success)" : "var(--warning)";
     }
 
     const posSearch = document.getElementById("barcode-input");

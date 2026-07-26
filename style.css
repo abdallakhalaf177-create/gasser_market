@@ -1737,111 +1737,126 @@ html[lang="en"] .search-bar-container input {
 }
 
 /* ==========================================================================
-   HEADER NAVIGATION STYLES
+   HEADER NAVIGATION & LAYOUT STYLES (UI/UX ENHANCEMENTS)
    ========================================================================== */
+html, body {
+    height: 100vh !important;
+    overflow: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
 .main-header {
     position: sticky;
     top: 0;
     z-index: 1000;
-    height: 70px;
-    background-color: var(--bg-card);
+    height: 64px;
+    background-color: #1e293b;
     border-bottom: 1px solid var(--border-color);
-    padding: 0 32px;
+    padding: 0 24px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    box-shadow: var(--shadow-sm);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
     backdrop-filter: blur(8px);
 }
 
 .logo-area {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
 }
 
 .logo-area .logo-icon {
-    font-size: 24px;
-    color: var(--primary);
-    filter: drop-shadow(0 0 8px var(--primary));
+    font-size: 26px;
+    color: #6366f1;
+    filter: drop-shadow(0 0 10px rgba(99, 102, 241, 0.6));
 }
 
 .logo-area h2 {
-    font-size: 18px;
-    font-weight: 800;
-    color: var(--text-primary);
+    font-size: 19px;
+    font-weight: 900;
+    color: #ffffff;
+    letter-spacing: -0.3px;
     margin: 0;
 }
 
 .nav-links {
     display: flex;
-    gap: 10px;
+    gap: 6px;
     align-items: center;
+    overflow-x: auto;
+    padding: 4px 0;
 }
 
 .nav-btn {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 10px 18px;
+    gap: 7px;
+    padding: 8px 16px;
     border-radius: var(--radius-full);
-    font-weight: 700;
-    font-size: 13.5px;
+    font-weight: 800;
+    font-size: 14.5px;
     background-color: transparent;
     border: 1px solid transparent;
-    color: var(--text-secondary);
+    color: #ffffff !important; /* High contrast crisp white for shop lighting */
     cursor: pointer;
-    transition: all var(--transition-fast);
+    white-space: nowrap;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .nav-btn i {
-    font-size: 16px;
+    font-size: 17px;
 }
 
 .nav-btn:hover {
-    background-color: var(--bg-hover);
-    color: var(--text-primary);
+    background-color: rgba(255, 255, 255, 0.12);
+    color: #ffffff !important;
+    transform: translateY(-1px);
 }
 
 .nav-btn.active {
-    background-color: var(--primary);
-    color: white;
-    box-shadow: var(--shadow-glow);
+    background: linear-gradient(135deg, #6366f1, #4f46e5) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 14px rgba(99, 102, 241, 0.45);
+    border-color: rgba(255, 255, 255, 0.2);
 }
 
 .header-actions {
     display: flex;
     align-items: center;
     gap: 12px;
+    flex-shrink: 0;
 }
 
 .user-badge {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 8px 16px;
+    padding: 6px 14px;
     background-color: var(--bg-input);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-full);
     font-size: 13px;
-    font-weight: 700;
-    color: var(--text-primary);
+    font-weight: 800;
+    color: #ffffff !important;
 }
 
 .main-container {
-    padding: 32px;
+    padding: 20px 24px;
     background-color: var(--bg-app);
-    min-height: calc(100vh - 70px);
+    height: calc(100vh - 64px) !important;
     width: 100%;
     overflow-y: auto;
     overflow-x: hidden;
+    box-sizing: border-border;
 }
 
 /* ==========================================================================
    DATA TABLES & WRAPPERS
    ========================================================================== */
 .table-wrapper {
-    max-height: calc(100vh - 220px);
+    max-height: calc(100vh - 240px);
     overflow-y: auto;
     overflow-x: hidden;
     border: 1px solid var(--border-color);
@@ -1871,8 +1886,8 @@ html[lang="en"] .data-table {
 
 .data-table th {
     background-color: var(--bg-card);
-    color: var(--text-secondary);
-    font-weight: 700;
+    color: #ffffff;
+    font-weight: 800;
     position: sticky;
     top: 0;
     z-index: 10;
@@ -1918,7 +1933,7 @@ select {
 }
 
 /* ==========================================================================
-   AUDIT FIXES: INPUTS, POS COMPACT ROW, FILTERS & SCROLL
+   AUDIT & POS WORKFLOW RE-ENGINEERING
    ========================================================================== */
 
 /* 1. Inputs & Selects Dark Theme Formatting */
@@ -1929,13 +1944,13 @@ textarea,
 .form-group input,
 .form-group select {
     background-color: var(--bg-input) !important;
-    color: var(--text-primary) !important;
+    color: #ffffff !important;
     border: 1px solid var(--border-color) !important;
     border-radius: var(--radius-sm) !important;
     padding: 10px 14px !important;
     font-family: var(--font-ar) !important;
     font-size: 14px !important;
-    font-weight: 600 !important;
+    font-weight: 700 !important;
     outline: none !important;
     transition: all var(--transition-fast) !important;
 }
@@ -1953,43 +1968,82 @@ textarea:focus,
 
 select option {
     background-color: var(--bg-card) !important;
-    color: var(--text-primary) !important;
+    color: #ffffff !important;
     padding: 10px 14px !important;
 }
 
-/* 2. POS Compact Row Layout */
+/* 2. POS Header & Prominent Barcode Search */
+.pos-invoice-container {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    height: 100%;
+}
+
 .pos-invoice-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
-    padding: 8px 12px;
-    margin-bottom: 8px;
+    gap: 16px;
+    padding: 12px 18px;
     background-color: var(--bg-card);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    box-shadow: var(--shadow-sm);
 }
 
 .pos-invoice-header .search-autocomplete-wrapper {
-    flex: 1 1 320px;
+    flex: 1 1 70%;
 }
 
-.search-bar-container {
+.prominent-barcode-search {
+    position: relative;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     background-color: var(--bg-input);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-sm);
-    padding: 2px 10px;
+    border: 2px solid #6366f1 !important;
+    border-radius: var(--radius-md) !important;
+    padding: 2px 12px;
+    box-shadow: 0 0 16px rgba(99, 102, 241, 0.25);
+    transition: all 0.2s ease;
 }
 
-.search-bar-container input {
+.prominent-barcode-search:focus-within {
+    border-color: #8b5cf6 !important;
+    box-shadow: 0 0 22px rgba(139, 92, 246, 0.4) !important;
+}
+
+.prominent-barcode-search i.search-icon {
+    font-size: 24px;
+    color: #6366f1;
+}
+
+.prominent-barcode-search input#barcode-input {
     border: none !important;
     background: transparent !important;
-    height: 38px;
+    height: 48px !important;
+    font-size: 16px !important;
+    font-weight: 800 !important;
+    color: #ffffff !important;
     padding: 0 !important;
+    box-shadow: none !important;
+}
+
+.prominent-barcode-search input#barcode-input::placeholder {
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 14px;
+}
+
+#btn-camera-scan {
+    height: 44px;
+    padding: 0 16px;
+    font-size: 13.5px;
+    font-weight: 800;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 .invoice-header-controls {
@@ -1997,55 +2051,151 @@ select option {
     align-items: center;
     gap: 12px;
     margin: 0;
+    flex-shrink: 0;
 }
 
 .invoice-header-controls .control-group {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     margin: 0;
 }
 
 .invoice-header-controls .control-group label {
     margin: 0;
     white-space: nowrap;
-    font-size: 12.5px;
-    font-weight: 700;
-    color: var(--text-secondary);
+    font-size: 13.5px;
+    font-weight: 800;
+    color: #ffffff;
 }
 
-.invoice-header-controls select {
-    height: 38px !important;
-    padding: 4px 10px !important;
-    font-size: 13px !important;
+.invoice-header-controls select#cart-customer-select {
+    height: 44px !important;
+    padding: 4px 14px !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    min-width: 180px;
+}
+
+/* 3. Expanded Cart Table Area */
+.invoice-body-wrapper {
+    flex: 1 1 auto;
+    min-height: 320px;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+}
+
+.cart-table-wrapper {
+    flex: 1 1 auto;
+    height: 100%;
+    max-height: calc(100vh - 310px) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+}
+
+.cart-table th {
+    background-color: var(--bg-sidebar) !important;
+    color: #ffffff !important;
+    font-weight: 800 !important;
+    font-size: 14px !important;
+    padding: 14px 18px !important;
+}
+
+.cart-table td {
+    padding: 14px 18px !important;
+    font-size: 14.5px !important;
+    font-weight: 700 !important;
+}
+
+/* 4. Bottom Invoice Summary & Action Bar with Payment Selector */
+.invoice-footer-wrapper {
+    padding: 16px 20px;
+    gap: 14px;
+}
+
+.payment-selector-bottom {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.payment-selector-bottom .payment-label {
+    font-size: 13.5px;
+    font-weight: 800;
+    color: #ffffff;
+    white-space: nowrap;
 }
 
 .payment-methods-group {
     display: flex;
-    gap: 4px;
+    gap: 6px;
+    background-color: var(--bg-input);
+    border: 1.5px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 4px;
 }
 
 .payment-method {
-    padding: 6px 12px;
-    font-size: 12px;
-    border-radius: 6px;
-    background-color: var(--bg-input);
-    border: 1px solid var(--border-color);
+    padding: 8px 18px;
+    font-size: 13.5px;
+    font-weight: 800;
+    border-radius: var(--radius-sm);
+    background-color: transparent;
+    border: 1px solid transparent;
     color: var(--text-secondary);
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.payment-method:hover {
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.08);
 }
 
 .payment-method.active {
-    background-color: var(--primary);
-    color: white;
-    border-color: var(--primary);
+    background: linear-gradient(135deg, #6366f1, #4f46e5) !important;
+    color: #ffffff !important;
+    border-color: #6366f1 !important;
+    box-shadow: 0 4px 14px rgba(99, 102, 241, 0.45) !important;
+    transform: scale(1.03);
 }
 
-.cart-table-wrapper {
-    max-height: calc(100vh - 270px) !important;
-    overflow-y: auto !important;
-    overflow-x: hidden !important;
+.invoice-actions-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+#clear-cart-btn {
+    height: 48px;
+    font-size: 14.5px;
+    font-weight: 700;
+}
+
+#checkout-btn {
+    height: 48px !important;
+    font-size: 16px !important;
+    font-weight: 900 !important;
+    background: linear-gradient(135deg, #10b981, #059669) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 16px rgba(16, 185, 129, 0.4) !important;
+    border: none !important;
+}
+
+#checkout-btn:hover {
+    background: linear-gradient(135deg, #059669, #047857) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5) !important;
 }
 
 /* 3. Inventory Filters Flex Row */
