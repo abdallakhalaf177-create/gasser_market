@@ -109,6 +109,9 @@ export function renderSuppliersTable() {
             <td>${s.lastUpdated || '—'}</td>
             <td>
                 <div style="display:flex;gap:4px;flex-wrap:wrap;">
+                    <button class="btn btn-info btn-sm" onclick="window.openSupplierHistoryModal('${s.id}')" title="كشف حساب وسجل التعاملات (Timeline)">
+                        <i class="ri-history-line"></i>
+                    </button>
                     <button class="btn btn-secondary btn-sm" onclick="window.editSupplier('${s.id}')" title="تعديل">
                         <i class="ri-edit-line"></i>
                     </button>

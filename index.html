@@ -890,32 +890,82 @@
         </div>
     </div>
 
-    <!-- Purchase Modal -->
+    <!-- Purchase Modal (تسجيل فاتورة مشتريات) -->
     <div class="modal-overlay" id="purchase-modal">
-        <div class="modal-container">
+        <div class="modal-container" style="max-width: 600px; width: 92vw;">
             <div class="modal-header">
-                <h3>تسجيل فاتورة توريد (مشتريات)</h3>
+                <h3><i class="ri-shopping-bag-line text-primary"></i> تسجيل فاتورة توريد (مشتريات)</h3>
                 <button class="btn-close-modal" id="close-purchase-modal">&times;</button>
             </div>
             <form id="purchase-form">
-                <div class="modal-body">
-                    <div class="form-group">
+                <div class="modal-body" style="max-height: 75vh; overflow-y: auto;">
+                    
+                    <!-- Supplier & Product Selectors -->
+                    <div class="form-group" style="margin-bottom: 14px;">
                         <label for="pur-supplier">المورد *</label>
                         <select id="pur-supplier" required></select>
                     </div>
-                    <div class="form-group">
+                    <div class="form-group" style="margin-bottom: 14px;">
                         <label for="pur-product">المنتج *</label>
                         <select id="pur-product" required></select>
                     </div>
-                    <div class="form-group">
+
+                    <!-- Bale / Carton Pricing Calculator (حاسبة البالة/الكرتونة) -->
+                    <div class="bale-calc-box">
+                        <label style="font-weight: 700; margin-bottom: 8px; display: block; color: var(--primary);">
+                            <i class="ri-calculator-line"></i> نظام التسعير (حاسبة البالة والكرتونة):
+                        </label>
+                        <div class="bale-mode-toggle">
+                            <button type="button" class="bale-mode-btn active" id="btn-mode-unit" onclick="switchBaleMode('unit')">تسعير بالقطعة</button>
+                            <button type="button" class="bale-mode-btn" id="btn-mode-bale" onclick="switchBaleMode('bale')">تسعير بالبالة / الكرتونة 📦</button>
+                        </div>
+                        
+                        <div id="bale-inputs-row" style="display: none; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                            <div>
+                                <label for="pur-bale-price" style="font-size: 12px; color: var(--text-muted);">سعر البالة/الكرتونة (ج.م):</label>
+                                <input type="number" id="pur-bale-price" step="0.5" min="0" placeholder="مثال: 360" style="padding: 8px;">
+                            </div>
+                            <div>
+                                <label for="pur-bale-qty" style="font-size: 12px; color: var(--text-muted);">عدد القطع في البالة:</label>
+                                <input type="number" id="pur-bale-qty" min="1" placeholder="مثال: 12" style="padding: 8px;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 14px;">
                         <label for="pur-cost">سعر التكلفة / الشراء للقطعة (ج.م) *</label>
                         <input type="number" id="pur-cost" step="0.01" min="0" required placeholder="0.00">
                     </div>
-                    <div class="form-group">
-                        <label for="pur-qty">الكمية الموردة *</label>
+                    
+                    <div class="form-group" style="margin-bottom: 14px;">
+                        <label for="pur-qty">إجمالي عدد القطع الموردة *</label>
                         <input type="number" id="pur-qty" min="1" value="1" required>
                     </div>
-                    <div class="form-group">
+
+                    <!-- Quick Invoice Details & Dates -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px;">
+                        <div class="form-group">
+                            <label for="pur-delivery-date">تاريخ الاستلام *</label>
+                            <input type="date" id="pur-delivery-date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="pur-due-date">تاريخ الاستحقاق (إن وجد)</label>
+                            <input type="date" id="pur-due-date">
+                        </div>
+                    </div>
+
+                    <!-- Paper Invoice Attachment Upload -->
+                    <div class="form-group" style="margin-bottom: 14px;">
+                        <label for="pur-invoice-file"><i class="ri-image-add-line text-primary"></i> إرفاق / تصوير صورة الفاتورة الورقية:</label>
+                        <input type="file" id="pur-invoice-file" accept="image/*">
+                        <input type="hidden" id="pur-invoice-image-data">
+                        <div id="pur-image-preview-wrapper" style="display:none; margin-top:8px;">
+                            <img id="pur-image-preview" class="invoice-preview-thumb" src="" alt="معاينة الفاتورة">
+                        </div>
+                    </div>
+
+                    <!-- Payment Status -->
+                    <div class="form-group" style="margin-bottom: 14px;">
                         <label for="pur-payment">حالة الدفع *</label>
                         <select id="pur-payment">
                             <option value="paid">نقداً (مدفوع بالكامل)</option>
@@ -931,7 +981,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" id="cancel-purchase-modal">إلغاء</button>
-                    <button type="submit" class="btn btn-primary">تأكيد وإضافة للمخزون</button>
+                    <button type="submit" class="btn btn-primary"><i class="ri-check-double-line"></i> تأكيد وحفظ الفاتورة</button>
                 </div>
             </form>
         </div>
@@ -1066,6 +1116,45 @@
                     <button type="submit" class="btn btn-primary">تأكيد السداد</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Supplier Details & Transaction History Timeline Modal (كشف حساب المورد والسجل الزمني) -->
+    <div class="modal-overlay" id="supplier-details-modal">
+        <div class="modal-container" style="max-width: 750px; width: 92vw;">
+            <div class="modal-header">
+                <h3><i class="ri-history-line text-primary"></i> كشف حساب وسجل التعاملات الزمني (Timeline)</h3>
+                <button class="btn-close-modal" onclick="document.getElementById('supplier-details-modal').classList.remove('active')">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 20px;">
+                <!-- Supplier Info Summary Banner -->
+                <div style="background: var(--bg-input); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 16px; margin-bottom: 20px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; text-align: center;">
+                    <div>
+                        <span style="font-size: 12px; color: var(--text-muted);">اسم الشركة / المورد:</span>
+                        <div id="sup-details-name" style="font-size: 16px; font-weight: 800; color: var(--text-primary); margin-top: 4px;">-</div>
+                    </div>
+                    <div>
+                        <span style="font-size: 12px; color: var(--text-muted);">إجمالي المشتريات:</span>
+                        <div id="sup-details-total" style="font-size: 16px; font-weight: 800; color: var(--primary); margin-top: 4px;">0.00 ج.م</div>
+                    </div>
+                    <div>
+                        <span style="font-size: 12px; color: var(--text-muted);">المديونية المستحقة حالياً:</span>
+                        <div id="sup-details-balance" style="font-size: 16px; font-weight: 900; color: var(--danger); margin-top: 4px;">0.00 ج.م</div>
+                    </div>
+                </div>
+
+                <h4 style="font-size: 14px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; color: var(--text-primary);">
+                    <i class="ri-time-line text-primary"></i> السجل الزمني للمعاملات والدفعات:
+                </h4>
+
+                <!-- Chronological Timeline Items Container -->
+                <div id="supplier-timeline-container" class="supplier-timeline-wrapper">
+                    <!-- Timeline items rendered dynamically -->
+                </div>
+            </div>
+            <div class="modal-footer" style="padding: 14px 20px; border-top: 1px solid var(--border-color); display: flex; justify-content: flex-end;">
+                <button class="btn btn-secondary" onclick="document.getElementById('supplier-details-modal').classList.remove('active')">إغلاق</button>
+            </div>
         </div>
     </div>
 
@@ -1414,23 +1503,23 @@
     <!-- Audio Effects for Barcode Reader -->
     <audio id="beep-sound" src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" preload="auto"></audio>
 
-    <!-- Mobile Bottom Navigation Bar (Fixed on Mobile Only) -->
+    <!-- Mobile Bottom Navigation Bar (Fixed on Mobile Only - Manager UI) -->
     <nav class="mobile-bottom-nav">
         <button class="mobile-nav-item active" data-view="dashboard-view">
             <i class="ri-dashboard-3-line"></i>
             <span>الرئيسية</span>
         </button>
-        <button class="mobile-nav-item" data-view="pos-view">
-            <i class="ri-shopping-cart-2-line"></i>
-            <span>الكاشير</span>
-        </button>
         <button class="mobile-nav-item" data-view="inventory-view">
             <i class="ri-archive-line"></i>
-            <span>المخزن</span>
+            <span>المخزن والأسعار</span>
         </button>
-        <button class="mobile-nav-item" data-view="reports-view">
-            <i class="ri-bar-chart-box-line"></i>
-            <span>التقارير</span>
+        <button class="mobile-nav-item" data-view="purchases-view">
+            <i class="ri-shopping-bag-line"></i>
+            <span>المشتريات</span>
+        </button>
+        <button class="mobile-nav-item" data-view="expenses-view">
+            <i class="ri-wallet-3-line"></i>
+            <span>المصروفات</span>
         </button>
         <button class="mobile-nav-item" id="mobile-drawer-toggle">
             <i class="ri-menu-3-line"></i>

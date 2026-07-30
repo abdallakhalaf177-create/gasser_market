@@ -34,105 +34,124 @@
     --z-overlay: 100;
     --z-modal: 101;
 
-    /* Slate & Zinc Dark Theme Palette */
-    --bg-app: #0f172a;
-    --bg-sidebar: #1e293b;
-    --bg-card: #1e293b;
-    --bg-input: #334155;
-    --bg-hover: #334155;
-    --border-color: #334155;
+    /* Slate & Navy Dark Theme Palette */
+    --bg-app: #0B0F17;
+    --bg-sidebar: #151C28;
+    --bg-card: #151C28;
+    --bg-input: #1E293B;
+    --bg-hover: #1F2D42;
+    --border-color: #26334D;
 
-    --text-primary: #f8fafc;
-    --text-secondary: #cbd5e1;
-    --text-muted: #94a3b8;
+    --text-primary: #F8FAFC;
+    --text-secondary: #CBD5E1;
+    --text-muted: #94A3B8;
 
-    --primary: #6366f1;
-    --primary-hover: #4f46e5;
-    --primary-glow: rgba(99, 102, 241, 0.25);
+    --primary: #38BDF8;
+    --primary-hover: #0284C7;
+    --primary-glow: rgba(56, 189, 248, 0.25);
 
-    --accent-purple: #8b5cf6;
-    --accent-purple-glow: rgba(139, 92, 246, 0.25);
+    --accent-purple: #818CF8;
+    --accent-purple-glow: rgba(129, 140, 248, 0.25);
 
-    --success: #10b981;
+    --success: #10B981;
     --success-hover: #059669;
     --success-glow: rgba(16, 185, 129, 0.2);
 
-    --warning: #f59e0b;
-    --warning-hover: #d97706;
+    --warning: #F59E0B;
+    --warning-hover: #D97706;
     --warning-glow: rgba(245, 158, 11, 0.2);
 
-    --danger: #ef4444;
-    --danger-hover: #dc2626;
+    --danger: #EF4444;
+    --danger-hover: #DC2626;
     --danger-glow: rgba(239, 68, 68, 0.2);
 
-    --glass-bg: rgba(30, 41, 59, 0.85);
-    --glass-border: rgba(99, 102, 241, 0.2);
+    --glass-bg: rgba(21, 28, 40, 0.85);
+    --glass-border: rgba(56, 189, 248, 0.2);
 }
 
 /* Dark Mode Colors (Default) */
 body.dark-mode {
-    --bg-app: #0f172a;
-    --bg-sidebar: #1e293b;
-    --bg-card: #1e293b;
-    --bg-input: #334155;
-    --bg-hover: #334155;
-    --border-color: #334155;
+    --bg-app: #0B0F17;
+    --bg-sidebar: #151C28;
+    --bg-card: #151C28;
+    --bg-input: #1E293B;
+    --bg-hover: #1F2D42;
+    --border-color: #26334D;
 
-    --text-primary: #f8fafc;
-    --text-secondary: #cbd5e1;
-    --text-muted: #94a3b8;
+    --text-primary: #F8FAFC;
+    --text-secondary: #CBD5E1;
+    --text-muted: #94A3B8;
 
-    --primary: #6366f1;
-    --primary-hover: #4f46e5;
-    --primary-glow: rgba(99, 102, 241, 0.25);
+    --primary: #38BDF8;
+    --primary-hover: #0284C7;
+    --primary-glow: rgba(56, 189, 248, 0.25);
 
-    --success: #10b981;
+    --success: #10B981;
     --success-hover: #059669;
     --success-glow: rgba(16, 185, 129, 0.2);
 
-    --warning: #f59e0b;
-    --warning-hover: #d97706;
+    --warning: #F59E0B;
+    --warning-hover: #D97706;
     --warning-glow: rgba(245, 158, 11, 0.2);
 
-    --danger: #ef4444;
-    --danger-hover: #dc2626;
+    --danger: #EF4444;
+    --danger-hover: #DC2626;
     --danger-glow: rgba(239, 68, 68, 0.2);
 
-    --glass-bg: rgba(30, 41, 59, 0.85);
-    --glass-border: rgba(99, 102, 241, 0.2);
+    --glass-bg: rgba(21, 28, 40, 0.85);
+    --glass-border: rgba(56, 189, 248, 0.2);
 }
 
-/* Light Mode Colors */
+/* Light Mode Colors - Ultra Clean High Contrast & Bold Text */
 body.light-mode {
-    --bg-app: #f8fafc;
-    --bg-sidebar: #ffffff;
-    --bg-card: #ffffff;
-    --bg-input: #f1f5f9;
-    --bg-hover: #e2e8f0;
-    --border-color: #cbd5e1;
+    --bg-app: #F8FAFC;
+    --bg-sidebar: #FFFFFF;
+    --bg-card: #FFFFFF;
+    --bg-input: #F1F5F9;
+    --bg-hover: #E2E8F0;
+    --border-color: #CBD5E1;
 
-    --text-primary: #0f172a;
-    --text-secondary: #475569;
-    --text-muted: #94a3b8;
+    --text-primary: #0F172A;
+    --text-secondary: #1E293B;
+    --text-muted: #64748B;
 
-    --primary: #4f46e5;
-    --primary-hover: #3730a3;
-    --primary-glow: rgba(79, 70, 229, 0.08);
+    --primary: #0284C7;
+    --primary-hover: #0369A1;
+    --primary-glow: rgba(2, 132, 199, 0.12);
 
-    --success: #10b981;
+    --success: #10B981;
     --success-hover: #059669;
-    --success-glow: rgba(16, 185, 129, 0.1);
+    --success-glow: rgba(16, 185, 129, 0.12);
 
-    --warning: #f59e0b;
-    --warning-hover: #d97706;
-    --warning-glow: rgba(245, 158, 11, 0.1);
+    --warning: #D97706;
+    --warning-hover: #B45309;
+    --warning-glow: rgba(217, 119, 6, 0.12);
 
-    --danger: #ef4444;
-    --danger-hover: #dc2626;
-    --danger-glow: rgba(239, 68, 68, 0.1);
+    --danger: #DC2626;
+    --danger-hover: #B91C1C;
+    --danger-glow: rgba(220, 38, 38, 0.12);
 
-    --glass-bg: rgba(255, 255, 255, 0.8);
-    --glass-border: rgba(79, 70, 229, 0.08);
+    --glass-bg: rgba(255, 255, 255, 0.9);
+    --glass-border: rgba(2, 132, 199, 0.15);
+}
+
+/* High Contrast Bold Text Rules for Light Mode under store lighting */
+body.light-mode,
+body.light-mode .nav-btn,
+body.light-mode .data-table,
+body.light-mode input,
+body.light-mode select,
+body.light-mode label,
+body.light-mode th,
+body.light-mode td,
+body.light-mode .stat-label,
+body.light-mode .stat-info h3,
+body.light-mode .modal-container,
+body.light-mode .cart-table,
+body.light-mode .summary-label,
+body.light-mode .summary-value {
+    font-weight: 700 !important;
+    color: #0F172A;
 }
 
 /* ==========================================================================
@@ -3020,6 +3039,147 @@ select option {
 }
 
 .checkout-payment-card:hover {
+    border-color: var(--primary) !important;
+}
+
+/* ==========================================================================
+   BALE CALCULATOR & QUICK INVOICES
+   ========================================================================== */
+.bale-calc-box {
+    background: rgba(56, 189, 248, 0.08);
+    border: 1px dashed var(--primary);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    margin-bottom: 14px;
+}
+
+.bale-mode-toggle {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.bale-mode-btn {
+    flex: 1;
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    font-weight: 700;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+}
+
+.bale-mode-btn.active {
+    background: var(--primary);
+    color: #ffffff;
+    border-color: var(--primary);
+}
+
+.invoice-preview-thumb {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+}
+
+/* ==========================================================================
+   SUPPLIER TIMELINE COMPONENT
+   ========================================================================== */
+.supplier-timeline-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.timeline-item {
+    position: relative;
+    display: flex;
+    gap: 14px;
+    padding-right: 28px;
+}
+
+.timeline-item::before {
+    content: '';
+    position: absolute;
+    right: 9px;
+    top: 24px;
+    bottom: -16px;
+    width: 2px;
+    background: var(--border-color);
+}
+
+.timeline-item:last-child::before {
+    display: none;
+}
+
+.timeline-badge {
+    position: absolute;
+    right: 0;
+    top: 2px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--primary);
+    border: 3px solid var(--bg-card);
+    z-index: 2;
+}
+
+.timeline-badge.badge-purchase {
+    background: var(--primary);
+}
+
+.timeline-badge.badge-settlement {
+    background: var(--success);
+}
+
+.timeline-card {
+    flex: 1;
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.timeline-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.timeline-title {
+    font-weight: 800;
+    font-size: 14px;
+    color: var(--text-primary);
+}
+
+.timeline-date {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.timeline-amount {
+    font-size: 16px;
+    font-weight: 900;
+}
+
+/* Modal Focus Highlight */
+#confirm-checkout-btn:focus,
+#confirm-checkout-btn.auto-focused {
+    outline: 3px solid var(--primary);
+    outline-offset: 2px;
+    box-shadow: 0 0 16px var(--primary);
+}
     border-color: var(--primary) !important;
     background: var(--bg-hover) !important;
 }
