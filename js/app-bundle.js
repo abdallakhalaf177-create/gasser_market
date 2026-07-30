@@ -3086,6 +3086,14 @@ function setupEventListeners() {
         const banner = document.getElementById("pwa-install-banner");
         if (banner) banner.style.display = "none";
     });
+
+    // Universal Close Buttons for All Modals & Backdrops
+    document.querySelectorAll(".modal-overlay .btn-close, .modal-overlay .close-btn, .modal-overlay .modal-close-btn, .modal-overlay [data-close-modal]").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const modal = btn.closest(".modal-overlay");
+            if (modal) modal.classList.remove("active", "show");
+        });
+    });
 }
 
 // ======================== WINDOW EXPORTS & GLOBAL SCOPE BINDINGS ========================
@@ -3110,6 +3118,9 @@ window.handleCustomerSettleFormSubmit = handleCustomerSettleFormSubmit;
 window.editSupplier = editSupplier;
 window.deleteSupplier = deleteSupplier;
 window.openSupplierModal = openSupplierModal;
+window.openSupplierHistoryModal = openSupplierHistoryModal;
+window.previewImageModal = previewImageModal;
+window.switchBaleMode = switchBaleMode;
 window.openPurchaseModal = openPurchaseModal;
 window.openSettleModal = openSettleModal;
 window.handleSettleFormSubmit = handleSettleFormSubmit;

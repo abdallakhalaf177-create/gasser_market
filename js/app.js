@@ -6,7 +6,7 @@ import { renderInventory, renderInventoryTable, handleProductFormSubmit, editPro
 import { handleCategoryFormSubmit, renderCategoriesList, deleteCategory } from './modules/categories.js';
 import { renderReports, renderReportsData, openLowStockReport, closeLowStockModal, printLowStockReport, exportLowStockCSV, setReportRange, openExpiryReport, closeExpiryModal } from './modules/reports.js';
 import { renderCustomers, handleCustomerFormSubmit, editCustomer, deleteCustomer, openCustomerModal, openCustomerSettleModal, handleCustomerSettleFormSubmit } from './modules/customers.js';
-import { renderSuppliers, renderSuppliersTable, handleSupplierFormSubmit, editSupplier, deleteSupplier, handlePurchaseFormSubmit, openSettleModal, handleSettleFormSubmit, renderPurchases, openSupplierModal, openPurchaseModal } from './modules/suppliers.js';
+import { renderSuppliers, renderSuppliersTable, handleSupplierFormSubmit, editSupplier, deleteSupplier, handlePurchaseFormSubmit, openSettleModal, handleSettleFormSubmit, renderPurchases, openSupplierModal, openPurchaseModal, openSupplierHistoryModal, previewImageModal, switchBaleMode } from './modules/suppliers.js';
 import { renderExpenses, openExpenseModal, handleExpenseFormSubmit, deleteExpense } from './modules/expenses.js';
 import { renderWaste, openWasteModal, handleWasteFormSubmit } from './modules/waste.js';
 import { openShiftModal, handleShiftClosingSubmit } from './modules/shifts.js';
@@ -36,6 +36,9 @@ window.refreshCurrentView = () => { switchView(state.currentView); };
 // These MUST be on window to work inside ES Module scope
 window.openCustomerModal = openCustomerModal;
 window.openSupplierModal = openSupplierModal;
+window.openSupplierHistoryModal = openSupplierHistoryModal;
+window.previewImageModal = previewImageModal;
+window.switchBaleMode = switchBaleMode;
 window.openPurchaseModal = openPurchaseModal;
 window.openExpenseModal = openExpenseModal;
 window.openWasteModal = openWasteModal;
