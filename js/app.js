@@ -1,7 +1,7 @@
 import { state, loadState, saveState, resetToDefault, addToCart, updateCartQty, clearCart, onCartChange, cancelTransaction } from './state.js';
 import { translations, SMART_BARCODE_DATABASE } from './constants.js';
 import { renderDashboard } from './modules/dashboard.js';
-import { renderPOS, renderPOSCategoryDropdowns, renderPOSProducts, renderPOSCustomerDropdown, renderCart, updateCartSummary, handleCheckout, viewReceipt, closeReceiptModal, printReceipt } from './modules/pos.js';
+import { renderPOS, renderPOSCategoryDropdowns, renderPOSProducts, renderPOSCustomerDropdown, renderCart, updateCartSummary, handleCheckout, openCheckoutModal, confirmCheckout, viewReceipt, closeReceiptModal, printReceipt } from './modules/pos.js';
 import { renderInventory, renderInventoryTable, handleProductFormSubmit, editProduct, deleteProduct } from './modules/inventory.js';
 import { handleCategoryFormSubmit, renderCategoriesList, deleteCategory } from './modules/categories.js';
 import { renderReports, renderReportsData, openLowStockReport, closeLowStockModal, printLowStockReport, exportLowStockCSV, setReportRange, openExpiryReport, closeExpiryModal } from './modules/reports.js';
@@ -13,67 +13,11 @@ import { openShiftModal, handleShiftClosingSubmit } from './modules/shifts.js';
 import { renderSettings } from './modules/settings.js';
 import { initAuth, renderUsers, handleUserFormSubmit, editUser, deleteUser } from './modules/users.js';
 
-
-
-// Audio Feedback Synthesizer using Web Audio API (works offline)
-export function playBeep(frequency = 440, duration = 0.1) {
-    try {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const oscillator = audioCtx.createOscillator();
-        const gainNode = audioCtx.createGain();
-
-        oscillator.connect(gainNode);
-        gainNode.connect(audioCtx.destination);
-
-        oscillator.type = 'sine';
-        oscillator.frequency.value = frequency;
-
-        gainNode.gain.setValueAtTime(0.04, audioCtx.currentTime); // volume limit
-        gainNode.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
-
-        oscillator.start(audioCtx.currentTime);
-        oscillator.stop(audioCtx.currentTime + duration);
-    } catch (e) {
-        console.warn("AudioContext block by browser auto-play policy or not supported", e);
-    }
-}
-
-// Gorgeous Toast Notification Helper
-export function showToast(message, type = 'info') {
-    const container = document.getElementById("toast-container");
-    if (!container) return;
-
-    const toast = document.createElement("div");
-    toast.className = `toast toast-${type}`;
-
-    let icon = 'info';
-    if (type === 'success') icon = 'check-circle';
-    else if (type === 'warning') icon = 'alert-triangle';
-    else if (type === 'danger') icon = 'alert-circle';
-
-    toast.innerHTML = `
-        <i data-lucide="${icon}" style="width: 18px; height: 18px; color: var(--${type === 'danger' ? 'danger' : type === 'success' ? 'success' : type === 'warning' ? 'warning' : 'primary'});"></i>
-        <span>${message}</span>
-    `;
-
-    container.appendChild(toast);
-    if (window.lucide) lucide.createIcons();
-
-    // Sound effect
-    if (type === 'success') {
-        playBeep(523.25, 0.08); // High pitch C5 beep for success
-    } else if (type === 'danger' || type === 'warning') {
-        playBeep(220, 0.22); // Low pitch error beep
-    }
-
-    setTimeout(() => {
-        toast.style.animation = 'toastOut 0.3s forwards';
-        setTimeout(() => toast.remove(), 300);
-    }, 3500);
-}
-
 // Bind dynamically called template functions to the window object
 window.updateCartQty = updateCartQty;
+window.handleCheckout = handleCheckout;
+window.openCheckoutModal = openCheckoutModal;
+window.confirmCheckout = confirmCheckout;
 window.viewReceipt = viewReceipt;
 window.editProduct = editProduct;
 window.deleteProduct = deleteProduct;

@@ -535,14 +535,132 @@ function renderPOSCategoryDropdowns() {
 
 function renderPOSCustomerDropdown() {
     const select = document.getElementById("cart-customer-select");
-    if (!select) return;
-    const currentVal = select.value || "walkin";
-    select.innerHTML =
+    const checkoutSelect = document.getElementById("checkout-customer-select");
+
+    const optionsHtml =
         `<option value="walkin">${state.language === "ar" ? "عميل سفري (نقدي)" : "Walk-in Customer (Cash)"}</option>` +
         (state.customers || []).map(c =>
             `<option value="${c.id}">${c.name} (${c.phone || 'بدون هاتف'})${c.balance > 0 ? ` — دين: ${c.balance.toFixed(2)}` : ''}</option>`
         ).join('');
-    if ([...select.options].some(o => o.value === currentVal)) select.value = currentVal;
+
+    if (select) {
+        const currentVal = select.value || "walkin";
+        select.innerHTML = optionsHtml;
+        if ([...select.options].some(o => o.value === currentVal)) select.value = currentVal;
+    }
+    if (checkoutSelect) {
+        const currentVal = checkoutSelect.value || "walkin";
+        checkoutSelect.innerHTML = optionsHtml;
+        if ([...checkoutSelect.options].some(o => o.value === currentVal)) checkoutSelect.value = currentVal;
+    }
+}
+
+function openCheckoutModal() {
+    if (!state.currentShift || state.currentShift.status !== "active") {
+        showToast(
+            state.language === "ar"
+                ? "🔒 الوردية مغلقة حالياً! يرجى فتح وردية جديدة للبدء في عمليات البيع."
+                : "Shift is closed! Please open a new shift to process sales.",
+            "danger"
+        );
+        openShiftModal();
+        return;
+    }
+
+    if (!state.cart || state.cart.length === 0) {
+        showToast(state.language === "ar" ? "السلة فارغة!" : "Cart is empty!", "warning");
+        return;
+    }
+
+    renderPOSCustomerDropdown();
+
+    let subtotal = 0;
+    (state.cart || []).forEach(item => {
+        const prod = (state.products || []).find(p => p.id === item.productId);
+        if (prod) subtotal += prod.price * item.qty;
+    });
+
+    const discountInput = document.getElementById("cart-discount-input");
+    const discountPercent = discountInput ? (parseFloat(discountInput.value) || 0) : 0;
+    const discountAmount = subtotal * (discountPercent / 100);
+    const taxableAmount = subtotal - discountAmount;
+    const taxAmount = taxableAmount * ((state.settings.taxRate || 0) / 100);
+    const finalTotal = taxableAmount + taxAmount;
+
+    const totalEl = document.getElementById("checkout-total-display");
+    if (totalEl) totalEl.textContent = `${finalTotal.toFixed(2)} ${state.settings.currency || 'ج.م'}`;
+
+    const paidInput = document.getElementById("paid-amount-input");
+    if (paidInput) paidInput.value = "";
+
+    updateCheckoutChangeDisplay(finalTotal);
+
+    const modal = document.getElementById("checkout-modal");
+    if (modal) modal.classList.add("active");
+
+    setTimeout(() => {
+        if (paidInput) {
+            paidInput.focus();
+            paidInput.select();
+        }
+    }, 150);
+}
+
+function updateCheckoutChangeDisplay(overrideTotal) {
+    let finalTotal = overrideTotal;
+    if (finalTotal === undefined) {
+        let subtotal = 0;
+        (state.cart || []).forEach(item => {
+            const prod = (state.products || []).find(p => p.id === item.productId);
+            if (prod) subtotal += prod.price * item.qty;
+        });
+        const discountInput = document.getElementById("cart-discount-input");
+        const discountPercent = discountInput ? (parseFloat(discountInput.value) || 0) : 0;
+        const discountAmount = subtotal * (discountPercent / 100);
+        const taxableAmount = subtotal - discountAmount;
+        const taxAmount = taxableAmount * ((state.settings.taxRate || 0) / 100);
+        finalTotal = taxableAmount + taxAmount;
+    }
+
+    const paidInput = document.getElementById("paid-amount-input");
+    const changeDisplay = document.getElementById("change-amount-display");
+    if (!paidInput || !changeDisplay) return;
+
+    const paidVal = parseFloat(paidInput.value);
+    if (isNaN(paidVal) || paidVal === 0) {
+        changeDisplay.textContent = `0.00 ${state.settings.currency || 'ج.م'}`;
+        changeDisplay.style.color = "var(--text-muted)";
+        return;
+    }
+
+    const change = paidVal - finalTotal;
+    changeDisplay.textContent = `${change.toFixed(2)} ${state.settings.currency || 'ج.م'}`;
+
+    if (change >= 0) {
+        changeDisplay.style.color = "var(--success)";
+    } else {
+        changeDisplay.style.color = "var(--danger)";
+    }
+}
+
+function confirmCheckout() {
+    const checkoutCustSelect = document.getElementById("checkout-customer-select");
+    const cartCustSelect = document.getElementById("cart-customer-select");
+    if (checkoutCustSelect && cartCustSelect) {
+        cartCustSelect.value = checkoutCustSelect.value;
+    }
+
+    const activePaymentCard = document.querySelector(".checkout-payment-card.active");
+    const selectedMethod = activePaymentCard ? activePaymentCard.getAttribute("data-method") : "cash";
+
+    document.querySelectorAll('input[name="payment-method"]').forEach(r => {
+        r.checked = (r.value === selectedMethod);
+    });
+
+    const modal = document.getElementById("checkout-modal");
+    if (modal) modal.classList.remove("active");
+
+    handleCheckout();
 }
 
 function renderCart() {
@@ -2313,6 +2431,31 @@ function setupNavigation() {
             if (view) switchView(view);
         });
     });
+
+    // Sidebar Collapse Toggle
+    const sidebarToggle = document.getElementById("sidebar-toggle-btn");
+    const sidebar = document.getElementById("app-sidebar");
+    if (sidebarToggle && sidebar) {
+        sidebarToggle.addEventListener("click", () => {
+            sidebar.classList.toggle("collapsed");
+        });
+    }
+
+    // Sidebar Menu Live Search Filter
+    const sidebarSearch = document.getElementById("sidebar-menu-search");
+    if (sidebarSearch) {
+        sidebarSearch.addEventListener("input", (e) => {
+            const q = (e.target.value || "").trim().toLowerCase();
+            document.querySelectorAll("#sidebar-nav-menu .nav-btn").forEach(btn => {
+                const text = (btn.textContent || "").toLowerCase();
+                if (!q || text.includes(q)) {
+                    btn.style.display = "flex";
+                } else {
+                    btn.style.display = "none";
+                }
+            });
+        });
+    }
 }
 
 function switchView(viewName) {
@@ -2384,10 +2527,35 @@ function setupLiveTime() {
 
 function setupKeyboardShortcuts() {
     document.addEventListener("keydown", (e) => {
+        // F1 -> Switch to POS
         if (e.key === "F1") { e.preventDefault(); switchView("pos"); showToast("تم الانتقال إلى الكاشير", "info"); }
-        if (e.key === "F2") { e.preventDefault(); refreshCurrentView(); }
+        
+        // F2 -> Open Checkout Modal in POS, or refresh view elsewhere
+        if (e.key === "F2") {
+            e.preventDefault();
+            if (state.currentView === "pos") {
+                openCheckoutModal();
+            } else {
+                refreshCurrentView();
+            }
+        }
+
+        // Enter -> If checkout modal is open, trigger checkout confirmation
+        if (e.key === "Enter") {
+            const checkoutModal = document.getElementById("checkout-modal");
+            if (checkoutModal && checkoutModal.classList.contains("active")) {
+                e.preventDefault();
+                confirmCheckout();
+            }
+        }
+
+        // F3 -> Switch to Dashboard
         if (e.key === "F3") { e.preventDefault(); switchView("dashboard"); showToast("تم الانتقال إلى لوحة التحكم", "info"); }
+        
+        // F4 -> Clear cart if in POS
         if (e.key === "F4" && state.currentView === "pos") { e.preventDefault(); clearCart(); showToast("تم تفريغ السلة", "warning"); }
+        
+        // Escape -> Close active modals
         if (e.key === "Escape") {
             document.querySelectorAll(".modal-overlay.active").forEach(m => m.classList.remove("active"));
         }
@@ -2673,6 +2841,55 @@ function setupEventListeners() {
         });
     }
 
+    // Checkout Modal Event Listeners
+    addListenerSafe("checkout-btn", "click", openCheckoutModal);
+    addListenerSafe("confirm-checkout-btn", "click", confirmCheckout);
+
+    const paidInputEl = document.getElementById("paid-amount-input");
+    if (paidInputEl) {
+        paidInputEl.addEventListener("input", () => updateCheckoutChangeDisplay());
+    }
+
+    document.querySelectorAll(".btn-quick-cash").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const amountType = btn.getAttribute("data-amount");
+            const paidInput = document.getElementById("paid-amount-input");
+            if (!paidInput) return;
+            if (amountType === "exact") {
+                let subtotal = 0;
+                (state.cart || []).forEach(item => {
+                    const prod = (state.products || []).find(p => p.id === item.productId);
+                    if (prod) subtotal += prod.price * item.qty;
+                });
+                const discountInput = document.getElementById("cart-discount-input");
+                const discountPercent = discountInput ? (parseFloat(discountInput.value) || 0) : 0;
+                const discountAmount = subtotal * (discountPercent / 100);
+                const taxableAmount = subtotal - discountAmount;
+                const taxAmount = taxableAmount * ((state.settings.taxRate || 0) / 100);
+                const finalTotal = taxableAmount + taxAmount;
+                paidInput.value = finalTotal.toFixed(2);
+            } else {
+                paidInput.value = amountType;
+            }
+            updateCheckoutChangeDisplay();
+        });
+    });
+
+    document.querySelectorAll(".checkout-payment-card").forEach(card => {
+        card.addEventListener("click", () => {
+            document.querySelectorAll(".checkout-payment-card").forEach(c => c.classList.remove("active"));
+            card.classList.add("active");
+            const radio = card.querySelector('input[type="radio"]');
+            if (radio) radio.checked = true;
+
+            const method = card.getAttribute("data-method");
+            const cashDetails = document.getElementById("cash-payment-details");
+            if (cashDetails) {
+                cashDetails.style.display = (method === "cash") ? "block" : "none";
+            }
+        });
+    });
+
     // PWA Install Banner
     let deferredPrompt = null;
     window.addEventListener("beforeinstallprompt", (e) => {
@@ -2702,6 +2919,8 @@ window.updateCartQty = updateCartQty;
 window.addToCart = addToCart;
 window.clearCart = clearCart;
 window.handleCheckout = handleCheckout;
+window.openCheckoutModal = openCheckoutModal;
+window.confirmCheckout = confirmCheckout;
 window.viewReceipt = viewReceipt;
 window.closeReceiptModal = closeReceiptModal;
 window.printReceipt = printReceipt;

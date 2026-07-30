@@ -28,71 +28,95 @@
 
 <body>
 
-    <!-- Main Navigation Bar -->
-    <header class="main-header">
-        <div class="logo-area" style="cursor:pointer;" onclick="window.switchView('dashboard')">
-            <i class="ri-store-3-line logo-icon"></i>
-            <h2>Gaser Market</h2>
-        </div>
-        <nav class="nav-links">
-            <button class="nav-btn active" data-view="dashboard-view">
-                <i class="ri-dashboard-3-line"></i> لوحة التحكم
-            </button>
-            <button class="nav-btn" data-view="pos-view">
-                <i class="ri-shopping-cart-2-line"></i> الكاشير (POS)
-            </button>
-            <button class="nav-btn" data-view="inventory-view">
-                <i class="ri-archive-line"></i> إدارة المخزن
-            </button>
-            <button class="nav-btn" data-view="purchases-view">
-                <i class="ri-shopping-bag-line"></i> المشتريات
-            </button>
-            <button class="nav-btn" data-view="expenses-view">
-                <i class="ri-wallet-3-line"></i> المصروفات
-            </button>
-            <button class="nav-btn" data-view="waste-view">
-                <i class="ri-delete-bin-3-line"></i> الهالك
-            </button>
-            <button class="nav-btn" data-view="reports-view">
-                <i class="ri-bar-chart-box-line"></i> التقارير والربح
-            </button>
-            <button class="nav-btn" data-view="customers-view">
-                <i class="ri-user-shared-line"></i> العملاء والديون
-            </button>
-            <button class="nav-btn" data-view="suppliers-view">
-                <i class="ri-truck-line"></i> الموردين
-            </button>
-            <button class="nav-btn" data-view="settings-view">
-                <i class="ri-settings-3-line"></i> الإعدادات
-            </button>
-            <button class="nav-btn" data-view="users-view">
-                <i class="ri-user-settings-line"></i> المستخدمين
-            </button>
-            <button class="nav-btn" id="open-shift-modal-btn" onclick="window.openShiftModal()" style="background: rgba(99,102,241,0.2); border:1px solid var(--primary);">
-                <i class="ri-time-line"></i> الوردية
-            </button>
-        </nav>
-        <div class="header-actions">
-            <button id="theme-toggle-btn" class="btn btn-sm btn-secondary" title="تبديل المظهر (داكن / فاتح)" style="padding: 6px 10px;">
-                <i class="ri-moon-line"></i>
-            </button>
-            <button id="lang-toggle-btn" class="btn btn-sm btn-secondary" title="Language Toggle" style="padding: 6px 10px; font-weight:700;">
-                EN
-            </button>
-            <div id="live-time" class="live-time-badge" style="display:flex; align-items:center; gap:6px; padding:6px 12px; background:var(--bg-input); border-radius:var(--radius-sm); font-size:13px; font-weight:700; color:#ffffff;">
-                <i class="ri-time-line text-primary"></i> <span>--:--:--</span>
+    <div class="app-layout">
+        <!-- Right Sidebar Navigation (القائمة الجانبية للنظام) -->
+        <aside class="app-sidebar" id="app-sidebar">
+            <div class="sidebar-header">
+                <div class="sidebar-logo" style="cursor:pointer;" onclick="window.switchView('dashboard')">
+                    <i class="ri-store-3-line logo-icon"></i>
+                    <span class="logo-text">Gaser Market</span>
+                </div>
+                <button id="sidebar-toggle-btn" class="sidebar-toggle-btn" title="طي / توسيع القائمة">
+                    <i class="ri-side-bar-line"></i>
+                </button>
             </div>
-            <div id="header-shift-badge" class="header-shift-badge" style="display:flex; align-items:center; gap:6px; padding:6px 12px; background:rgba(16,185,129,0.15); border:1px solid var(--success); border-radius:var(--radius-sm); font-size:12px; font-weight:700; color:var(--success);">
-                <i class="ri-shield-user-line"></i> <span id="header-shift-cashier">الكاشير: أدمن</span>
-            </div>
-            <span id="current-user-display" class="user-badge" style="color:#ffffff; font-weight:800;"><i class="ri-user-line"></i> أدمن</span>
-            <button id="logout-btn" class="btn btn-sm btn-danger" style="display:none;"><i class="ri-logout-box-r-line"></i> خروج</button>
-            <button id="mobile-menu-btn" class="mobile-menu-btn" title="القائمة"><i class="ri-menu-3-line"></i></button>
-        </div>
-    </header>
 
-    <!-- Main Content Container -->
-    <main class="main-container">
+            <!-- Sidebar Section Search Box -->
+            <div class="sidebar-search-box">
+                <i class="ri-search-line search-icon"></i>
+                <input type="text" id="sidebar-menu-search" placeholder="ابحث عن قسم أو صفحة..." autocomplete="off">
+            </div>
+
+            <!-- Sidebar Nav Links -->
+            <nav class="sidebar-nav scrollable-y" id="sidebar-nav-menu">
+                <button class="nav-btn active" data-view="dashboard-view">
+                    <i class="ri-dashboard-3-line"></i> <span>لوحة التحكم</span>
+                </button>
+                <button class="nav-btn" data-view="pos-view">
+                    <i class="ri-shopping-cart-2-line"></i> <span>الكاشير (POS)</span>
+                </button>
+                <button class="nav-btn" data-view="inventory-view">
+                    <i class="ri-archive-line"></i> <span>إدارة المخزن</span>
+                </button>
+                <button class="nav-btn" data-view="purchases-view">
+                    <i class="ri-shopping-bag-line"></i> <span>المشتريات</span>
+                </button>
+                <button class="nav-btn" data-view="expenses-view">
+                    <i class="ri-wallet-3-line"></i> <span>المصروفات</span>
+                </button>
+                <button class="nav-btn" data-view="waste-view">
+                    <i class="ri-delete-bin-3-line"></i> <span>الهالك</span>
+                </button>
+                <button class="nav-btn" data-view="reports-view">
+                    <i class="ri-bar-chart-box-line"></i> <span>التقارير والربح</span>
+                </button>
+                <button class="nav-btn" data-view="customers-view">
+                    <i class="ri-user-shared-line"></i> <span>العملاء والديون</span>
+                </button>
+                <button class="nav-btn" data-view="suppliers-view">
+                    <i class="ri-truck-line"></i> <span>الموردين</span>
+                </button>
+                <button class="nav-btn" data-view="settings-view">
+                    <i class="ri-settings-3-line"></i> <span>الإعدادات</span>
+                </button>
+                <button class="nav-btn" data-view="users-view">
+                    <i class="ri-user-settings-line"></i> <span>المستخدمين</span>
+                </button>
+            </nav>
+
+            <!-- Sidebar Footer Controls & Status -->
+            <div class="sidebar-footer">
+                <button class="nav-btn shift-btn" id="open-shift-modal-btn" onclick="window.openShiftModal()" style="width:100%; justify-content:center; background: rgba(99,102,241,0.2); border:1px solid var(--primary); color:var(--text-primary); font-weight:700;">
+                    <i class="ri-time-line"></i> <span>الوردية اليومية</span>
+                </button>
+                <div class="sidebar-status-box">
+                    <div id="live-time" class="live-time-badge">
+                        <i class="ri-time-line text-primary"></i> <span>--:--:--</span>
+                    </div>
+                    <div id="header-shift-badge" class="header-shift-badge">
+                        <i class="ri-shield-user-line"></i> <span id="header-shift-cashier">الكاشير: أدمن</span>
+                    </div>
+                </div>
+                <div class="sidebar-user-row">
+                    <span id="current-user-display" class="user-badge"><i class="ri-user-line"></i> أدمن</span>
+                    <div class="sidebar-actions-btns">
+                        <button id="theme-toggle-btn" class="btn btn-sm btn-secondary" title="تبديل المظهر (داكن / فاتح)">
+                            <i class="ri-moon-line"></i>
+                        </button>
+                        <button id="lang-toggle-btn" class="btn btn-sm btn-secondary" title="Language Toggle" style="font-weight:700;">
+                            EN
+                        </button>
+                        <button id="logout-btn" class="btn btn-sm btn-danger" style="display:none;" title="تسجيل الخروج">
+                            <i class="ri-logout-box-r-line"></i>
+                        </button>
+                        <button id="mobile-menu-btn" class="mobile-menu-btn" title="القائمة"><i class="ri-menu-3-line"></i></button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Workspace -->
+        <main class="main-container main-workspace">
 
         <!-- 0. Dashboard View (لوحة التحكم العامة الإحصائية) -->
         <section id="dashboard-view" class="view-section active">
@@ -200,9 +224,9 @@
         <section id="pos-view" class="view-section">
             <div class="pos-invoice-container">
                 
-                <!-- Top controls: Prominent Fast Barcode Search & Customer -->
-                <div class="pos-invoice-header">
-                    <div class="search-autocomplete-wrapper">
+                <!-- Front & Center Prominent Barcode & Product Search Bar -->
+                <div class="pos-invoice-header prominent-header">
+                    <div class="search-autocomplete-wrapper full-width-search">
                         <div class="search-bar-container prominent-barcode-search">
                             <i class="ri-barcode-line search-icon"></i>
                             <input type="text" id="barcode-input" placeholder="امسح الباركود أو ابحث باسم المنتج..." autofocus autocomplete="off">
@@ -214,18 +238,16 @@
                         <div id="search-suggestions" class="search-suggestions-dropdown" style="display: none;"></div>
                     </div>
                     
-                    <div class="invoice-header-controls">
-                        <!-- Customer Selection -->
-                        <div class="control-group">
-                            <label for="cart-customer-select"><i class="ri-user-3-line"></i> العميل:</label>
-                            <select id="cart-customer-select">
-                                <option value="walkin">عميل سفري (نقدي)</option>
-                            </select>
-                        </div>
+                    <!-- Hidden elements for backward compatibility sync -->
+                    <div style="display:none;">
+                        <select id="cart-customer-select"><option value="walkin">عميل سفري</option></select>
+                        <input type="radio" name="payment-method" value="cash" checked>
+                        <input type="radio" name="payment-method" value="card">
+                        <input type="radio" name="payment-method" value="credit">
                     </div>
                 </div>
 
-                <!-- Invoice items Table -->
+                <!-- Invoice items Table (Takes Maximum Available Vertical Height) -->
                 <div class="invoice-body-wrapper">
                     <div class="cart-table-wrapper">
                         <table class="cart-table">
@@ -245,7 +267,7 @@
                     </div>
                 </div>
 
-                <!-- Invoice summary & Action Buttons -->
+                <!-- Invoice Summary & Action Buttons Bar -->
                 <div class="invoice-footer-wrapper">
                     <div class="invoice-summary-grid">
                         <div class="summary-card">
@@ -271,31 +293,14 @@
                             <i class="ri-lock-line"></i> وردية مغلقة — اضغط لفتح وردية جديدة
                         </div>
                         
-                        <!-- Payment Method Selector (Relocated to bottom action bar for logical checkout workflow) -->
-                        <div class="payment-selector-bottom">
-                            <span class="payment-label"><i class="ri-bank-card-line"></i> طريقة الدفع:</span>
-                            <div class="payment-methods-group">
-                                <label class="payment-method active">
-                                    <input type="radio" name="payment-method" value="cash" checked style="display:none;">
-                                    <span>كاش</span>
-                                </label>
-                                <label class="payment-method">
-                                    <input type="radio" name="payment-method" value="card" style="display:none;">
-                                    <span>فيزا</span>
-                                </label>
-                                <label class="payment-method">
-                                    <input type="radio" name="payment-method" value="credit" style="display:none;">
-                                    <span>آجل</span>
-                                </label>
-                            </div>
+                        <div class="pos-action-buttons" style="display:flex; gap:12px; align-items:center;">
+                            <button id="clear-cart-btn" class="btn btn-lg btn-danger-outline">
+                                <i class="ri-delete-bin-5-line"></i> تفريغ السلة (F4)
+                            </button>
+                            <button id="checkout-btn" class="btn btn-lg btn-success" style="font-size:16px; font-weight:800;">
+                                <i class="ri-check-double-line"></i> إنهاء / طباعة الفاتورة (F2)
+                            </button>
                         </div>
-
-                        <button id="clear-cart-btn" class="btn btn-lg btn-danger-outline">
-                            <i class="ri-delete-bin-5-line"></i> تفريغ السلة (F4)
-                        </button>
-                        <button id="checkout-btn" class="btn btn-lg btn-success">
-                            <i class="ri-check-double-line"></i> إنهاء / طباعة الفاتورة
-                        </button>
                     </div>
                 </div>
 
@@ -738,6 +743,92 @@
         </section>
 
     </main>
+    </div> <!-- End .app-layout -->
+
+    <!-- ==================== MODALS SECTION ==================== -->
+
+    <!-- 0. Checkout / Payment Modal (نافذة إنهاء الفاتورة والدفع) -->
+    <div class="modal-overlay" id="checkout-modal">
+        <div class="modal-container modal-md" style="max-width: 520px; width: 92vw;">
+            <div class="modal-header" style="background: linear-gradient(135deg, var(--bg-card), var(--bg-input)); border-bottom: 1px solid var(--border-color);">
+                <h3><i class="ri-shopping-bag-3-line text-success"></i> إتمام الدفع وإنهاء الفاتورة</h3>
+                <button class="btn-close-modal" onclick="document.getElementById('checkout-modal').classList.remove('active')">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 20px;">
+                <!-- Total Amount Banner -->
+                <div style="background: rgba(16, 185, 129, 0.12); border: 1px solid var(--success); border-radius: var(--radius-md); padding: 16px; text-align: center; margin-bottom: 20px;">
+                    <span style="font-size: 13px; color: var(--text-muted); font-weight: 700;">الصافي النهائي المطلوب:</span>
+                    <div id="checkout-total-display" style="font-size: 32px; font-weight: 900; color: var(--success); margin-top: 4px;">0.00 ج.م</div>
+                </div>
+
+                <!-- Customer Selector -->
+                <div class="form-group" style="margin-bottom: 16px;">
+                    <label for="checkout-customer-select" style="font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+                        <i class="ri-user-3-line text-primary"></i> اسم العميل:
+                    </label>
+                    <select id="checkout-customer-select" class="form-control" style="width: 100%; padding: 10px 14px; border-radius: var(--radius-md); font-weight: 700; background: var(--bg-input); color: var(--text-primary); border: 1px solid var(--border-color);">
+                        <option value="walkin">عميل سفري (نقدي)</option>
+                    </select>
+                </div>
+
+                <!-- Payment Method Selector -->
+                <div class="form-group" style="margin-bottom: 20px;">
+                    <label style="font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;">
+                        <i class="ri-bank-card-line text-primary"></i> طريقة الدفع:
+                    </label>
+                    <div class="checkout-payment-methods" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                        <label class="checkout-payment-card active" data-method="cash" style="display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 8px; border: 2px solid var(--primary); border-radius: var(--radius-md); background: rgba(99, 102, 241, 0.1); cursor: pointer; text-align: center; font-weight: 700; transition: all 0.2s;">
+                            <input type="radio" name="checkout-payment-radio" value="cash" checked style="display: none;">
+                            <i class="ri-money-dollar-box-line" style="font-size: 24px; color: var(--success);"></i>
+                            <span>كاش 💵</span>
+                        </label>
+                        <label class="checkout-payment-card" data-method="card" style="display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 8px; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-input); cursor: pointer; text-align: center; font-weight: 700; transition: all 0.2s;">
+                            <input type="radio" name="checkout-payment-radio" value="card" style="display: none;">
+                            <i class="ri-bank-card-line" style="font-size: 24px; color: var(--primary);"></i>
+                            <span>فيزا 💳</span>
+                        </label>
+                        <label class="checkout-payment-card" data-method="credit" style="display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 8px; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--bg-input); cursor: pointer; text-align: center; font-weight: 700; transition: all 0.2s;">
+                            <input type="radio" name="checkout-payment-radio" value="credit" style="display: none;">
+                            <i class="ri-time-line" style="font-size: 24px; color: var(--warning);"></i>
+                            <span>آجل 📋</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Cash Payment Details (Paid Amount & Change) -->
+                <div id="cash-payment-details" style="background: var(--bg-input); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-bottom: 20px;">
+                    <div class="form-group" style="margin-bottom: 12px;">
+                        <label for="paid-amount-input" style="font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 6px;">
+                            <i class="ri-coins-line text-warning"></i> المبلغ المدفوع من العميل:
+                        </label>
+                        <input type="number" id="paid-amount-input" step="0.5" min="0" placeholder="0.00" style="width: 100%; padding: 12px 14px; font-size: 20px; font-weight: 800; border-radius: var(--radius-md); border: 1px solid var(--primary); background: var(--bg-card); color: var(--text-primary);">
+                    </div>
+
+                    <!-- Quick Cash Preset Chips -->
+                    <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px;">
+                        <button type="button" class="btn-quick-cash" data-amount="exact" style="padding: 6px 12px; font-size: 12px; font-weight: 700; border-radius: var(--radius-sm); border: 1px solid var(--primary); background: var(--primary-glow); color: var(--primary); cursor: pointer;">المبلغ بالضبط</button>
+                        <button type="button" class="btn-quick-cash" data-amount="50" style="padding: 6px 12px; font-size: 12px; font-weight: 700; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); cursor: pointer;">50 ج.م</button>
+                        <button type="button" class="btn-quick-cash" data-amount="100" style="padding: 6px 12px; font-size: 12px; font-weight: 700; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); cursor: pointer;">100 ج.م</button>
+                        <button type="button" class="btn-quick-cash" data-amount="200" style="padding: 6px 12px; font-size: 12px; font-weight: 700; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); cursor: pointer;">200 ج.م</button>
+                        <button type="button" class="btn-quick-cash" data-amount="500" style="padding: 6px 12px; font-size: 12px; font-weight: 700; border-radius: var(--radius-sm); border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); cursor: pointer;">500 ج.م</button>
+                    </div>
+
+                    <!-- Change Calculation Box -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: var(--bg-card); border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                        <span style="font-weight: 700; font-size: 14px; color: var(--text-secondary);">المبلغ المتبقي للعميل (الباقي):</span>
+                        <span id="change-amount-display" style="font-size: 20px; font-weight: 900; color: var(--success);">0.00 ج.م</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer" style="padding: 16px 20px; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; gap: 12px;">
+                <button type="button" class="btn btn-secondary" onclick="document.getElementById('checkout-modal').classList.remove('active')">إلغاء (Esc)</button>
+                <button type="button" id="confirm-checkout-btn" class="btn btn-success btn-lg" style="flex: 1; font-size: 16px; font-weight: 800;">
+                    <i class="ri-printer-line"></i> تأكيد وطباعة الفاتورة (Enter)
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- Modals Section (النوافذ المنبثقة) -->
 

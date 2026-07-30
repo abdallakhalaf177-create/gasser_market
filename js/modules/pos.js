@@ -131,17 +131,134 @@ export function renderPOSProducts() {
 
 export function renderPOSCustomerDropdown() {
     const select = document.getElementById("cart-customer-select");
-    if (!select) return;
-    const currentVal = select.value || "walkin";
-    select.innerHTML =
+    const checkoutSelect = document.getElementById("checkout-customer-select");
+
+    const optionsHtml =
         `<option value="walkin">${state.language === "ar" ? "عميل سفري (نقدي)" : "Walk-in Customer (Cash)"}</option>` +
         (state.customers || []).map(c =>
             `<option value="${c.id}">${c.name} (${c.phone || 'بدون هاتف'})${c.balance > 0 ? ` — دين: ${c.balance.toFixed(2)}` : ''}</option>`
         ).join('');
-    // Restore selection if still valid
-    if ([...select.options].some(o => o.value === currentVal)) {
-        select.value = currentVal;
+
+    if (select) {
+        const currentVal = select.value || "walkin";
+        select.innerHTML = optionsHtml;
+        if ([...select.options].some(o => o.value === currentVal)) select.value = currentVal;
     }
+    if (checkoutSelect) {
+        const currentVal = checkoutSelect.value || "walkin";
+        checkoutSelect.innerHTML = optionsHtml;
+        if ([...checkoutSelect.options].some(o => o.value === currentVal)) checkoutSelect.value = currentVal;
+    }
+}
+
+export function openCheckoutModal() {
+    if (!state.currentShift || state.currentShift.status !== "active") {
+        if (window.showToast) {
+            window.showToast(
+                state.language === "ar"
+                    ? "🔒 الوردية مغلقة حالياً! يرجى فتح وردية جديدة للبدء في عمليات البيع."
+                    : "Shift is closed! Please open a new shift to process sales.",
+                "danger"
+            );
+        }
+        if (window.openShiftModal) window.openShiftModal();
+        return;
+    }
+
+    if (!state.cart || state.cart.length === 0) {
+        if (window.showToast) window.showToast(state.language === "ar" ? "السلة فارغة!" : "Cart is empty!", "warning");
+        return;
+    }
+
+    renderPOSCustomerDropdown();
+
+    let subtotal = 0;
+    (state.cart || []).forEach(item => {
+        const prod = (state.products || []).find(p => p.id === item.productId);
+        if (prod) subtotal += prod.price * item.qty;
+    });
+
+    const discountInput = document.getElementById("cart-discount-input");
+    const discountPercent = discountInput ? (parseFloat(discountInput.value) || 0) : 0;
+    const discountAmount = subtotal * (discountPercent / 100);
+    const taxableAmount = subtotal - discountAmount;
+    const taxAmount = taxableAmount * ((state.settings.taxRate || 0) / 100);
+    const finalTotal = taxableAmount + taxAmount;
+
+    const totalEl = document.getElementById("checkout-total-display");
+    if (totalEl) totalEl.textContent = `${finalTotal.toFixed(2)} ${state.settings.currency || 'ج.م'}`;
+
+    const paidInput = document.getElementById("paid-amount-input");
+    if (paidInput) paidInput.value = "";
+
+    updateCheckoutChangeDisplay(finalTotal);
+
+    const modal = document.getElementById("checkout-modal");
+    if (modal) modal.classList.add("active");
+
+    setTimeout(() => {
+        if (paidInput) {
+            paidInput.focus();
+            paidInput.select();
+        }
+    }, 150);
+}
+
+export function updateCheckoutChangeDisplay(overrideTotal) {
+    let finalTotal = overrideTotal;
+    if (finalTotal === undefined) {
+        let subtotal = 0;
+        (state.cart || []).forEach(item => {
+            const prod = (state.products || []).find(p => p.id === item.productId);
+            if (prod) subtotal += prod.price * item.qty;
+        });
+        const discountInput = document.getElementById("cart-discount-input");
+        const discountPercent = discountInput ? (parseFloat(discountInput.value) || 0) : 0;
+        const discountAmount = subtotal * (discountPercent / 100);
+        const taxableAmount = subtotal - discountAmount;
+        const taxAmount = taxableAmount * ((state.settings.taxRate || 0) / 100);
+        finalTotal = taxableAmount + taxAmount;
+    }
+
+    const paidInput = document.getElementById("paid-amount-input");
+    const changeDisplay = document.getElementById("change-amount-display");
+    if (!paidInput || !changeDisplay) return;
+
+    const paidVal = parseFloat(paidInput.value);
+    if (isNaN(paidVal) || paidVal === 0) {
+        changeDisplay.textContent = `0.00 ${state.settings.currency || 'ج.م'}`;
+        changeDisplay.style.color = "var(--text-muted)";
+        return;
+    }
+
+    const change = paidVal - finalTotal;
+    changeDisplay.textContent = `${change.toFixed(2)} ${state.settings.currency || 'ج.م'}`;
+
+    if (change >= 0) {
+        changeDisplay.style.color = "var(--success)";
+    } else {
+        changeDisplay.style.color = "var(--danger)";
+    }
+}
+
+export function confirmCheckout() {
+    const checkoutCustSelect = document.getElementById("checkout-customer-select");
+    const cartCustSelect = document.getElementById("cart-customer-select");
+    if (checkoutCustSelect && cartCustSelect) {
+        cartCustSelect.value = checkoutCustSelect.value;
+    }
+
+    const activePaymentCard = document.querySelector(".checkout-payment-card.active");
+    const selectedMethod = activePaymentCard ? activePaymentCard.getAttribute("data-method") : "cash";
+
+    document.querySelectorAll('input[name="payment-method"]').forEach(r => {
+        r.checked = (r.value === selectedMethod);
+    });
+
+    const modal = document.getElementById("checkout-modal");
+    if (modal) modal.classList.remove("active");
+
+    handleCheckout();
 }
 
 export function renderCart() {
