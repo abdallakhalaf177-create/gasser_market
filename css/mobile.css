@@ -258,7 +258,7 @@
     }
 
     /* Sidebar becomes a slim vertical icon strip */
-    .sidebar {
+    .sidebar, .app-sidebar {
         width: 64px !important;
         overflow: hidden;
     }
@@ -387,7 +387,7 @@
     }
 
     /* === Mobile Sidebar Drawer === */
-    .sidebar {
+    .sidebar, .app-sidebar {
         position: fixed !important;
         top: 0 !important;
         bottom: 0 !important;
@@ -404,7 +404,7 @@
         flex-direction: column !important;
     }
 
-    html[lang="en"] .sidebar {
+    html[lang="en"] .sidebar, html[lang="en"] .app-sidebar {
         right: auto !important;
         left: 0 !important;
         /* Drawer opens from left in LTR */
@@ -412,7 +412,7 @@
         box-shadow: 5px 0 25px rgba(0, 0, 0, 0.45);
     }
 
-    body.sidebar-open .sidebar {
+    body.sidebar-open .sidebar, body.sidebar-open .app-sidebar {
         transform: translateX(0) !important;
     }
 

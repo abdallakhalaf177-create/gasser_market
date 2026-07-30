@@ -3,11 +3,13 @@
  * Enables: Offline mode, Add to Home Screen, background caching
  */
 
-const CACHE_NAME = 'gasser-market-v1.2';
+const CACHE_NAME = 'gasser-market-v2.0';
 const STATIC_ASSETS = [
     './',
     'index.html',
     'style.css',
+    'css/mobile.css',
+    'js/app-bundle.js',
     'js/app.js',
     'manifest.json',
     'icons/icon.svg',

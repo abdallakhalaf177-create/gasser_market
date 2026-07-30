@@ -1,9 +1,11 @@
-const CACHE_NAME = 'gaser-market-v1';
+const CACHE_NAME = 'gaser-market-v2';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './style.css',
+  './css/mobile.css',
   './manifest.json',
+  './js/app-bundle.js',
   './js/app.js',
   './js/state.js',
   './js/constants.js',

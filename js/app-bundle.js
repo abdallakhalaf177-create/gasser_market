@@ -2705,7 +2705,7 @@ function setupEventListeners() {
     // POS Cart Controls
     addListenerSafe("clear-cart-btn", "click", () => { clearCart(); showToast("تم تفريغ السلة", "warning"); });
     addListenerSafe("cart-discount-input", "input", updateCartSummary);
-    addListenerSafe("checkout-btn", "click", handleCheckout);
+    addListenerSafe("checkout-btn", "click", openCheckoutModal);
 
     // Purchase payment toggle
     addListenerSafe("pur-payment", "change", () => {

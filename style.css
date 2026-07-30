@@ -191,73 +191,231 @@ html[lang="en"] * {
 }
 
 /* ==========================================================================
-   LAYOUT STRUCTURE
+   LAYOUT STRUCTURE & SIDEBAR NAVIGATION
    ========================================================================== */
-.app-container {
-    display: none;
+.app-layout {
+    display: flex;
     height: 100vh;
     width: 100vw;
+    overflow: hidden;
+    background-color: var(--bg-app);
 }
 
-body.authenticated .app-container {
-    display: flex;
-}
-
-/* Sidebar Styling */
-.sidebar {
-    width: 280px;
+/* App Sidebar Navigation (Right side in RTL mode) */
+.app-sidebar {
+    width: 270px;
     background-color: var(--bg-sidebar);
     border-left: 1px solid var(--border-color);
     display: flex;
     flex-direction: column;
     z-index: var(--z-sidebar);
     flex-shrink: 0;
+    transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 2px 0 12px rgba(0,0,0,0.15);
 }
 
-html[lang="en"] .sidebar {
+html[lang="en"] .app-sidebar {
     border-left: none;
     border-right: 1px solid var(--border-color);
 }
 
+/* Collapsed Sidebar Mode */
+.app-sidebar.collapsed {
+    width: 72px;
+}
+
+.app-sidebar.collapsed .logo-text,
+.app-sidebar.collapsed .sidebar-search-box,
+.app-sidebar.collapsed .nav-btn span,
+.app-sidebar.collapsed .sidebar-status-box,
+.app-sidebar.collapsed .user-badge {
+    display: none !important;
+}
+
+.app-sidebar.collapsed .sidebar-header {
+    justify-content: center;
+    padding: 16px 8px;
+}
+
+.app-sidebar.collapsed .nav-btn {
+    justify-content: center;
+    padding: 14px;
+}
+
 .sidebar-header {
-    padding: 24px;
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     border-bottom: 1px solid var(--border-color);
 }
 
-.logo-container {
+.sidebar-logo {
     display: flex;
     align-items: center;
-    gap: 12px;
-}
-
-.logo-icon {
-    width: 32px;
-    height: 32px;
-    color: var(--primary);
-    filter: drop-shadow(0 0 8px var(--primary));
-}
-
-.logo-text {
-    font-size: 20px;
+    gap: 10px;
+    font-size: 18px;
     font-weight: 800;
-    letter-spacing: -0.5px;
 }
 
-.logo-text .highlight {
+.sidebar-logo i {
+    font-size: 24px;
     color: var(--primary);
 }
 
-.sidebar-menu {
-    padding: 20px 12px;
+.sidebar-toggle-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 20px;
+    padding: 4px;
+    border-radius: var(--radius-sm);
+    transition: color 0.15s;
+}
+
+.sidebar-toggle-btn:hover {
+    color: var(--primary);
+    background: var(--bg-hover);
+}
+
+/* Menu Section Search Box */
+.sidebar-search-box {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-color);
+    position: relative;
+}
+
+.sidebar-search-box .search-icon {
+    position: absolute;
+    top: 50%;
+    right: 28px;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 16px;
+    pointer-events: none;
+}
+
+html[lang="en"] .sidebar-search-box .search-icon {
+    right: auto;
+    left: 28px;
+}
+
+.sidebar-search-box input {
+    width: 100%;
+    padding: 8px 36px 8px 12px;
+    background-color: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+html[lang="en"] .sidebar-search-box input {
+    padding: 8px 12px 8px 36px;
+}
+
+.sidebar-search-box input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px var(--primary-glow);
+}
+
+/* Sidebar Nav Links Scrollable Container */
+.sidebar-nav {
+    padding: 12px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 4px;
     flex-grow: 1;
     overflow-y: auto;
 }
 
-.menu-item {
+.sidebar-nav .nav-btn {
     display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    color: var(--text-secondary);
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    text-align: right;
+    width: 100%;
+    transition: all var(--transition-fast);
+}
+
+html[lang="en"] .sidebar-nav .nav-btn {
+    text-align: left;
+}
+
+.sidebar-nav .nav-btn i {
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.sidebar-nav .nav-btn:hover {
+    background-color: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.sidebar-nav .nav-btn.active {
+    background-color: var(--primary-glow);
+    color: var(--primary);
+    font-weight: 700;
+    border-right: 3px solid var(--primary);
+}
+
+html[lang="en"] .sidebar-nav .nav-btn.active {
+    border-right: none;
+    border-left: 3px solid var(--primary);
+}
+
+/* Sidebar Footer & User Info */
+.sidebar-footer {
+    padding: 14px 16px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background-color: var(--bg-sidebar);
+}
+
+.sidebar-status-box {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.sidebar-user-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding-top: 6px;
+    border-top: 1px dashed var(--border-color);
+}
+
+.sidebar-actions-btns {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Main Workspace */
+.main-workspace {
+    flex-grow: 1;
+    height: 100vh;
+    overflow-y: auto;
+    background-color: var(--bg-app);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+}
     align-items: center;
     gap: 14px;
     padding: 12px 16px;
@@ -2646,5 +2804,143 @@ select option {
     border-radius: var(--radius-full);
     font-size: 12px;
     font-weight: 700;
+}
+
+/* ==========================================================================
+   REFACTORED POS LAYOUT & CHECKOUT MODAL STYLES
+   ========================================================================== */
+
+#pos-view.view-section.active {
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - 48px);
+    overflow: hidden;
+}
+
+.pos-invoice-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    gap: 14px;
+}
+
+.pos-invoice-header.prominent-header {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 14px 18px;
+    box-shadow: var(--shadow-sm);
+}
+
+.search-autocomplete-wrapper.full-width-search {
+    width: 100%;
+    position: relative;
+}
+
+.prominent-barcode-search {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--bg-input);
+    border: 2px solid var(--primary);
+    border-radius: var(--radius-md);
+    padding: 6px 14px;
+    transition: all 0.2s ease;
+}
+
+.prominent-barcode-search:focus-within {
+    box-shadow: 0 0 0 3px var(--primary-glow);
+}
+
+.prominent-barcode-search .search-icon {
+    font-size: 24px;
+    color: var(--primary);
+}
+
+.prominent-barcode-search input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text-primary);
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.invoice-body-wrapper {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+.cart-table-wrapper {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.invoice-footer-wrapper {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 14px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: var(--shadow-sm);
+}
+
+.invoice-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+
+.summary-card {
+    background: var(--bg-input);
+    padding: 10px 14px;
+    border-radius: var(--radius-md);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.summary-card.net-total-card {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid var(--success);
+}
+
+.summary-card.net-total-card .summary-value {
+    color: var(--success);
+    font-size: 22px;
+    font-weight: 900;
+}
+
+.checkout-payment-card {
+    transition: all 0.2s ease;
+}
+
+.checkout-payment-card:hover {
+    border-color: var(--primary) !important;
+    background: var(--bg-hover) !important;
+}
+
+.checkout-payment-card.active {
+    border: 2px solid var(--primary) !important;
+    background: rgba(99, 102, 241, 0.12) !important;
+}
+
+.btn-quick-cash {
+    transition: all 0.15s ease;
+}
+
+.btn-quick-cash:hover {
+    background: var(--primary) !important;
+    color: #ffffff !important;
+    border-color: var(--primary) !important;
 }
 
