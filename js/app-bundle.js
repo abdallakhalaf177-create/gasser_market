@@ -2399,17 +2399,6 @@ window.previewImageModal = function(imgSrc) {
         w.document.write(`<title>معاينة الفاتورة الورقية</title><div style="display:flex;justify-content:center;align-items:center;min-height:100vh;background:#111;"><img src="${imgSrc}" style="max-width:90vw; max-height:90vh; border-radius:8px; box-shadow:0 10px 30px rgba(0,0,0,0.8);" /></div>`);
     }
 };
-        paymentMethod: "cash"
-    });
-
-    saveState();
-    const modal = document.getElementById("settle-modal");
-    if (modal) modal.classList.remove("active");
-
-    showToast(`✅ تم سداد ${amount.toFixed(2)} ${state.settings.currency} للمورد "${sup.company}". المديونية المتبقية: ${sup.balance.toFixed(2)} ${state.settings.currency}`, "success");
-    renderSuppliers();
-    refreshCurrentView();
-}
 
 function renderPurchases() {
     const tbody = document.getElementById("purchases-table-body");
