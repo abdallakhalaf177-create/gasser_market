@@ -4,9 +4,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Prevent Browser Caching & HMR Sticking -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Gaser Market | نظام الكاشير</title>
     <!-- PWA Manifest & Meta Tags -->
-    <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="manifest.json?v=1.1.0">
     <meta name="theme-color" content="#1e293b">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -21,9 +25,9 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Html5Qrcode for Camera Barcode Scanner -->
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-    <!-- Main & Mobile CSS -->
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="css/mobile.css">
+    <!-- Main & Mobile CSS (Cache Busting v1.1.0) -->
+    <link rel="stylesheet" href="style.css?v=1.1.0">
+    <link rel="stylesheet" href="css/mobile.css?v=1.1.0">
 </head>
 
 <body>
@@ -1720,8 +1724,8 @@
         </div>
     </div>
 
-    <!-- Main Consolidated JavaScript Application -->
-    <script type="module" src="js/app.js"></script>
+    <!-- Main Consolidated JavaScript Application (Cache Busting v1.1.0) -->
+    <script type="module" src="js/app.js?v=1.1.0"></script>
 </body>
 
 </html>

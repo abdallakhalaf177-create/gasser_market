@@ -7,6 +7,15 @@ const PORT = process.env.PORT || 3000;
 const DB_FILE = path.join(__dirname, 'db.json');
 
 app.use(express.json());
+
+// Strict No-Cache middleware to prevent browser caching & HMR sticking in development
+app.use((req, res, next) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+    next();
+});
+
 app.use(express.static(__dirname));
 
 // Default data helper

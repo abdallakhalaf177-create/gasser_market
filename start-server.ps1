@@ -72,12 +72,10 @@ while ($listener.IsListening) {
 
             # Enable PWA / Service Worker by allowing all origins
             $res.AddHeader("Access-Control-Allow-Origin", "*")
-            # Cache control: no-cache for HTML/JS, 1hr for assets
-            if ($ext -in '.html', '.js') {
-                $res.AddHeader("Cache-Control", "no-cache, no-store, must-revalidate")
-            } else {
-                $res.AddHeader("Cache-Control", "public, max-age=3600")
-            }
+            # Cache control: strict no-cache for HTML, JS, CSS
+            $res.AddHeader("Cache-Control", "no-cache, no-store, must-revalidate")
+            $res.AddHeader("Pragma", "no-cache")
+            $res.AddHeader("Expires", "0")
 
             $res.OutputStream.Write($bytes, 0, $bytes.Length)
         } else {

@@ -129,10 +129,30 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (window.lucide) lucide.createIcons();
 });
 
-// Safe event listener attaching helper (DOM Check Guards)
+// Idempotent event listener attaching helper (Hot Reload Cleanup Guard)
+const boundListenersRegistry = [];
+
 const addListenerSafe = (id, event, callback) => {
     const el = document.getElementById(id);
-    if (el) el.addEventListener(event, callback);
+    if (!el) return;
+
+    if (!el._boundListeners) el._boundListeners = {};
+    if (el._boundListeners[event]) {
+        el.removeEventListener(event, el._boundListeners[event]);
+    }
+
+    el._boundListeners[event] = callback;
+    el.addEventListener(event, callback);
+    boundListenersRegistry.push({ el, event, callback });
+};
+
+window.__cleanupEventListeners = () => {
+    boundListenersRegistry.forEach(({ el, event, callback }) => {
+        if (el && el.removeEventListener) {
+            el.removeEventListener(event, callback);
+        }
+    });
+    boundListenersRegistry.length = 0;
 };
 
 // Keyboard Shortcuts Integration (F1, F2, F3, F4)
