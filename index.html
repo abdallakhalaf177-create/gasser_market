@@ -10,7 +10,6 @@
     <meta http-equiv="Expires" content="0">
     <title>Gaser Market | نظام الكاشير</title>
     <!-- PWA Manifest & Meta Tags -->
-    <link rel="manifest" href="manifest.json?v=1.1.0">
     <meta name="theme-color" content="#1e293b">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -25,9 +24,28 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Html5Qrcode for Camera Barcode Scanner -->
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-    <!-- Main & Mobile CSS (Cache Busting v1.1.0) -->
-    <link rel="stylesheet" href="style.css?v=1.1.0">
-    <link rel="stylesheet" href="css/mobile.css?v=1.1.0">
+    <!-- Dynamic Cache-Busting for Manifest, Main & Mobile CSS (GitHub Pages Cache Prevention) -->
+    <script>
+        (function() {
+            var v = Date.now();
+            var manifest = document.createElement('link');
+            manifest.rel = 'manifest';
+            manifest.href = 'manifest.json?v=' + v;
+            document.head.appendChild(manifest);
+
+            ['style.css', 'css/mobile.css'].forEach(function(cssFile) {
+                var link = document.createElement('link');
+                link.rel = 'stylesheet';
+                link.href = cssFile + '?v=' + v;
+                document.head.appendChild(link);
+            });
+        })();
+    </script>
+    <noscript>
+        <link rel="manifest" href="manifest.json?v=Date.now()">
+        <link rel="stylesheet" href="style.css?v=Date.now()">
+        <link rel="stylesheet" href="css/mobile.css?v=Date.now()">
+    </noscript>
 </head>
 
 <body>
@@ -1724,8 +1742,18 @@
         </div>
     </div>
 
-    <!-- Main Consolidated JavaScript Application (Cache Busting v1.1.0) -->
-    <script type="module" src="js/app.js?v=1.1.0"></script>
+    <!-- Main Consolidated JavaScript Application with Dynamic Cache Busting (Date.now()) -->
+    <script>
+        (function() {
+            var script = document.createElement('script');
+            script.type = 'module';
+            script.src = 'js/app.js?v=' + Date.now();
+            document.body.appendChild(script);
+        })();
+    </script>
+    <noscript>
+        <script type="module" src="js/app.js?v=Date.now()"></script>
+    </noscript>
 </body>
 
 </html>

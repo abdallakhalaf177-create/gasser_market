@@ -59,13 +59,13 @@ self.addEventListener('fetch', (event) => {
         return networkResponse;
       })
       .catch(() => {
-        // Fallback to cache when offline
-        return caches.match(event.request).then((cachedResponse) => {
+        // Fallback to cache when offline (ignoreSearch allows matching assets with dynamic ?v= timestamp parameters)
+        return caches.match(event.request, { ignoreSearch: true }).then((cachedResponse) => {
           if (cachedResponse) {
             return cachedResponse;
           }
           if (event.request.headers.get('accept') && event.request.headers.get('accept').includes('text/html')) {
-            return caches.match('./index.html?v=1.1.0');
+            return caches.match('./index.html', { ignoreSearch: true });
           }
         });
       })
