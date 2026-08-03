@@ -3,11 +3,13 @@ import { renderPOSCategoryDropdowns } from './pos.js';
 
 export function handleCategoryFormSubmit(e) {
     e.preventDefault();
-    const name = document.getElementById("new-cat-name").value.trim();
+    const input = document.getElementById("new-cat-name");
+    if (!input) return;
+    const name = input.value.trim();
     if (name && !state.categories.includes(name)) {
         state.categories.push(name);
         saveState();
-        document.getElementById("new-cat-name").value = "";
+        input.value = "";
         renderCategoriesList();
         renderPOSCategoryDropdowns();
     }
@@ -27,7 +29,7 @@ export function renderCategoriesList() {
         `;
         ul.appendChild(li);
     });
-    lucide.createIcons();
+    if (window.lucide) window.lucide.createIcons();
 }
 
 export function deleteCategory(catName) {

@@ -130,7 +130,7 @@ export function renderDashboard() {
 
     // Render Charts
     renderDashboardCharts();
-    lucide.createIcons();
+    if (window.lucide) window.lucide.createIcons();
 }
 
 export function renderDashboardCharts() {
@@ -141,6 +141,11 @@ export function renderDashboardCharts() {
     const ctxSales = document.getElementById('salesChart');
     const ctxCats = document.getElementById('categoriesChart');
     if (!ctxSales || !ctxCats) return;
+
+    if (typeof Chart === 'undefined') {
+        console.warn('Chart.js library is not loaded yet.');
+        return;
+    }
 
     // Weekly Sales Data
     const days = state.language === "ar" ? ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'] : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];

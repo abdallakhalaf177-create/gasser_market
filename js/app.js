@@ -48,6 +48,39 @@ export function setQuickExpiry(inputId, months) {
     dynamicCalculatedExpiry(months, 'months', inputId);
 }
 
+export function playBeep(frequency = 440, duration = 0.1) {
+    try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.type = 'sine';
+        osc.frequency.value = frequency;
+        gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
+        osc.start(audioCtx.currentTime);
+        osc.stop(audioCtx.currentTime + duration);
+    } catch (e) {}
+}
+
+export function showToast(message, type = 'info') {
+    const container = document.getElementById("toast-container");
+    if (!container) return;
+    const toast = document.createElement("div");
+    toast.className = `toast toast-${type}`;
+    let icon = 'info';
+    if (type === 'success') icon = 'check-circle';
+    else if (type === 'warning') icon = 'alert-triangle';
+    else if (type === 'danger') icon = 'alert-circle';
+    toast.innerHTML = `<i data-lucide="${icon}" style="width:18px;height:18px;"></i><span>${message}</span>`;
+    container.appendChild(toast);
+    if (window.lucide) lucide.createIcons();
+    if (type === 'success') playBeep(523.25, 0.08);
+    else if (type === 'danger' || type === 'warning') playBeep(220, 0.22);
+    setTimeout(() => { toast.style.animation = 'toastOut 0.3s forwards'; setTimeout(() => toast.remove(), 300); }, 3500);
+}
+
 // Bind dynamically called template functions to the window object
 window.dynamicCalculatedExpiry = dynamicCalculatedExpiry;
 window.applyDynamicExpiry = applyDynamicExpiry;
@@ -768,4 +801,12 @@ document.addEventListener("DOMContentLoaded", () => {
             if (banner) banner.style.display = "none";
         });
     }
+});
+
+// Global exception safety handler
+window.addEventListener('error', (e) => {
+    console.error('System Notice:', e.message, e.filename, e.lineno);
+});
+window.addEventListener('unhandledrejection', (e) => {
+    console.error('Unhandled Promise Rejection:', e.reason);
 });
