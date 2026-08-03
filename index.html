@@ -881,6 +881,19 @@
                         <label for="prod-min-stock">حد الأمان (الحد الأدنى للتنبيه بالنواقص)</label>
                         <input type="number" id="prod-min-stock" min="0" value="5" placeholder="5">
                     </div>
+                    <div class="form-group">
+                        <label for="prod-expiry">تاريخ انتهى الصلاحية (اختياري)</label>
+                        <input type="date" id="prod-expiry">
+                        <div class="dynamic-expiry-calculator">
+                            <input type="number" id="prod-expiry-amount" min="1" value="1" placeholder="1" oninput="window.applyDynamicExpiry('prod-expiry-amount', 'prod-expiry-unit', 'prod-expiry')" onchange="window.applyDynamicExpiry('prod-expiry-amount', 'prod-expiry-unit', 'prod-expiry')">
+                            <select id="prod-expiry-unit" onchange="window.applyDynamicExpiry('prod-expiry-amount', 'prod-expiry-unit', 'prod-expiry')">
+                                <option value="days">أيام / Days</option>
+                                <option value="months" selected>شهور / Months</option>
+                                <option value="years">سنوات / Years</option>
+                            </select>
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="window.applyDynamicExpiry('prod-expiry-amount', 'prod-expiry-unit', 'prod-expiry')">+ إضافة</button>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" id="cancel-product-modal">إلغاء</button>
@@ -890,72 +903,157 @@
         </div>
     </div>
 
-    <!-- Purchase Modal (تسجيل فاتورة مشتريات) -->
+    <!-- Purchase Modal (جلسة فاتورة توريد مشتريات متعددة الأصناف) -->
     <div class="modal-overlay" id="purchase-modal">
-        <div class="modal-container" style="max-width: 600px; width: 92vw;">
+        <div class="modal-container" style="max-width: 780px; width: 94vw;">
             <div class="modal-header">
-                <h3><i class="ri-shopping-bag-line text-primary"></i> تسجيل فاتورة توريد (مشتريات)</h3>
+                <h3><i class="ri-shopping-bag-line text-primary"></i> فاتورة توريد ومشتريات جديدة (جلسة متعددة الأصناف)</h3>
                 <button class="btn-close-modal" id="close-purchase-modal">&times;</button>
             </div>
             <form id="purchase-form">
-                <div class="modal-body" style="max-height: 75vh; overflow-y: auto;">
+                <div class="modal-body">
                     
-                    <!-- Supplier & Product Selectors -->
-                    <div class="form-group" style="margin-bottom: 14px;">
-                        <label for="pur-supplier">المورد *</label>
-                        <select id="pur-supplier" required></select>
-                    </div>
-                    <div class="form-group" style="margin-bottom: 14px;">
-                        <label for="pur-product">المنتج *</label>
-                        <select id="pur-product" required></select>
-                    </div>
-
-                    <!-- Bale / Carton Pricing Calculator (حاسبة البالة/الكرتونة) -->
-                    <div class="bale-calc-box">
-                        <label style="font-weight: 700; margin-bottom: 8px; display: block; color: var(--primary);">
-                            <i class="ri-calculator-line"></i> نظام التسعير (حاسبة البالة والكرتونة):
-                        </label>
-                        <div class="bale-mode-toggle">
-                            <button type="button" class="bale-mode-btn active" id="btn-mode-unit" onclick="switchBaleMode('unit')">تسعير بالقطعة</button>
-                            <button type="button" class="bale-mode-btn" id="btn-mode-bale" onclick="switchBaleMode('bale')">تسعير بالبالة / الكرتونة 📦</button>
+                    <!-- Supplier Selection & Filter Bar -->
+                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px; margin-bottom: 14px; background: rgba(99,102,241,0.06); padding: 12px; border-radius: var(--radius-md); border: 1px solid rgba(99,102,241,0.2);">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label for="pur-supplier">المورد *</label>
+                            <select id="pur-supplier" required></select>
                         </div>
-                        
-                        <div id="bale-inputs-row" style="display: none; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
-                            <div>
-                                <label for="pur-bale-price" style="font-size: 12px; color: var(--text-muted);">سعر البالة/الكرتونة (ج.م):</label>
-                                <input type="number" id="pur-bale-price" step="0.5" min="0" placeholder="مثال: 360" style="padding: 8px;">
-                            </div>
-                            <div>
-                                <label for="pur-bale-qty" style="font-size: 12px; color: var(--text-muted);">عدد القطع في البالة:</label>
-                                <input type="number" id="pur-bale-qty" min="1" placeholder="مثال: 12" style="padding: 8px;">
-                            </div>
+                        <div class="form-group" style="margin-bottom: 0; display: flex; flex-direction: column; justify-content: center;">
+                            <label style="font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 6px; margin-top: 20px; font-weight: 600; color: var(--primary);">
+                                <input type="checkbox" id="pur-show-all-products" style="width:16px; height:16px; accent-color:var(--primary);">
+                                <span>إظهار كل المنتجات</span>
+                            </label>
                         </div>
                     </div>
 
-                    <div class="form-group" style="margin-bottom: 14px;">
-                        <label for="pur-cost">سعر التكلفة / الشراء للقطعة (ج.م) *</label>
-                        <input type="number" id="pur-cost" step="0.01" min="0" required placeholder="0.00">
-                    </div>
-                    
-                    <div class="form-group" style="margin-bottom: 14px;">
-                        <label for="pur-qty">إجمالي عدد القطع الموردة *</label>
-                        <input type="number" id="pur-qty" min="1" value="1" required>
+                    <!-- Single Item Add Row Section (إضافة أصناف للفاتورة) -->
+                    <div class="batch-order-section">
+                        <div style="font-weight: 700; color: var(--primary); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+                            <span><i class="ri-add-circle-line"></i> إدخال صنف للفاتورة:</span>
+                            <small class="text-muted" style="font-weight: normal;">اضغط Enter لإضافة الصنف ونزوله للجدول</small>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="pur-product">اختر المنتج *</label>
+                                <select id="pur-product"></select>
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="pur-cost">سعر الشراء (ج.م) *</label>
+                                <input type="number" id="pur-cost" step="0.01" min="0" placeholder="0.00">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="pur-sell-price">سعر البيع الجديد *</label>
+                                <input type="number" id="pur-sell-price" step="0.01" min="0" placeholder="0.00">
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1.6fr; gap: 10px; margin-bottom: 10px;">
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="pur-qty">الكمية המوردة *</label>
+                                <input type="number" id="pur-qty" min="1" value="1">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label for="pur-expiry">تاريخ الصلاحية</label>
+                                <input type="date" id="pur-expiry">
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0; display: flex; flex-direction: column; justify-content: flex-end;">
+                                <div class="dynamic-expiry-calculator" style="margin-top: 0;">
+                                    <input type="number" id="pur-expiry-amount" min="1" value="1" placeholder="1" oninput="window.applyDynamicExpiry('pur-expiry-amount', 'pur-expiry-unit', 'pur-expiry')" onchange="window.applyDynamicExpiry('pur-expiry-amount', 'pur-expiry-unit', 'pur-expiry')">
+                                    <select id="pur-expiry-unit" onchange="window.applyDynamicExpiry('pur-expiry-amount', 'pur-expiry-unit', 'pur-expiry')">
+                                        <option value="days">أيام / Days</option>
+                                        <option value="months" selected>شهور / Months</option>
+                                        <option value="years">سنوات / Years</option>
+                                    </select>
+                                    <button type="button" class="btn btn-secondary btn-sm" onclick="window.applyDynamicExpiry('pur-expiry-amount', 'pur-expiry-unit', 'pur-expiry')">+ إضافة</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Bale / Carton Pricing Calculator (حاسبة البالة/الكرتونة) -->
+                        <div class="bale-calc-box" style="margin-top: 8px; padding: 8px 12px;">
+                            <div class="bale-mode-toggle" style="margin-bottom: 0;">
+                                <button type="button" class="bale-mode-btn active" id="btn-mode-unit" onclick="switchBaleMode('unit')">تسعير بالقطعة</button>
+                                <button type="button" class="bale-mode-btn" id="btn-mode-bale" onclick="switchBaleMode('bale')">تسعير بالبالة / الكرتونة 📦</button>
+                            </div>
+                            <div id="bale-inputs-row" style="display: none; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px;">
+                                <div>
+                                    <label for="pur-bale-price" style="font-size: 11px; color: var(--text-muted);">سعر البالة/الكرتونة (ج.م):</label>
+                                    <input type="number" id="pur-bale-price" step="0.5" min="0" placeholder="مثال: 360" style="padding: 6px;">
+                                </div>
+                                <div>
+                                    <label for="pur-bale-qty" style="font-size: 11px; color: var(--text-muted);">عدد القطع في البالة:</label>
+                                    <input type="number" id="pur-bale-qty" min="1" placeholder="مثال: 12" style="padding: 6px;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="margin-top: 10px; text-align: left;">
+                            <button type="button" id="add-batch-item-btn" class="btn btn-secondary btn-sm" style="background: var(--primary); color: #fff; border: none; font-weight: 700; width: 100%; justify-content: center; padding: 10px;">
+                                <i class="ri-add-line"></i> تنزيل الصنف في جدول الفاتورة (Enter)
+                            </button>
+                        </div>
                     </div>
 
-                    <!-- Quick Invoice Details & Dates -->
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px;">
+                    <!-- Batch Items Table (جدول أصناف الفاتورة) -->
+                    <div style="font-weight: 700; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center;">
+                        <span><i class="ri-list-check-2"></i> أصناف الفاتورة الحالية:</span>
+                        <span id="batch-items-count" class="badge badge-info">0 أصناف</span>
+                    </div>
+
+                    <div class="batch-table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>اسم المنتج</th>
+                                    <th>سعر الشراء</th>
+                                    <th>سعر البيع</th>
+                                    <th>الكمية</th>
+                                    <th>الصلاحية</th>
+                                    <th>الإجمالي</th>
+                                    <th>إجراء</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pur-batch-items-body">
+                                <tr>
+                                    <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 20px;">لم يتم إضافة أي أصناف بعد. اختر المنتج واضغط إضافة.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Batch Summary Total -->
+                    <div class="batch-summary-card">
+                        <span>إجمالي الفاتورة الكلي:</span>
+                        <span id="pur-batch-total" style="font-size: 18px; color: var(--success);">0.00 ج.م</span>
+                    </div>
+
+                    <!-- Invoice Header & Payment Details -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px;">
                         <div class="form-group">
                             <label for="pur-delivery-date">تاريخ الاستلام *</label>
                             <input type="date" id="pur-delivery-date" required>
                         </div>
                         <div class="form-group">
-                            <label for="pur-due-date">تاريخ الاستحقاق (إن وجد)</label>
-                            <input type="date" id="pur-due-date">
+                            <label for="pur-payment">حالة الدفع *</label>
+                            <select id="pur-payment">
+                                <option value="paid">نقداً (مدفوع بالكامل)</option>
+                                <option value="partial">دفع جزئي</option>
+                                <option value="credit">آجل (تسجيل على المديونية)</option>
+                            </select>
                         </div>
                     </div>
 
+                    <div class="form-group" id="pur-paid-amount-wrapper" style="display:none; margin-bottom: 14px;">
+                        <label for="pur-paid-amount">المبلغ المدفوع الآن (ج.م)</label>
+                        <input type="number" id="pur-paid-amount" step="0.01" min="0" value="0" placeholder="0.00">
+                        <small class="text-muted">المبلغ المتبقي سيُضاف لمديونية المورد آلياً</small>
+                    </div>
+
                     <!-- Paper Invoice Attachment Upload -->
-                    <div class="form-group" style="margin-bottom: 14px;">
+                    <div class="form-group" style="margin-bottom: 0;">
                         <label for="pur-invoice-file"><i class="ri-image-add-line text-primary"></i> إرفاق / تصوير صورة الفاتورة الورقية:</label>
                         <input type="file" id="pur-invoice-file" accept="image/*">
                         <input type="hidden" id="pur-invoice-image-data">
@@ -964,24 +1062,10 @@
                         </div>
                     </div>
 
-                    <!-- Payment Status -->
-                    <div class="form-group" style="margin-bottom: 14px;">
-                        <label for="pur-payment">حالة الدفع *</label>
-                        <select id="pur-payment">
-                            <option value="paid">نقداً (مدفوع بالكامل)</option>
-                            <option value="partial">دفع جزئي</option>
-                            <option value="credit">آجل (تسجيل على المديونية)</option>
-                        </select>
-                    </div>
-                    <div class="form-group" id="pur-paid-amount-wrapper" style="display:none;">
-                        <label for="pur-paid-amount">المبلغ المدفوع الآن (ج.م)</label>
-                        <input type="number" id="pur-paid-amount" step="0.01" min="0" value="0" placeholder="0.00">
-                        <small class="text-muted">الفرق سيُضاف لمديونية المورد آلياً</small>
-                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" id="cancel-purchase-modal">إلغاء</button>
-                    <button type="submit" class="btn btn-primary"><i class="ri-check-double-line"></i> تأكيد وحفظ الفاتورة</button>
+                    <button type="submit" class="btn btn-primary" id="save-batch-purchase-btn"><i class="ri-check-double-line"></i> حفظ الفاتورة بالكامل</button>
                 </div>
             </form>
         </div>
@@ -1083,12 +1167,58 @@
                         <label for="sup-balance">المديونية المبدئية (ج.م)</label>
                         <input type="number" id="sup-balance" step="0.01" min="0" value="0">
                     </div>
+                    <div class="form-group">
+                        <label for="sup-products">المنتجات المخصصة لهذا المورد (اختياري)</label>
+                        <select id="sup-products" multiple style="height: 110px; padding: 6px;"></select>
+                        <small class="text-muted">اضغط Ctrl (أو Command) لاختيار أكثر من منتج</small>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" id="cancel-supplier-modal">إلغاء</button>
                     <button type="submit" class="btn btn-primary">حفظ المورد</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Price History Modal (سجل تاريخ أسعار المنتج) -->
+    <div class="modal-overlay" id="price-history-modal">
+        <div class="modal-container" style="max-width: 680px; width: 92vw;">
+            <div class="modal-header">
+                <h3><i class="ri-history-line text-primary"></i> سجل تاريخ أسعار المنتج عبر الوقت</h3>
+                <button class="btn-close-modal" onclick="document.getElementById('price-history-modal').classList.remove('active')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; background:var(--bg-input); padding:12px 16px; border-radius:var(--radius-md); border: 1px solid var(--border-color);">
+                    <div>
+                        <strong id="ph-product-name" style="font-size:16px; color:var(--primary); font-weight:700;">-</strong>
+                        <div id="ph-product-barcode" style="font-size:12px; color:var(--text-muted); margin-top:2px;">الباركود: -</div>
+                    </div>
+                    <div style="text-align:left; display:flex; gap:8px;">
+                        <span id="ph-current-cost" class="badge badge-info" style="font-size:12px;">سعر الشراء: -</span>
+                        <span id="ph-current-price" class="badge badge-success" style="font-size:12px;">سعر البيع: -</span>
+                    </div>
+                </div>
+                <div class="batch-table-wrapper" style="max-height: 320px;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>التاريخ والوقت</th>
+                                <th>سعر الشراء (التكلفة)</th>
+                                <th>سعر البيع</th>
+                                <th>هامش الربح</th>
+                                <th>البيان / مرجع الفاتورة</th>
+                            </tr>
+                        </thead>
+                        <tbody id="price-history-table-body">
+                            <tr><td colspan="5" style="text-align:center; padding:20px; color:var(--text-muted);">لا يوجد سجل أسعار متاح</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="document.getElementById('price-history-modal').classList.remove('active')">إغلاق</button>
+            </div>
         </div>
     </div>
 
@@ -1591,7 +1721,7 @@
     </div>
 
     <!-- Main Consolidated JavaScript Application -->
-    <script src="js/app-bundle.js"></script>
+    <script type="module" src="js/app.js"></script>
 </body>
 
 </html>

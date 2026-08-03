@@ -63,6 +63,9 @@ export function renderInventoryTable() {
             <td>${stockBadge}</td>
             <td>
                 <div style="display: flex; gap: 4px;">
+                    <button class="btn btn-info btn-sm" onclick="window.openPriceHistoryModal('${p.id}')" title="سجل الأسعار (Price History)">
+                        <i class="ri-history-line"></i>
+                    </button>
                     <button class="btn btn-secondary btn-sm" onclick="editProduct('${p.id}')" title="تعديل">
                         <i data-lucide="edit-3" style="width: 14px; height: 14px;"></i>
                     </button>
@@ -74,12 +77,51 @@ export function renderInventoryTable() {
         `;
         tbody.appendChild(row);
     });
-    lucide.createIcons();
+    if (window.lucide) window.lucide.createIcons();
 }
 
 export function isExpired(dateStr) {
     if (!dateStr) return false;
     return new Date(dateStr) < new Date();
+}
+
+export function getFormattedNow() {
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const dd = String(now.getDate()).padStart(2, '0');
+    const hh = String(now.getHours()).padStart(2, '0');
+    const min = String(now.getMinutes()).padStart(2, '0');
+    const ss = String(now.getSeconds()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
+}
+
+export function logPriceChange(product, newCost, newPrice, ref = "تعديل يدوي") {
+    if (!product) return;
+    if (!product.priceHistory) product.priceHistory = [];
+    
+    const nowStr = getFormattedNow();
+
+    // If empty history, log baseline price
+    if (product.priceHistory.length === 0) {
+        product.priceHistory.push({
+            date: nowStr,
+            cost: product.cost || 0,
+            price: product.price || 0,
+            ref: "سعر السجل التأسيسي"
+        });
+    }
+
+    // Only log if cost or price changed
+    const last = product.priceHistory[product.priceHistory.length - 1];
+    if (!last || last.cost !== newCost || last.price !== newPrice) {
+        product.priceHistory.push({
+            date: nowStr,
+            cost: newCost,
+            price: newPrice,
+            ref: ref
+        });
+    }
 }
 
 export function handleProductFormSubmit(e) {
@@ -106,12 +148,16 @@ export function handleProductFormSubmit(e) {
         // Edit existing
         const index = state.products.findIndex(p => p.id === id);
         if (index !== -1) {
-            state.products[index] = { id, barcode, name, category, cost, price, stock, minStock, expiry, image };
+            logPriceChange(state.products[index], cost, price, "تعديل من المخزون");
+            const history = state.products[index].priceHistory || [];
+            state.products[index] = { id, barcode, name, category, cost, price, stock, minStock, expiry, image, priceHistory: history };
         }
     } else {
         // Add new
         const newId = (state.products.length + 1).toString();
-        state.products.push({ id: newId, barcode, name, category, cost, price, stock, minStock, expiry, image });
+        const newProd = { id: newId, barcode, name, category, cost, price, stock, minStock, expiry, image, priceHistory: [] };
+        logPriceChange(newProd, cost, price, "سعر الإضافة الأولي");
+        state.products.push(newProd);
     }
 
     saveState();
@@ -154,4 +200,58 @@ export function deleteProduct(id) {
         saveState();
         renderInventory();
     }
+}
+
+export function openPriceHistoryModal(productId) {
+    const prod = (state.products || []).find(p => p.id === productId);
+    if (!prod) return;
+
+    const nameEl = document.getElementById("ph-product-name");
+    const barcodeEl = document.getElementById("ph-product-barcode");
+    const costEl = document.getElementById("ph-current-cost");
+    const priceEl = document.getElementById("ph-current-price");
+    const tbody = document.getElementById("price-history-table-body");
+
+    if (nameEl) nameEl.textContent = prod.name;
+    if (barcodeEl) barcodeEl.textContent = `الباركود: ${prod.barcode}`;
+    if (costEl) costEl.textContent = `سعر الشراء الحالي: ${prod.cost.toFixed(2)} ${state.settings.currency}`;
+    if (priceEl) priceEl.textContent = `سعر البيع الحالي: ${prod.price.toFixed(2)} ${state.settings.currency}`;
+
+    if (!tbody) return;
+    tbody.innerHTML = "";
+
+    const history = prod.priceHistory || [];
+    if (history.length === 0) {
+        // Show current price as default baseline entry with current timestamp
+        const nowStr = getFormattedNow();
+        tbody.innerHTML = `
+            <tr>
+                <td style="font-size:12px; font-family:monospace;">${nowStr}</td>
+                <td><strong class="text-info">${prod.cost.toFixed(2)} ${state.settings.currency}</strong></td>
+                <td><strong class="text-success">${prod.price.toFixed(2)} ${state.settings.currency}</strong></td>
+                <td class="text-success">+${(prod.price - prod.cost).toFixed(2)} ${state.settings.currency}</td>
+                <td><span class="badge badge-primary" style="font-size:11px;">السعر النشط الحالي</span></td>
+            </tr>
+        `;
+    } else {
+        // Sort descending: newest date/time first
+        const sortedHistory = [...history].sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+
+        sortedHistory.forEach(h => {
+            const profit = (h.price || 0) - (h.cost || 0);
+            const dateFormatted = h.date ? (h.date.includes('T') ? h.date.replace('T', ' ').substring(0, 19) : h.date) : '—';
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td style="font-size:12px; font-family:monospace; direction:ltr; text-align:right;">${dateFormatted}</td>
+                <td><strong class="text-info">${(h.cost || 0).toFixed(2)} ${state.settings.currency}</strong></td>
+                <td><strong class="text-success">${(h.price || 0).toFixed(2)} ${state.settings.currency}</strong></td>
+                <td class="${profit >= 0 ? 'text-success' : 'text-danger'}">${profit >= 0 ? '+' : ''}${profit.toFixed(2)} ${state.settings.currency}</td>
+                <td><span class="badge badge-secondary" style="font-size:11px;">${h.ref || 'تحديث تلقائي'}</span></td>
+            `;
+            tbody.appendChild(row);
+        });
+    }
+
+    const modal = document.getElementById("price-history-modal");
+    if (modal) modal.classList.add("active");
 }

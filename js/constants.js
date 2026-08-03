@@ -35,8 +35,8 @@ export const DEFAULT_CUSTOMERS = [
 ];
 
 export const DEFAULT_SUPPLIERS = [
-    { id: "s1", company: "شركة جهينة للصناعات الغذائية", name: "م. عصام رأفت", phone: "0238204222", balance: 12500.00, totalPurchases: 45000.00, lastUpdated: "2026-07-10" },
-    { id: "s2", company: "الشركة المصرية للأغذية (بسكو مصر)", name: "أ. محمد سليم", phone: "19234", balance: 0.00, totalPurchases: 18400.00, lastUpdated: "2026-07-08" }
+    { id: "s1", company: "شركة جهينة للصناعات الغذائية", name: "م. عصام رأفت", phone: "0238204222", balance: 12500.00, totalPurchases: 45000.00, productIds: ["1", "2"], lastUpdated: "2026-07-10" },
+    { id: "s2", company: "الشركة المصرية للأغذية (بسكو مصر)", name: "أ. محمد سليم", phone: "19234", balance: 0.00, totalPurchases: 18400.00, productIds: ["3"], lastUpdated: "2026-07-08" }
 ];
 
 export const DEFAULT_USERS = [

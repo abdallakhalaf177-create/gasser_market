@@ -1,8 +1,11 @@
 import { state, saveState } from '../state.js';
+import { logPriceChange } from './inventory.js';
 
 // ============================================================
-// SUPPLIERS MODULE — Full CRUD + WAC + Credit Purchases + Settlements
+// SUPPLIERS MODULE — Batch Purchases + Supplier Product Mapping + 2-Way Price Sync
 // ============================================================
+
+let currentBatchItems = [];
 
 export function renderSuppliers() {
     _populatePurchaseDropdowns();
@@ -27,31 +30,183 @@ function _populatePurchaseDropdowns() {
             purSupplierSel.innerHTML = suppliers.map(s =>
                 `<option value="${s.id}">${s.company || s.name}</option>`
             ).join('');
+            purSupplierSel.onchange = () => filterPurchaseProductsBySupplier();
         } else {
             purSupplierSel.innerHTML = `<option value="">لا يوجد موردين — أضف مورداً أولاً</option>`;
         }
     }
 
-    const purProductSel = document.getElementById("pur-product");
-    if (purProductSel) {
-        const products = state.products || [];
-        if (products.length > 0) {
-            purProductSel.innerHTML = products.map(p =>
-                `<option value="${p.id}">${p.name} (${p.barcode}) — تكلفة حالية: ${(p.cost || 0).toFixed(2)} ${state.settings.currency}</option>`
-            ).join('');
-
-            // Auto-fill cost when product changes
-            const fillCost = () => {
-                const prod = products.find(x => x.id === purProductSel.value);
-                const costInput = document.getElementById("pur-cost");
-                if (prod && costInput) costInput.value = (prod.cost || 0).toFixed(2);
-            };
-            purProductSel.onchange = fillCost;
-            fillCost(); // fill on initial load
-        } else {
-            purProductSel.innerHTML = `<option value="">لا يوجد منتجات بالمخزن</option>`;
-        }
+    const showAllCheckbox = document.getElementById("pur-show-all-products");
+    if (showAllCheckbox) {
+        showAllCheckbox.onchange = () => filterPurchaseProductsBySupplier();
     }
+
+    filterPurchaseProductsBySupplier();
+}
+
+export function filterPurchaseProductsBySupplier() {
+    const purSupplierSel = document.getElementById("pur-supplier");
+    const purProductSel = document.getElementById("pur-product");
+    const showAllCheckbox = document.getElementById("pur-show-all-products");
+
+    if (!purProductSel) return;
+
+    const supplierId = purSupplierSel ? purSupplierSel.value : "";
+    const showAll = showAllCheckbox ? showAllCheckbox.checked : false;
+
+    const supplier = (state.suppliers || []).find(s => s.id === supplierId);
+    const products = state.products || [];
+
+    let filtered = products;
+    if (!showAll && supplier && supplier.productIds && supplier.productIds.length > 0) {
+        filtered = products.filter(p => supplier.productIds.includes(p.id) || p.supplier === supplier.company);
+    }
+
+    if (filtered.length > 0) {
+        purProductSel.innerHTML = filtered.map(p =>
+            `<option value="${p.id}">${p.name} (${p.barcode}) — شراء: ${(p.cost || 0).toFixed(2)} / بيع: ${(p.price || 0).toFixed(2)} ${state.settings.currency}</option>`
+        ).join('');
+
+        // Auto-fill cost & selling price when selected product changes
+        const fillPrices = () => {
+            const prod = products.find(x => x.id === purProductSel.value);
+            const costInput = document.getElementById("pur-cost");
+            const priceInput = document.getElementById("pur-sell-price");
+            const expiryInput = document.getElementById("pur-expiry");
+            if (prod) {
+                if (costInput) costInput.value = (prod.cost || 0).toFixed(2);
+                if (priceInput) priceInput.value = (prod.price || 0).toFixed(2);
+                if (expiryInput && prod.expiry) expiryInput.value = prod.expiry;
+            }
+        };
+        purProductSel.onchange = fillPrices;
+        fillPrices();
+    } else {
+        purProductSel.innerHTML = `<option value="">لا توجد منتجات مخصصة لهذا المورد (اختر إظهار الكل)</option>`;
+        const costInput = document.getElementById("pur-cost");
+        const priceInput = document.getElementById("pur-sell-price");
+        if (costInput) costInput.value = "";
+        if (priceInput) priceInput.value = "";
+    }
+}
+
+export function addBatchItem() {
+    const prodSel = document.getElementById("pur-product");
+    const productId = prodSel ? prodSel.value : "";
+    const prod = (state.products || []).find(p => p.id === productId);
+
+    if (!prod) {
+        if (window.showToast) window.showToast("يرجى اختيار صنف صحيح للبيان!", "warning");
+        return;
+    }
+
+    const cost = parseFloat(document.getElementById("pur-cost")?.value) || 0;
+    const price = parseFloat(document.getElementById("pur-sell-price")?.value) || 0;
+    const qty = parseInt(document.getElementById("pur-qty")?.value) || 1;
+    const expiry = document.getElementById("pur-expiry")?.value || "";
+
+    if (qty <= 0) {
+        if (window.showToast) window.showToast("يرجى اختيار كمية أكبر من صفر!", "danger");
+        return;
+    }
+    if (cost < 0 || price < 0) {
+        if (window.showToast) window.showToast("أسعار الشراء والبيع يجب أن تكون قيم موجبة!", "danger");
+        return;
+    }
+
+    const total = cost * qty;
+    currentBatchItems.push({
+        productId: prod.id,
+        barcode: prod.barcode,
+        name: prod.name,
+        cost,
+        price,
+        qty,
+        expiry,
+        total
+    });
+
+    renderBatchItemsTable();
+
+    // Reset inputs for next item
+    const qtyInput = document.getElementById("pur-qty");
+    if (qtyInput) qtyInput.value = 1;
+    const expiryInput = document.getElementById("pur-expiry");
+    if (expiryInput) expiryInput.value = "";
+
+    if (window.showToast) window.showToast(`تم تنزيل ${qty} × ${prod.name} بجدول الفاتورة!`, "info");
+}
+
+export function removeBatchItem(index) {
+    if (index >= 0 && index < currentBatchItems.length) {
+        currentBatchItems.splice(index, 1);
+        renderBatchItemsTable();
+    }
+}
+
+export function editBatchItem(index) {
+    if (index >= 0 && index < currentBatchItems.length) {
+        const item = currentBatchItems[index];
+        const prodSel = document.getElementById("pur-product");
+        const costInput = document.getElementById("pur-cost");
+        const priceInput = document.getElementById("pur-sell-price");
+        const qtyInput = document.getElementById("pur-qty");
+        const expiryInput = document.getElementById("pur-expiry");
+
+        if (prodSel) prodSel.value = item.productId;
+        if (costInput) costInput.value = item.cost;
+        if (priceInput) priceInput.value = item.price;
+        if (qtyInput) qtyInput.value = item.qty;
+        if (expiryInput) expiryInput.value = item.expiry || "";
+
+        currentBatchItems.splice(index, 1);
+        renderBatchItemsTable();
+    }
+}
+
+export function renderBatchItemsTable() {
+    const tbody = document.getElementById("pur-batch-items-body");
+    const countBadge = document.getElementById("batch-items-count");
+    const totalEl = document.getElementById("pur-batch-total");
+
+    if (countBadge) countBadge.textContent = `${currentBatchItems.length} أصناف`;
+
+    let totalSum = 0;
+    if (!tbody) return;
+    tbody.innerHTML = "";
+
+    if (currentBatchItems.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 20px;">لم يتم إضافة أي أصناف بعد. اختر المنتج واضغط إضافة.</td></tr>`;
+        if (totalEl) totalEl.textContent = `0.00 ${state.settings.currency}`;
+        return;
+    }
+
+    currentBatchItems.forEach((item, idx) => {
+        totalSum += item.total;
+        const row = document.createElement("tr");
+        row.innerHTML = `
+            <td>${idx + 1}</td>
+            <td><strong>${item.name}</strong> <small class="text-muted">(${item.barcode})</small></td>
+            <td><span class="text-info">${item.cost.toFixed(2)} ${state.settings.currency}</span></td>
+            <td><span class="text-success">${item.price.toFixed(2)} ${state.settings.currency}</span></td>
+            <td><strong>${item.qty}</strong></td>
+            <td><span style="font-size:11px;">${item.expiry || '-'}</span></td>
+            <td><strong class="text-primary">${item.total.toFixed(2)} ${state.settings.currency}</strong></td>
+            <td>
+                <div style="display:flex; gap:4px;">
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="window.editBatchItem(${idx})" title="تعديل">
+                        <i class="ri-edit-line"></i>
+                    </button>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="window.removeBatchItem(${idx})" title="حذف">
+                        <i class="ri-delete-bin-line"></i>
+                    </button>
+                </div>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+
+    if (totalEl) totalEl.textContent = `${totalSum.toFixed(2)} ${state.settings.currency}`;
 }
 
 export function openSupplierModal() {
@@ -62,16 +217,30 @@ export function openSupplierModal() {
     if (idField) idField.value = "";
     const titleEl = document.getElementById("supplier-modal-title");
     if (titleEl) titleEl.textContent = state.language === "ar" ? "إضافة مورد جديد" : "Add New Supplier";
+
+    _populateSupplierProductsDropdown([]);
+
     if (modal) modal.classList.add("active");
 }
 
+function _populateSupplierProductsDropdown(selectedIds = []) {
+    const supProductsSel = document.getElementById("sup-products");
+    if (!supProductsSel) return;
+    const products = state.products || [];
+    supProductsSel.innerHTML = products.map(p =>
+        `<option value="${p.id}" ${selectedIds.includes(p.id) ? 'selected' : ''}>${p.name} (${p.category.split(' ')[0]})</option>`
+    ).join('');
+}
+
 export function openPurchaseModal() {
+    currentBatchItems = [];
     _populatePurchaseDropdowns();
+    renderBatchItemsTable();
+
     const form = document.getElementById("purchase-form");
     if (form) form.reset();
-    // Re-fill after reset
     _populatePurchaseDropdowns();
-    // Reset partial wrapper
+
     const wrapper = document.getElementById("pur-paid-amount-wrapper");
     if (wrapper) wrapper.style.display = "none";
     const modal = document.getElementById("purchase-modal");
@@ -99,9 +268,13 @@ export function renderSuppliersTable() {
 
     filtered.forEach(s => {
         const balance = s.balance || 0;
+        const mappedCount = (s.productIds || []).length;
         const row = document.createElement("tr");
         row.innerHTML = `
-            <td><strong>${s.company || '—'}</strong></td>
+            <td>
+                <strong>${s.company || '—'}</strong>
+                ${mappedCount > 0 ? `<br><small class="text-muted"><i class="ri-links-line"></i> ${mappedCount} منتج مخصص</small>` : ''}
+            </td>
             <td>${s.name || '—'}</td>
             <td><code>${s.phone || '—'}</code></td>
             <td><strong class="${balance > 0 ? 'text-danger' : 'text-success'}">${balance.toFixed(2)} ${state.settings.currency}</strong></td>
@@ -139,6 +312,9 @@ export function handleSupplierFormSubmit(e) {
     const phone = document.getElementById("sup-phone")?.value?.trim();
     const balance = parseFloat(document.getElementById("sup-balance")?.value) || 0;
 
+    const supProductsSel = document.getElementById("sup-products");
+    const productIds = supProductsSel ? Array.from(supProductsSel.selectedOptions).map(o => o.value) : [];
+
     if (!company) {
         if (window.showToast) window.showToast("يرجى إدخال اسم الشركة / المورد!", "danger");
         return;
@@ -149,11 +325,11 @@ export function handleSupplierFormSubmit(e) {
     if (id) {
         const idx = state.suppliers.findIndex(s => s.id === id);
         if (idx !== -1) {
-            state.suppliers[idx] = { ...state.suppliers[idx], company, name, phone, balance, lastUpdated: new Date().toISOString().split('T')[0] };
+            state.suppliers[idx] = { ...state.suppliers[idx], company, name, phone, balance, productIds, lastUpdated: new Date().toISOString().split('T')[0] };
         }
     } else {
         state.suppliers.push({
-            id: "s_" + Date.now(), company, name, phone, balance,
+            id: "s_" + Date.now(), company, name, phone, balance, productIds,
             totalPurchases: 0, lastUpdated: new Date().toISOString().split('T')[0]
         });
     }
@@ -181,6 +357,8 @@ export function editSupplier(id) {
     set("sup-phone", s.phone || "");
     set("sup-balance", s.balance || 0);
 
+    _populateSupplierProductsDropdown(s.productIds || []);
+
     const titleEl = document.getElementById("supplier-modal-title");
     if (titleEl) titleEl.textContent = "تعديل بيانات المورد";
     const modal = document.getElementById("supplier-modal");
@@ -198,90 +376,90 @@ export function deleteSupplier(id) {
 export function handlePurchaseFormSubmit(e) {
     e.preventDefault();
 
-    const supplierId  = document.getElementById("pur-supplier")?.value;
-    const productId   = document.getElementById("pur-product")?.value;
-    const newBatchCost = parseFloat(document.getElementById("pur-cost")?.value) || 0;
-    const qty          = parseInt(document.getElementById("pur-qty")?.value) || 0;
+    const supplierId = document.getElementById("pur-supplier")?.value;
     const paymentStatus = document.getElementById("pur-payment")?.value || "paid";
 
-    if (!supplierId || !productId) {
-        if (window.showToast) window.showToast("يرجى اختيار المورد والمنتج!", "danger");
-        return;
-    }
-    if (qty <= 0) {
-        if (window.showToast) window.showToast("يرجى إدخال كمية توريد صحيحة!", "danger");
-        return;
-    }
-    if (newBatchCost <= 0) {
-        if (window.showToast) window.showToast("يرجى إدخال سعر التكلفة الصحيح!", "danger");
+    if (!supplierId) {
+        if (window.showToast) window.showToast("يرجى اختيار المورد!", "danger");
         return;
     }
 
-    const totalCost = newBatchCost * qty;
-
-    // ---- WAC: Update Product Stock & Weighted Average Cost ----
-    const prod = (state.products || []).find(p => p.id === productId);
-    if (prod) {
-        const currentStock = Math.max(0, prod.stock || 0);
-        const currentCost = prod.cost || 0;
-        const totalStockAfter = currentStock + qty;
-
-        // WAC = ((currentStock × currentCost) + (newQty × newCost)) / totalStockAfter
-        prod.cost = totalStockAfter > 0
-            ? parseFloat(((currentStock * currentCost + qty * newBatchCost) / totalStockAfter).toFixed(4))
-            : newBatchCost;
-
-        prod.stock = totalStockAfter;
+    if (currentBatchItems.length === 0) {
+        if (window.showToast) window.showToast("الفاتورة فارغة! يرجى إضافة صنف واحد على الأقل قبل الحفظ.", "danger");
+        return;
     }
 
-    // ---- Update Supplier Balance & totals ----
+    const totalCost = currentBatchItems.reduce((sum, item) => sum + item.total, 0);
+    const invoiceId = String(2000 + (state.purchaseInvoices || []).length + 1);
+    const invoiceRef = `فاتورة مشتريات #${invoiceId}`;
+
+    // ---- 1. Process Batch Items (Two-Way Price Sync, Stock & Price History) ----
+    currentBatchItems.forEach(item => {
+        const prod = (state.products || []).find(p => p.id === item.productId);
+        if (prod) {
+            // Log Price History if prices changed
+            logPriceChange(prod, item.cost, item.price, invoiceRef);
+
+            // Two-Way Price Sync (adopt new purchase cost & selling price in system)
+            prod.cost = item.cost;
+            prod.price = item.price;
+
+            // Increment Stock
+            prod.stock = Math.max(0, (prod.stock || 0) + item.qty);
+
+            // Expiry update if provided
+            if (item.expiry) prod.expiry = item.expiry;
+        }
+    });
+
+    // ---- 2. Update Supplier Balance & totals ----
     const sup = (state.suppliers || []).find(s => s.id === supplierId);
+    let paidAmount = totalCost;
     if (sup) {
         sup.totalPurchases = (sup.totalPurchases || 0) + totalCost;
 
         if (paymentStatus === "credit") {
-            // Full credit — entire invoice on account
             sup.balance = (sup.balance || 0) + totalCost;
+            paidAmount = 0;
         } else if (paymentStatus === "partial") {
-            // Partial — remaining unpaid portion on account
             const paidNow = parseFloat(document.getElementById("pur-paid-amount")?.value) || 0;
+            paidAmount = paidNow;
             const remaining = Math.max(0, totalCost - paidNow);
             if (remaining > 0) sup.balance = (sup.balance || 0) + remaining;
         }
-        // "paid" — fully paid, no change to balance
 
         sup.lastUpdated = new Date().toISOString().split('T')[0];
     }
 
-    // ---- Log Purchase Invoice ----
+    // ---- 3. Log Purchase Invoice ----
     if (!state.purchaseInvoices) state.purchaseInvoices = [];
     state.purchaseInvoices.push({
-        id: String(2000 + state.purchaseInvoices.length + 1),
+        id: invoiceId,
         date: new Date().toISOString(),
         supplierId,
         supplierName: sup ? sup.company : "—",
-        productId,
-        productName: prod ? prod.name : "—",
-        qty,
-        cost: newBatchCost,
+        items: [...currentBatchItems],
         totalCost,
         paymentStatus,
-        newWAC: prod ? prod.cost : newBatchCost
+        paidAmount
     });
 
     saveState();
+
+    currentBatchItems = [];
+    renderBatchItemsTable();
 
     const modal = document.getElementById("purchase-modal");
     if (modal) modal.classList.remove("active");
     const form = document.getElementById("purchase-form");
     if (form) form.reset();
-    // Reset partial wrapper visibility
+
     const wrapper = document.getElementById("pur-paid-amount-wrapper");
     if (wrapper) wrapper.style.display = "none";
 
     if (window.showToast) {
         window.showToast(
-            `✅ تم توريد ${qty} قطعة من "${prod?.name || '—'}" وتحديث متوسط التكلفة إلى ${prod ? prod.cost.toFixed(2) : newBatchCost} ${state.settings.currency}!`,
+            `✅ تم حفظ فاتورة التوريد #${invoiceId} بالكامل وتحديث الأسعار والمخزن بنجاح!`,
             "success"
         );
     }

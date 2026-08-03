@@ -2,18 +2,62 @@ import { state, loadState, saveState, resetToDefault, addToCart, updateCartQty, 
 import { translations, SMART_BARCODE_DATABASE } from './constants.js';
 import { renderDashboard } from './modules/dashboard.js';
 import { renderPOS, renderPOSCategoryDropdowns, renderPOSProducts, renderPOSCustomerDropdown, renderCart, updateCartSummary, handleCheckout, openCheckoutModal, confirmCheckout, viewReceipt, closeReceiptModal, printReceipt } from './modules/pos.js';
-import { renderInventory, renderInventoryTable, handleProductFormSubmit, editProduct, deleteProduct } from './modules/inventory.js';
+import { renderInventory, renderInventoryTable, handleProductFormSubmit, editProduct, deleteProduct, openPriceHistoryModal } from './modules/inventory.js';
 import { handleCategoryFormSubmit, renderCategoriesList, deleteCategory } from './modules/categories.js';
 import { renderReports, renderReportsData, openLowStockReport, closeLowStockModal, printLowStockReport, exportLowStockCSV, setReportRange, openExpiryReport, closeExpiryModal } from './modules/reports.js';
 import { renderCustomers, handleCustomerFormSubmit, editCustomer, deleteCustomer, openCustomerModal, openCustomerSettleModal, handleCustomerSettleFormSubmit } from './modules/customers.js';
-import { renderSuppliers, renderSuppliersTable, handleSupplierFormSubmit, editSupplier, deleteSupplier, handlePurchaseFormSubmit, openSettleModal, handleSettleFormSubmit, renderPurchases, openSupplierModal, openPurchaseModal, openSupplierHistoryModal, previewImageModal, switchBaleMode } from './modules/suppliers.js';
+import { renderSuppliers, renderSuppliersTable, handleSupplierFormSubmit, editSupplier, deleteSupplier, handlePurchaseFormSubmit, openSettleModal, handleSettleFormSubmit, renderPurchases, openSupplierModal, openPurchaseModal, openSupplierHistoryModal, previewImageModal, switchBaleMode, filterPurchaseProductsBySupplier, addBatchItem, removeBatchItem, editBatchItem } from './modules/suppliers.js';
 import { renderExpenses, openExpenseModal, handleExpenseFormSubmit, deleteExpense } from './modules/expenses.js';
 import { renderWaste, openWasteModal, handleWasteFormSubmit } from './modules/waste.js';
 import { openShiftModal, handleShiftClosingSubmit } from './modules/shifts.js';
 import { renderSettings } from './modules/settings.js';
 import { initAuth, renderUsers, handleUserFormSubmit, editUser, deleteUser } from './modules/users.js';
 
+export function dynamicCalculatedExpiry(amount, unit, targetInputId) {
+    const targetInput = document.getElementById(targetInputId);
+    if (!targetInput) return;
+
+    const num = parseInt(amount) || 0;
+    if (num <= 0) return;
+
+    const d = new Date();
+    if (unit === 'days') {
+        d.setDate(d.getDate() + num);
+    } else if (unit === 'months') {
+        d.setMonth(d.getMonth() + num);
+    } else if (unit === 'years') {
+        d.setFullYear(d.getFullYear() + num);
+    }
+
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+
+    targetInput.value = `${yyyy}-${mm}-${dd}`;
+    targetInput.dispatchEvent(new Event('input', { bubbles: true }));
+    targetInput.dispatchEvent(new Event('change', { bubbles: true }));
+}
+
+export function applyDynamicExpiry(amountInputId, unitSelectId, targetInputId) {
+    const amountVal = document.getElementById(amountInputId)?.value || 1;
+    const unitVal = document.getElementById(unitSelectId)?.value || 'months';
+    dynamicCalculatedExpiry(amountVal, unitVal, targetInputId);
+}
+
+export function setQuickExpiry(inputId, months) {
+    dynamicCalculatedExpiry(months, 'months', inputId);
+}
+
 // Bind dynamically called template functions to the window object
+window.dynamicCalculatedExpiry = dynamicCalculatedExpiry;
+window.applyDynamicExpiry = applyDynamicExpiry;
+window.setQuickExpiry = setQuickExpiry;
+window.openPriceHistoryModal = openPriceHistoryModal;
+window.filterPurchaseProductsBySupplier = filterPurchaseProductsBySupplier;
+window.addBatchItem = addBatchItem;
+window.removeBatchItem = removeBatchItem;
+window.editBatchItem = editBatchItem;
+
 window.updateCartQty = updateCartQty;
 window.handleCheckout = handleCheckout;
 window.openCheckoutModal = openCheckoutModal;
@@ -444,6 +488,22 @@ function setupEventListeners() {
     // Print receipt
     addListenerSafe("print-receipt-btn", "click", () => {
         window.print();
+    });
+
+    // Add Batch Item Button for Purchase Order Session
+    addListenerSafe("add-batch-item-btn", "click", (e) => {
+        e.preventDefault();
+        addBatchItem();
+    });
+
+    // Enter key in purchase batch inputs triggers addBatchItem()
+    ["pur-qty", "pur-cost", "pur-sell-price"].forEach(id => {
+        addListenerSafe(id, "keydown", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                addBatchItem();
+            }
+        });
     });
 
     // Prevent random form submit via scanner ENTER keypress glitch
