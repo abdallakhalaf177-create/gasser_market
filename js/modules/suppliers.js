@@ -579,3 +579,104 @@ export function renderPurchases() {
         tbody.appendChild(row);
     });
 }
+
+export function openSupplierHistoryModal(supplierId) {
+    const sup = (state.suppliers || []).find(s => s.id === supplierId);
+    if (!sup) return;
+
+    const setVal = (id, txt) => { const el = document.getElementById(id); if (el) el.textContent = txt; };
+    setVal("sup-details-name", sup.company || sup.name || "—");
+    setVal("sup-details-total", `${(sup.totalPurchases || 0).toFixed(2)} ${state.settings.currency}`);
+    setVal("sup-details-balance", `${(sup.balance || 0).toFixed(2)} ${state.settings.currency}`);
+
+    const timelineContainer = document.getElementById("supplier-timeline-container");
+    if (!timelineContainer) return;
+
+    timelineContainer.innerHTML = "";
+
+    const invoices = (state.purchaseInvoices || []).filter(i => i.supplierId === supplierId);
+    const events = [];
+
+    invoices.forEach(inv => {
+        events.push({
+            type: 'purchase',
+            id: inv.id,
+            date: inv.deliveryDate || inv.date,
+            title: `فاتورة توريد #${inv.id}`,
+            subtitle: `مجموع التوريد: ${(inv.totalCost || 0).toFixed(2)} ${state.settings.currency}`,
+            amount: inv.totalCost || 0,
+            paymentStatus: inv.paymentStatus,
+            image: inv.invoiceImage || ''
+        });
+    });
+
+    if (sup.settlements && Array.isArray(sup.settlements)) {
+        sup.settlements.forEach(s => {
+            events.push({
+                type: 'settlement',
+                id: s.id,
+                date: s.date,
+                title: `دفعة سداد مديونية`,
+                subtitle: `تم سداد مبلغ ${s.amount.toFixed(2)} ${state.settings.currency} من رصيد المديونية`,
+                amount: s.amount,
+                paymentStatus: 'paid',
+                image: ''
+            });
+        });
+    }
+
+    events.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    if (events.length === 0) {
+        timelineContainer.innerHTML = `<div style="text-align:center; color:var(--text-muted); padding:30px;">لا تتوفر تعاملات سابقة مسجلة لهذا المورد</div>`;
+    } else {
+        events.forEach(ev => {
+            const dateStr = ev.date ? new Date(ev.date).toLocaleString('ar-EG', { dateStyle: 'medium', timeStyle: 'short' }) : '—';
+            const isPurchase = ev.type === 'purchase';
+            const itemEl = document.createElement("div");
+            itemEl.className = "timeline-item";
+            itemEl.innerHTML = `
+                <div class="timeline-badge ${isPurchase ? 'badge-purchase' : 'badge-settlement'}"></div>
+                <div class="timeline-card">
+                    <div class="timeline-header">
+                        <span class="timeline-title">${ev.title}</span>
+                        <span class="timeline-date">${dateStr}</span>
+                    </div>
+                    <div style="font-size:13px; color:var(--text-secondary);">${ev.subtitle}</div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px;">
+                        <span class="timeline-amount ${isPurchase ? 'text-primary' : 'text-success'}">
+                            ${isPurchase ? '+' : '-'}${ev.amount.toFixed(2)} ${state.settings.currency}
+                        </span>
+                        ${ev.image ? `<button type="button" class="btn btn-sm btn-outline" onclick="window.previewImageModal('${ev.image}')"><i class="ri-image-line"></i> معاينة الفاتورة الورقية</button>` : ''}
+                    </div>
+                </div>
+            `;
+            timelineContainer.appendChild(itemEl);
+        });
+    }
+
+    const modal = document.getElementById("supplier-details-modal");
+    if (modal) modal.classList.add("active");
+}
+
+export function previewImageModal(imgSrc) {
+    const w = window.open("");
+    if (w) {
+        w.document.write(`<title>معاينة الفاتورة الورقية</title><div style="display:flex;justify-content:center;align-items:center;min-height:100vh;background:#111;"><img src="${imgSrc}" style="max-width:90vw; max-height:90vh; border-radius:8px; box-shadow:0 10px 30px rgba(0,0,0,0.8);" /></div>`);
+    }
+}
+
+export function switchBaleMode(mode) {
+    const btnUnit = document.getElementById("btn-mode-unit");
+    const btnBale = document.getElementById("btn-mode-bale");
+    const baleRow = document.getElementById("bale-inputs-row");
+    if (mode === "bale") {
+        if (btnUnit) btnUnit.classList.remove("active");
+        if (btnBale) btnBale.classList.add("active");
+        if (baleRow) baleRow.style.display = "grid";
+    } else {
+        if (btnBale) btnBale.classList.remove("active");
+        if (btnUnit) btnUnit.classList.add("active");
+        if (baleRow) baleRow.style.display = "none";
+    }
+}
