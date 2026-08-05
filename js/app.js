@@ -33,7 +33,7 @@ const REQUIRED_GLOBAL_FUNCTIONS = [
 
 REQUIRED_GLOBAL_FUNCTIONS.forEach(fnName => {
     if (!window[fnName]) {
-        window[fnName] = function(...args) {
+        window[fnName] = function (...args) {
             console.warn(`[Fallback Guard] Function "${fnName}" called before full module initialization or fallback triggered.`, args);
         };
     }
@@ -144,7 +144,7 @@ window.deleteSupplier = deleteSupplier;
 window.cancelTransaction = cancelTransaction;
 window.showToast = showToast;
 window.playBeep = playBeep;
-window.refreshCurrentView = () => { try { switchView(state.currentView); } catch(e){ console.error(e); } };
+window.refreshCurrentView = () => { try { switchView(state.currentView); } catch (e) { console.error(e); } };
 
 window.openCustomerModal = openCustomerModal;
 window.openSupplierModal = openSupplierModal;
@@ -189,21 +189,21 @@ window.renderUsers = renderUsers;
 document.addEventListener("DOMContentLoaded", async () => {
     try {
         await loadState();
-        try { initAuth(); } catch(e) { console.error("initAuth error:", e); }
-        try { applyTheme(); } catch(e) { console.error("applyTheme error:", e); }
-        try { applyLanguage(); } catch(e) { console.error("applyLanguage error:", e); }
-        try { setupNavigation(); } catch(e) { console.error("setupNavigation error:", e); }
-        try { setupEventListeners(); } catch(e) { console.error("setupEventListeners error:", e); }
-        try { setupLiveTime(); } catch(e) { console.error("setupLiveTime error:", e); }
-        try { setupKeyboardShortcuts(); } catch(e) { console.error("setupKeyboardShortcuts error:", e); }
+        try { initAuth(); } catch (e) { console.error("initAuth error:", e); }
+        try { applyTheme(); } catch (e) { console.error("applyTheme error:", e); }
+        try { applyLanguage(); } catch (e) { console.error("applyLanguage error:", e); }
+        try { setupNavigation(); } catch (e) { console.error("setupNavigation error:", e); }
+        try { setupEventListeners(); } catch (e) { console.error("setupEventListeners error:", e); }
+        try { setupLiveTime(); } catch (e) { console.error("setupLiveTime error:", e); }
+        try { setupKeyboardShortcuts(); } catch (e) { console.error("setupKeyboardShortcuts error:", e); }
 
         onCartChange(() => {
-            try { renderCart(); } catch(e) { console.error("renderCart error:", e); }
+            try { renderCart(); } catch (e) { console.error("renderCart error:", e); }
         });
 
-        try { switchView(state.currentView || "pos"); } catch(e) { console.error("switchView error:", e); }
+        try { switchView(state.currentView || "pos"); } catch (e) { console.error("switchView error:", e); }
         if (window.lucide) {
-            try { lucide.createIcons(); } catch(e) {}
+            try { lucide.createIcons(); } catch (e) { }
         }
     } catch (globalErr) {
         console.error("Critical Application Startup Error:", globalErr);
@@ -275,7 +275,7 @@ function setupKeyboardShortcuts() {
                     m.classList.remove("active", "show");
                 });
             }
-        } catch(err) {
+        } catch (err) {
             console.error("Keyboard shortcut error:", err);
         }
     });
@@ -301,7 +301,7 @@ function setupLiveTime() {
             if (timeEl && timeEl.querySelector("span")) {
                 timeEl.querySelector("span").textContent = timeStr;
             }
-        } catch(e) {}
+        } catch (e) { }
     };
     updateTime();
     setInterval(updateTime, 1000);
@@ -482,7 +482,7 @@ function switchView(viewName) {
         }
 
         if (window.lucide) lucide.createIcons();
-    } catch(err) {
+    } catch (err) {
         console.error(`Error rendering view ${viewName}:`, err);
     }
 }
@@ -510,22 +510,22 @@ function setupEventListeners() {
     });
 
     const closeModalBtns = [
-        ["close-product-modal",  "product-modal"],
+        ["close-product-modal", "product-modal"],
         ["cancel-product-modal", "product-modal"],
         ["close-customer-modal", "customer-modal"],
-        ["cancel-customer-modal","customer-modal"],
+        ["cancel-customer-modal", "customer-modal"],
         ["close-supplier-modal", "supplier-modal"],
-        ["cancel-supplier-modal","supplier-modal"],
+        ["cancel-supplier-modal", "supplier-modal"],
         ["close-purchase-modal", "purchase-modal"],
-        ["cancel-purchase-modal","purchase-modal"],
-        ["close-settle-modal",   "settle-modal"],
-        ["cancel-settle-modal",  "settle-modal"],
-        ["close-user-modal",     "user-modal"],
-        ["cancel-user-modal",    "user-modal"],
-        ["close-barcode-modal",  "barcode-modal"],
+        ["cancel-purchase-modal", "purchase-modal"],
+        ["close-settle-modal", "settle-modal"],
+        ["cancel-settle-modal", "settle-modal"],
+        ["close-user-modal", "user-modal"],
+        ["cancel-user-modal", "user-modal"],
+        ["close-barcode-modal", "barcode-modal"],
         ["cancel-barcode-modal", "barcode-modal"],
         ["close-category-modal", "category-modal"],
-        ["close-camera-modal",   "camera-modal"],
+        ["close-camera-modal", "camera-modal"],
     ];
     closeModalBtns.forEach(([btnId, modalId]) => {
         const btn = document.getElementById(btnId);
@@ -606,17 +606,17 @@ function setupEventListeners() {
         }
     });
 
-    addListenerSafe("product-form",         "submit", handleProductFormSubmit);
-    addListenerSafe("customer-form",        "submit", handleCustomerFormSubmit);
-    addListenerSafe("supplier-form",        "submit", handleSupplierFormSubmit);
-    addListenerSafe("purchase-form",        "submit", handlePurchaseFormSubmit);
-    addListenerSafe("add-category-form",    "submit", handleCategoryFormSubmit);
-    addListenerSafe("expense-form",         "submit", handleExpenseFormSubmit);
-    addListenerSafe("waste-form",           "submit", handleWasteFormSubmit);
-    addListenerSafe("shift-form",           "submit", handleShiftClosingSubmit);
+    addListenerSafe("product-form", "submit", handleProductFormSubmit);
+    addListenerSafe("customer-form", "submit", handleCustomerFormSubmit);
+    addListenerSafe("supplier-form", "submit", handleSupplierFormSubmit);
+    addListenerSafe("purchase-form", "submit", handlePurchaseFormSubmit);
+    addListenerSafe("add-category-form", "submit", handleCategoryFormSubmit);
+    addListenerSafe("expense-form", "submit", handleExpenseFormSubmit);
+    addListenerSafe("waste-form", "submit", handleWasteFormSubmit);
+    addListenerSafe("shift-form", "submit", handleShiftClosingSubmit);
     addListenerSafe("customer-settle-form", "submit", handleCustomerSettleFormSubmit);
-    addListenerSafe("settle-form",          "submit", handleSettleFormSubmit);
-    addListenerSafe("user-form",            "submit", handleUserFormSubmit);
+    addListenerSafe("settle-form", "submit", handleSettleFormSubmit);
+    addListenerSafe("user-form", "submit", handleUserFormSubmit);
 
     addListenerSafe("gen-barcode-btn", "click", () => {
         const barcodeInput = document.getElementById("prod-barcode");
