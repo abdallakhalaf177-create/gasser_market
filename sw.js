@@ -1,30 +1,6 @@
-const CACHE_NAME = 'gaser-market-v4-cachebust';
-const ASSETS_TO_CACHE = [
-  './',
-  './index.html?v=1.1.0',
-  './style.css?v=1.1.0',
-  './css/mobile.css?v=1.1.0',
-  './manifest.json?v=1.1.0',
-  './js/app.js?v=1.1.0',
-  './js/state.js',
-  './js/constants.js',
-  './js/modules/pos.js',
-  './js/modules/inventory.js',
-  './js/modules/dashboard.js',
-  './js/modules/categories.js',
-  './js/modules/customers.js',
-  './js/modules/suppliers.js',
-  './js/modules/reports.js',
-  './js/modules/settings.js',
-  './js/modules/users.js'
-];
+const CACHE_NAME = 'gaser-market-v5-clean';
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS_TO_CACHE);
-    })
-  );
   self.skipWaiting();
 });
 
@@ -32,21 +8,39 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
-        cacheNames.map((cache) => {
-          if (cache !== CACHE_NAME) {
-            return caches.delete(cache);
-          }
-        })
+        cacheNames.map((cache) => caches.delete(cache))
       );
-    })
+    }).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
-// Network-First strategy to ensure browser always gets fresh JS/CSS code when online
+// Network-First strategy to ensure browser always gets fresh JS/CSS code when online without throwing net::ERR
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
+  const url = new URL(event.request.url);
+
+  // Bypass cache completely for dynamic JS / CSS scripts to avoid cached old syntax/module error
+  if (url.pathname.endsWith('.js') || url.pathname.endsWith('.css')) {
+    event.respondWith(
+      fetch(event.request)
+        .then((response) => {
+          if (response && response.status === 200) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          }
+          return response;
+        })
+        .catch(() => {
+          return caches.match(event.request, { ignoreSearch: true }).then((cached) => {
+            return cached || new Response('', { status: 200, statusText: 'OK' });
+          });
+        })
+    );
+    return;
+  }
+
+  // Standard Network-First for other GET requests
   event.respondWith(
     fetch(event.request)
       .then((networkResponse) => {
@@ -59,7 +53,6 @@ self.addEventListener('fetch', (event) => {
         return networkResponse;
       })
       .catch(() => {
-        // Fallback to cache when offline (ignoreSearch allows matching assets with dynamic ?v= timestamp parameters)
         return caches.match(event.request, { ignoreSearch: true }).then((cachedResponse) => {
           if (cachedResponse) {
             return cachedResponse;
@@ -67,6 +60,7 @@ self.addEventListener('fetch', (event) => {
           if (event.request.headers.get('accept') && event.request.headers.get('accept').includes('text/html')) {
             return caches.match('./index.html', { ignoreSearch: true });
           }
+          return new Response('', { status: 200, statusText: 'OK' });
         });
       })
   );

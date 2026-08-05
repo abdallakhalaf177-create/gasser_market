@@ -16,23 +16,22 @@ export function renderReportsData(range = "today") {
     const now = new Date();
     const todayStr = now.toISOString().split('T')[0];
 
-    // Filter transactions, expenses, and waste based on range
     let filteredTxns = [...(state.transactions || [])];
     let filteredExpenses = [...(state.expenses || [])];
     let filteredWaste = [...(state.wastes || [])];
 
     if (range === "today") {
-        filteredTxns = state.transactions.filter(t => t.date && t.date.startsWith(todayStr));
+        filteredTxns = (state.transactions || []).filter(t => t.date && t.date.startsWith(todayStr));
         filteredExpenses = (state.expenses || []).filter(e => e.date && e.date.startsWith(todayStr));
         filteredWaste = (state.wastes || []).filter(w => w.date && w.date.startsWith(todayStr));
     } else if (range === "week") {
         const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-        filteredTxns = state.transactions.filter(t => new Date(t.date) >= oneWeekAgo);
+        filteredTxns = (state.transactions || []).filter(t => new Date(t.date) >= oneWeekAgo);
         filteredExpenses = (state.expenses || []).filter(e => new Date(e.date) >= oneWeekAgo);
         filteredWaste = (state.wastes || []).filter(w => new Date(w.date) >= oneWeekAgo);
     } else if (range === "month") {
         const oneMonthAgo = new Date(now.getFullYear(), now.getMonth() - 1, now.getDate());
-        filteredTxns = state.transactions.filter(t => new Date(t.date) >= oneMonthAgo);
+        filteredTxns = (state.transactions || []).filter(t => new Date(t.date) >= oneMonthAgo);
         filteredExpenses = (state.expenses || []).filter(e => new Date(e.date) >= oneMonthAgo);
         filteredWaste = (state.wastes || []).filter(w => new Date(w.date) >= oneMonthAgo);
     }
@@ -40,7 +39,6 @@ export function renderReportsData(range = "today") {
     const validTxns = filteredTxns.filter(t => t.status !== "cancelled");
     const totalSales = validTxns.reduce((sum, t) => sum + (t.total || 0), 0);
     
-    // Calculate total COGS strictly
     const totalCogs = validTxns.reduce((sum, t) => {
         if (t.totalCost !== undefined) return sum + t.totalCost;
         return sum + Math.max(0, (t.total || 0) - (t.profit || 0));
@@ -55,11 +53,9 @@ export function renderReportsData(range = "today") {
     const lowStockItems = (state.products || []).filter(p => Number(p.stock) <= (Number(p.minStock) || 5));
     const lowStockCount = lowStockItems.length;
 
-    // Near Expiration Items (within 30 days or expired)
     const nearExpiryItems = (state.products || []).filter(p => p.expiry && (new Date(p.expiry) <= new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)));
     const nearExpiryCount = nearExpiryItems.length;
 
-    // Update Overview Stats & P&L Cards
     const todaySalesEl = document.getElementById("stat-today-sales");
     const todayCogsEl = document.getElementById("stat-today-cogs");
     const grossProfitEl = document.getElementById("report-gross-profit") || document.getElementById("stat-today-gross-profit");
@@ -85,10 +81,7 @@ export function renderReportsData(range = "today") {
     if (statLowStockEl) statLowStockEl.textContent = lowStockCount;
     if (expiryBadgeEl) expiryBadgeEl.textContent = nearExpiryCount;
 
-    // 1. Render Category Profit Breakdown Table
     renderCategoryProfitsTable(validTxns);
-
-    // 2. Render Sales Transaction Log Table
     renderSalesHistoryTable(filteredTxns);
 }
 
@@ -97,13 +90,12 @@ function renderCategoryProfitsTable(validTxns) {
     if (!tbody) return;
     tbody.innerHTML = "";
 
-    // Aggregate sales and profits by category
     const categoriesMap = {};
 
     validTxns.forEach(txn => {
         if (!txn.items || !Array.isArray(txn.items)) return;
         txn.items.forEach(item => {
-            const product = state.products.find(p => p.id === item.id || p.id === item.productId || p.barcode === item.barcode || (p.name && item.name && p.name.trim() === item.name.trim()));
+            const product = (state.products || []).find(p => p.id === item.id || p.id === item.productId || p.barcode === item.barcode || (p.name && item.name && p.name.trim() === item.name.trim()));
             const cat = (product && product.category) ? product.category : (item.category || "غير تصنيف");
             const qty = Number(item.quantity || item.qty) || 1;
             const itemPrice = Number(item.price) || 0;
@@ -186,7 +178,7 @@ function renderSalesHistoryTable(filteredTxns) {
 
         const cancelBtn = isCancelled
             ? ""
-            : `<button class="btn btn-danger btn-sm" onclick="cancelTransaction('${t.id}')" title="${state.language === "ar" ? "إلغاء المعاملة / مرتجع" : "Cancel/Refund"}">
+            : `<button class="btn btn-danger btn-sm" onclick="window.cancelTransaction('${t.id}')" title="${state.language === "ar" ? "إلغاء المعاملة / مرتجع" : "Cancel/Refund"}">
                   <i data-lucide="x" style="width: 14px; height: 14px;"></i>
                </button>`;
 
@@ -202,7 +194,7 @@ function renderSalesHistoryTable(filteredTxns) {
             <td><strong ${profitStyle}>+${(t.profit || 0).toFixed(2)} ${state.settings.currency}</strong></td>
             <td>
                 <div style="display: flex; gap: 4px;">
-                    <button class="btn btn-secondary btn-sm" onclick="viewReceipt('${t.id}')" title="${state.language === "ar" ? "عرض الفاتورة" : "View"}">
+                    <button class="btn btn-secondary btn-sm" onclick="window.viewReceipt('${t.id}')" title="${state.language === "ar" ? "عرض الفاتورة" : "View"}">
                         <i data-lucide="eye" style="width: 14px; height: 14px;"></i>
                     </button>
                     ${cancelBtn}
@@ -214,9 +206,6 @@ function renderSalesHistoryTable(filteredTxns) {
     if (window.lucide) window.lucide.createIcons();
 }
 
-/* ==========================================================================
-   DAILY LOW-STOCK REPORT MODAL FUNCTIONS
-   ========================================================================== */
 export function openLowStockReport() {
     const modal = document.getElementById("low-stock-modal");
     const tbody = document.getElementById("low-stock-table-body");

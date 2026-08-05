@@ -5,7 +5,6 @@ let salesChartInstance = null;
 let categoriesChartInstance = null;
 
 export function renderDashboard() {
-    // Calculate stats (excluding cancelled transactions)
     const today = new Date().toISOString().split('T')[0];
     const transactions = state.transactions || [];
     const products = state.products || [];
@@ -20,7 +19,6 @@ export function renderDashboard() {
     const lowStockCount = products.filter(p => p.stock <= (state.settings.lowStockLimit || 10)).length;
     const totalProducts = products.length;
 
-    // Update stats UI
     const salesEl = document.getElementById("stat-today-sales");
     const ordersEl = document.getElementById("stat-today-orders");
     const lowStockEl = document.getElementById("stat-low-stock");
@@ -31,7 +29,6 @@ export function renderDashboard() {
     if (lowStockEl) lowStockEl.textContent = lowStockCount;
     if (totalProdEl) totalProdEl.textContent = totalProducts;
 
-    // Render Low Stock List
     const lowStockList = document.getElementById("dashboard-low-stock-list");
     if (lowStockList) {
         lowStockList.innerHTML = "";
@@ -58,7 +55,6 @@ export function renderDashboard() {
                     </span>
                 `;
                 
-                // Clicking a low stock item opens purchase (restock) modal
                 item.addEventListener("click", () => {
                     const purchaseModal = document.getElementById("purchase-modal");
                     if (purchaseModal) {
@@ -76,7 +72,6 @@ export function renderDashboard() {
         }
     }
 
-    // Recent Sales Table
     const recentSalesBody = document.getElementById("dashboard-recent-sales");
     if (recentSalesBody) {
         recentSalesBody.innerHTML = "";
@@ -102,21 +97,21 @@ export function renderDashboard() {
 
                 const cancelBtn = isCancelled
                     ? ""
-                    : `<button class="btn btn-danger btn-sm" onclick="cancelTransaction('${t.id}')" title="${state.language === "ar" ? "إلغاء المعاملة / مرتجع" : "Cancel/Refund"}">
+                    : `<button class="btn btn-danger btn-sm" onclick="window.cancelTransaction('${t.id}')" title="${state.language === "ar" ? "إلغاء المعاملة / مرتجع" : "Cancel/Refund"}">
                           <i data-lucide="x" style="width: 14px; height: 14px;"></i>
                        </button>`;
 
                 row.innerHTML = `
                     <td><strong>#${t.id}</strong></td>
-                    <td>${t.date.replace('T', ' ').substring(0, 16)}</td>
+                    <td>${t.date ? t.date.replace('T', ' ').substring(0, 16) : ''}</td>
                     <td>${customerName}</td>
-                    <td>${t.items.reduce((sum, item) => sum + item.qty, 0)}</td>
-                    <td><strong ${totalStyle}>${t.total.toFixed(2)} ${state.settings.currency}</strong></td>
+                    <td>${(t.items || []).reduce((sum, item) => sum + item.qty, 0)}</td>
+                    <td><strong ${totalStyle}>${(t.total || 0).toFixed(2)} ${state.settings.currency}</strong></td>
                     <td><span class="badge badge-info">${state.language === "ar" ? (t.paymentMethod === "cash" ? "نقدي" : t.paymentMethod === "card" ? "بطاقة" : "محفظة") : t.paymentMethod}</span></td>
                     <td>${statusBadge}</td>
                     <td>
                         <div style="display: flex; gap: 4px;">
-                            <button class="btn btn-secondary btn-sm" onclick="viewReceipt('${t.id}')" title="${state.language === "ar" ? "عرض الفاتورة" : "View Receipt"}">
+                            <button class="btn btn-secondary btn-sm" onclick="window.viewReceipt('${t.id}')" title="${state.language === "ar" ? "عرض الفاتورة" : "View Receipt"}">
                                 <i data-lucide="eye" style="width: 14px; height: 14px;"></i>
                             </button>
                             ${cancelBtn}
@@ -128,15 +123,17 @@ export function renderDashboard() {
         }
     }
 
-    // Render Charts
     renderDashboardCharts();
     if (window.lucide) window.lucide.createIcons();
 }
 
 export function renderDashboardCharts() {
-    // Destroy existing charts to avoid overlay bugs
-    if (salesChartInstance) salesChartInstance.destroy();
-    if (categoriesChartInstance) categoriesChartInstance.destroy();
+    if (salesChartInstance) {
+        try { salesChartInstance.destroy(); } catch(e){}
+    }
+    if (categoriesChartInstance) {
+        try { categoriesChartInstance.destroy(); } catch(e){}
+    }
 
     const ctxSales = document.getElementById('salesChart');
     const ctxCats = document.getElementById('categoriesChart');
@@ -147,11 +144,9 @@ export function renderDashboardCharts() {
         return;
     }
 
-    // Weekly Sales Data
     const days = state.language === "ar" ? ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'] : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     const salesData = [0, 0, 0, 0, 0, 0, 0];
 
-    // Map transactions to days of the week (excluding cancelled ones)
     (state.transactions || []).forEach(t => {
         if (t.status !== "cancelled" && t.date) {
             const dayIndex = new Date(t.date).getDay();
@@ -159,7 +154,6 @@ export function renderDashboardCharts() {
         }
     });
 
-    // Shift data so today is at the end
     const todayIndex = new Date().getDay();
     const orderedDays = [];
     const orderedSales = [];
@@ -198,7 +192,6 @@ export function renderDashboardCharts() {
         }
     });
 
-    // Category Sales Data (excluding cancelled transactions)
     const catSales = {};
     (state.categories || []).forEach(c => catSales[c] = 0);
     (state.transactions || []).forEach(t => {
@@ -212,7 +205,7 @@ export function renderDashboardCharts() {
         }
     });
 
-    const catLabels = Object.keys(catSales).map(c => c.split(' ')[0]); // Shorten labels
+    const catLabels = Object.keys(catSales).map(c => c.split(' ')[0]);
     const catData = Object.values(catSales);
 
     categoriesChartInstance = new Chart(ctxCats, {
@@ -220,7 +213,7 @@ export function renderDashboardCharts() {
         data: {
             labels: catLabels,
             datasets: [{
-                data: catData.every(v => v === 0) ? catData.map(() => 1) : catData, // Placeholder if all 0
+                data: catData.every(v => v === 0) ? catData.map(() => 1) : catData,
                 backgroundColor: ['#6366f1', '#06b6d4', '#8b5cf6', '#f43f5e', '#f59e0b', '#3b82f6', '#10b981'],
                 borderWidth: 0
             }]

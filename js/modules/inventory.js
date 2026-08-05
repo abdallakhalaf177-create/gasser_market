@@ -54,9 +54,9 @@ export function renderInventoryTable() {
         row.innerHTML = `
             <td><code>${p.barcode}</code></td>
             <td><strong>${p.name}</strong></td>
-            <td><span class="badge badge-info">${p.category.split(' ')[0]}</span></td>
-            <td>${p.cost.toFixed(2)} ${state.settings.currency}</td>
-            <td>${p.price.toFixed(2)} ${state.settings.currency}</td>
+            <td><span class="badge badge-info">${(p.category || '').split(' ')[0]}</span></td>
+            <td>${(p.cost || 0).toFixed(2)} ${state.settings.currency}</td>
+            <td>${(p.price || 0).toFixed(2)} ${state.settings.currency}</td>
             <td class="text-success">+${profit.toFixed(2)} ${state.settings.currency}</td>
             <td><strong>${p.stock}</strong></td>
             <td><span class="${isExpired(p.expiry) ? 'text-danger font-bold' : ''}">${p.expiry || '-'}</span></td>
@@ -66,10 +66,10 @@ export function renderInventoryTable() {
                     <button class="btn btn-info btn-sm" onclick="window.openPriceHistoryModal('${p.id}')" title="سجل الأسعار (Price History)">
                         <i class="ri-history-line"></i>
                     </button>
-                    <button class="btn btn-secondary btn-sm" onclick="editProduct('${p.id}')" title="تعديل">
+                    <button class="btn btn-secondary btn-sm" onclick="window.editProduct('${p.id}')" title="تعديل">
                         <i data-lucide="edit-3" style="width: 14px; height: 14px;"></i>
                     </button>
-                    <button class="btn btn-danger btn-sm" onclick="deleteProduct('${p.id}')" title="حذف">
+                    <button class="btn btn-danger btn-sm" onclick="window.deleteProduct('${p.id}')" title="حذف">
                         <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
                     </button>
                 </div>
@@ -102,7 +102,6 @@ export function logPriceChange(product, newCost, newPrice, ref = "تعديل ي�
     
     const nowStr = getFormattedNow();
 
-    // If empty history, log baseline price
     if (product.priceHistory.length === 0) {
         product.priceHistory.push({
             date: nowStr,
@@ -112,7 +111,6 @@ export function logPriceChange(product, newCost, newPrice, ref = "تعديل ي�
         });
     }
 
-    // Only log if cost or price changed
     const last = product.priceHistory[product.priceHistory.length - 1];
     if (!last || last.cost !== newCost || last.price !== newPrice) {
         product.priceHistory.push({
@@ -145,7 +143,6 @@ export function handleProductFormSubmit(e) {
     const image = imageEl ? imageEl.value : "";
 
     if (id) {
-        // Edit existing
         const index = state.products.findIndex(p => p.id === id);
         if (index !== -1) {
             logPriceChange(state.products[index], cost, price, "تعديل من المخزون");
@@ -153,7 +150,6 @@ export function handleProductFormSubmit(e) {
             state.products[index] = { id, barcode, name, category, cost, price, stock, minStock, expiry, image, priceHistory: history };
         }
     } else {
-        // Add new
         const newId = (state.products.length + 1).toString();
         const newProd = { id: newId, barcode, name, category, cost, price, stock, minStock, expiry, image, priceHistory: [] };
         logPriceChange(newProd, cost, price, "سعر الإضافة الأولي");
@@ -161,9 +157,12 @@ export function handleProductFormSubmit(e) {
     }
 
     saveState();
-    document.getElementById("product-modal").classList.remove("active");
-    document.getElementById("product-form").reset();
-    document.getElementById("product-id").value = "";
+    const modal = document.getElementById("product-modal");
+    if (modal) modal.classList.remove("active");
+    const form = document.getElementById("product-form");
+    if (form) form.reset();
+    const idField = document.getElementById("product-id");
+    if (idField) idField.value = "";
     renderInventory();
 }
 
@@ -171,27 +170,32 @@ export function editProduct(id) {
     const p = state.products.find(x => x.id === id);
     if (!p) return;
 
-    document.getElementById("product-id").value = p.id;
-    document.getElementById("prod-barcode").value = p.barcode;
-    document.getElementById("prod-name").value = p.name;
-    document.getElementById("prod-category").value = p.category;
-    document.getElementById("prod-stock").value = p.stock;
-
+    const idEl = document.getElementById("product-id");
+    const barcodeEl = document.getElementById("prod-barcode");
+    const nameEl = document.getElementById("prod-name");
+    const categoryEl = document.getElementById("prod-category");
+    const stockEl = document.getElementById("prod-stock");
     const minStockEl = document.getElementById("prod-min-stock");
-    if (minStockEl) minStockEl.value = p.minStock || 5;
-
     const costEl = document.getElementById("prod-cost") || document.getElementById("prod-buy-price");
     const priceEl = document.getElementById("prod-price") || document.getElementById("prod-sell-price");
     const expiryEl = document.getElementById("prod-expiry");
     const imageEl = document.getElementById("prod-image");
+    const titleEl = document.getElementById("product-modal-title");
+    const modal = document.getElementById("product-modal");
 
+    if (idEl) idEl.value = p.id;
+    if (barcodeEl) barcodeEl.value = p.barcode;
+    if (nameEl) nameEl.value = p.name;
+    if (categoryEl) categoryEl.value = p.category;
+    if (stockEl) stockEl.value = p.stock;
+    if (minStockEl) minStockEl.value = p.minStock || 5;
     if (costEl) costEl.value = p.cost;
     if (priceEl) priceEl.value = p.price;
     if (expiryEl) expiryEl.value = p.expiry || "";
     if (imageEl) imageEl.value = p.image || "";
 
-    document.getElementById("product-modal-title").textContent = state.language === "ar" ? "تعديل المنتج" : "Edit Product";
-    document.getElementById("product-modal").classList.add("active");
+    if (titleEl) titleEl.textContent = state.language === "ar" ? "تعديل المنتج" : "Edit Product";
+    if (modal) modal.classList.add("active");
 }
 
 export function deleteProduct(id) {
@@ -222,7 +226,6 @@ export function openPriceHistoryModal(productId) {
 
     const history = prod.priceHistory || [];
     if (history.length === 0) {
-        // Show current price as default baseline entry with current timestamp
         const nowStr = getFormattedNow();
         tbody.innerHTML = `
             <tr>
@@ -234,7 +237,6 @@ export function openPriceHistoryModal(productId) {
             </tr>
         `;
     } else {
-        // Sort descending: newest date/time first
         const sortedHistory = [...history].sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
 
         sortedHistory.forEach(h => {

@@ -13,6 +13,35 @@ import { openShiftModal, handleShiftClosingSubmit } from './modules/shifts.js';
 import { renderSettings } from './modules/settings.js';
 import { initAuth, renderUsers, handleUserFormSubmit, editUser, deleteUser } from './modules/users.js';
 
+// ==========================================================================
+// FALLBACK GUARD SYSTEM — Protects script execution from breaking UI
+// ==========================================================================
+const REQUIRED_GLOBAL_FUNCTIONS = [
+    'dynamicCalculatedExpiry', 'applyDynamicExpiry', 'setQuickExpiry', 'playBeep', 'showToast',
+    'openPriceHistoryModal', 'filterPurchaseProductsBySupplier', 'addBatchItem', 'removeBatchItem', 'editBatchItem',
+    'updateCartQty', 'handleCheckout', 'openCheckoutModal', 'confirmCheckout', 'viewReceipt',
+    'editProduct', 'deleteProduct', 'deleteCategory', 'editCustomer', 'deleteCustomer',
+    'editSupplier', 'openSettleModal', 'deleteSupplier', 'cancelTransaction', 'refreshCurrentView',
+    'openCustomerModal', 'openSupplierModal', 'openSupplierHistoryModal', 'previewImageModal', 'switchBaleMode',
+    'openPurchaseModal', 'openExpenseModal', 'openWasteModal', 'openShiftModal', 'handleShiftClosingSubmit',
+    'handleExpenseFormSubmit', 'handleWasteFormSubmit', 'openCustomerSettleModal', 'handleCustomerSettleFormSubmit',
+    'closeReceiptModal', 'printReceipt', 'openLowStockReport', 'closeLowStockModal', 'openExpiryReport',
+    'closeExpiryModal', 'printLowStockReport', 'exportLowStockCSV', 'setReportRange', 'deleteExpense',
+    'editUser', 'deleteUser', 'renderCustomers', 'renderSuppliers', 'renderPurchases', 'renderInventory',
+    'renderExpenses', 'renderWaste', 'renderReports', 'renderDashboard', 'renderSettings', 'renderUsers'
+];
+
+REQUIRED_GLOBAL_FUNCTIONS.forEach(fnName => {
+    if (!window[fnName]) {
+        window[fnName] = function(...args) {
+            console.warn(`[Fallback Guard] Function "${fnName}" called before full module initialization or fallback triggered.`, args);
+        };
+    }
+});
+
+// ==========================================================================
+// UTILITY FUNCTIONS & TOASTS
+// ==========================================================================
 export function dynamicCalculatedExpiry(amount, unit, targetInputId) {
     const targetInput = document.getElementById(targetInputId);
     if (!targetInput) return;
@@ -50,7 +79,9 @@ export function setQuickExpiry(inputId, months) {
 
 export function playBeep(frequency = 440, duration = 0.1) {
     try {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const audioCtx = new AudioCtx();
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.connect(gain);
@@ -61,27 +92,33 @@ export function playBeep(frequency = 440, duration = 0.1) {
         gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
         osc.start(audioCtx.currentTime);
         osc.stop(audioCtx.currentTime + duration);
-    } catch (e) {}
+    } catch (e) {
+        console.warn("Audio Context playback warning:", e);
+    }
 }
 
 export function showToast(message, type = 'info') {
-    const container = document.getElementById("toast-container");
-    if (!container) return;
-    const toast = document.createElement("div");
-    toast.className = `toast toast-${type}`;
-    let icon = 'info';
-    if (type === 'success') icon = 'check-circle';
-    else if (type === 'warning') icon = 'alert-triangle';
-    else if (type === 'danger') icon = 'alert-circle';
-    toast.innerHTML = `<i data-lucide="${icon}" style="width:18px;height:18px;"></i><span>${message}</span>`;
-    container.appendChild(toast);
-    if (window.lucide) lucide.createIcons();
-    if (type === 'success') playBeep(523.25, 0.08);
-    else if (type === 'danger' || type === 'warning') playBeep(220, 0.22);
-    setTimeout(() => { toast.style.animation = 'toastOut 0.3s forwards'; setTimeout(() => toast.remove(), 300); }, 3500);
+    try {
+        const container = document.getElementById("toast-container");
+        if (!container) return;
+        const toast = document.createElement("div");
+        toast.className = `toast toast-${type}`;
+        let icon = 'info';
+        if (type === 'success') icon = 'check-circle';
+        else if (type === 'warning') icon = 'alert-triangle';
+        else if (type === 'danger') icon = 'alert-circle';
+        toast.innerHTML = `<i data-lucide="${icon}" style="width:18px;height:18px;"></i><span>${message}</span>`;
+        container.appendChild(toast);
+        if (window.lucide) lucide.createIcons();
+        if (type === 'success') playBeep(523.25, 0.08);
+        else if (type === 'danger' || type === 'warning') playBeep(220, 0.22);
+        setTimeout(() => { toast.style.animation = 'toastOut 0.3s forwards'; setTimeout(() => toast.remove(), 300); }, 3500);
+    } catch (e) {
+        console.error("Toast render error:", e);
+    }
 }
 
-// Bind dynamically called template functions to the window object
+// Bind all module functions to window scope for HTML inline handlers & global availability
 window.dynamicCalculatedExpiry = dynamicCalculatedExpiry;
 window.applyDynamicExpiry = applyDynamicExpiry;
 window.setQuickExpiry = setQuickExpiry;
@@ -107,10 +144,8 @@ window.deleteSupplier = deleteSupplier;
 window.cancelTransaction = cancelTransaction;
 window.showToast = showToast;
 window.playBeep = playBeep;
-window.refreshCurrentView = () => { switchView(state.currentView); };
+window.refreshCurrentView = () => { try { switchView(state.currentView); } catch(e){ console.error(e); } };
 
-// Expose module functions called from HTML inline onclick (without window. prefix)
-// These MUST be on window to work inside ES Module scope
 window.openCustomerModal = openCustomerModal;
 window.openSupplierModal = openSupplierModal;
 window.openSupplierHistoryModal = openSupplierHistoryModal;
@@ -140,29 +175,43 @@ window.deleteUser = deleteUser;
 window.renderCustomers = renderCustomers;
 window.renderSuppliers = renderSuppliers;
 window.renderPurchases = renderPurchases;
+window.renderInventory = renderInventory;
+window.renderExpenses = renderExpenses;
+window.renderWaste = renderWaste;
+window.renderReports = renderReports;
+window.renderDashboard = renderDashboard;
+window.renderSettings = renderSettings;
+window.renderUsers = renderUsers;
 
-
+// ==========================================================================
+// APPLICATION INITIALIZATION & EVENT LISTENERS
+// ==========================================================================
 document.addEventListener("DOMContentLoaded", async () => {
-    await loadState();
-    initAuth();
-    applyTheme();
-    applyLanguage();
-    setupNavigation();
-    setupEventListeners();
-    setupLiveTime();
-    setupKeyboardShortcuts();
+    try {
+        await loadState();
+        try { initAuth(); } catch(e) { console.error("initAuth error:", e); }
+        try { applyTheme(); } catch(e) { console.error("applyTheme error:", e); }
+        try { applyLanguage(); } catch(e) { console.error("applyLanguage error:", e); }
+        try { setupNavigation(); } catch(e) { console.error("setupNavigation error:", e); }
+        try { setupEventListeners(); } catch(e) { console.error("setupEventListeners error:", e); }
+        try { setupLiveTime(); } catch(e) { console.error("setupLiveTime error:", e); }
+        try { setupKeyboardShortcuts(); } catch(e) { console.error("setupKeyboardShortcuts error:", e); }
 
-    // Register cart change UI rendering hook
-    onCartChange(() => {
-        renderCart();
-    });
+        onCartChange(() => {
+            try { renderCart(); } catch(e) { console.error("renderCart error:", e); }
+        });
 
-    // Initial view rendering
-    switchView(state.currentView);
-    if (window.lucide) lucide.createIcons();
+        try { switchView(state.currentView || "pos"); } catch(e) { console.error("switchView error:", e); }
+        if (window.lucide) {
+            try { lucide.createIcons(); } catch(e) {}
+        }
+    } catch (globalErr) {
+        console.error("Critical Application Startup Error:", globalErr);
+        if (window.showToast) window.showToast("حدث خطأ أثناء تحميل التطبيق، يرجى تحديث الصفحة", "danger");
+    }
 });
 
-// Idempotent event listener attaching helper (Hot Reload Cleanup Guard)
+// Idempotent event listener attaching helper (Hot Reload & Exception Guard)
 const boundListenersRegistry = [];
 
 const addListenerSafe = (id, event, callback) => {
@@ -174,9 +223,17 @@ const addListenerSafe = (id, event, callback) => {
         el.removeEventListener(event, el._boundListeners[event]);
     }
 
-    el._boundListeners[event] = callback;
-    el.addEventListener(event, callback);
-    boundListenersRegistry.push({ el, event, callback });
+    const safeCallback = (e) => {
+        try {
+            callback(e);
+        } catch (err) {
+            console.error(`[Listener Failure] Target #${id} Event "${event}":`, err);
+        }
+    };
+
+    el._boundListeners[event] = safeCallback;
+    el.addEventListener(event, safeCallback);
+    boundListenersRegistry.push({ el, event, callback: safeCallback });
 };
 
 window.__cleanupEventListeners = () => {
@@ -191,40 +248,38 @@ window.__cleanupEventListeners = () => {
 // Keyboard Shortcuts Integration (F1, F2, F3, F4)
 function setupKeyboardShortcuts() {
     document.addEventListener("keydown", (e) => {
-        // F1 -> Switch to POS
-        if (e.key === "F1") {
-            e.preventDefault();
-            switchView("pos");
-            showToast(state.language === "ar" ? "تم الانتقال إلى الكاشير" : "Switched to POS", "info");
-        }
-        // F2 -> Refresh current view
-        if (e.key === "F2") {
-            e.preventDefault();
-            switchView(state.currentView);
-        }
-        // F3 -> Switch to Dashboard
-        if (e.key === "F3") {
-            e.preventDefault();
-            switchView("dashboard");
-            showToast(state.language === "ar" ? "تم الانتقال إلى لوحة التحكم" : "Switched to Dashboard", "info");
-        }
-        // F4 -> Clear cart if in POS
-        if (e.key === "F4") {
-            if (state.currentView === "pos") {
+        try {
+            if (e.key === "F1") {
                 e.preventDefault();
-                clearCart();
-                showToast(state.language === "ar" ? "تم تفريغ السلة" : "Cart cleared", "warning");
+                switchView("pos");
+                showToast(state.language === "ar" ? "تم الانتقال إلى الكاشير" : "Switched to POS", "info");
             }
-        }
-        // Escape -> Close active modals
-        if (e.key === "Escape") {
-            document.querySelectorAll(".modal-overlay.active, .modal-backdrop.active").forEach(m => {
-                m.classList.remove("active", "show");
-            });
+            if (e.key === "F2") {
+                e.preventDefault();
+                switchView(state.currentView);
+            }
+            if (e.key === "F3") {
+                e.preventDefault();
+                switchView("dashboard");
+                showToast(state.language === "ar" ? "تم الانتقال إلى لوحة التحكم" : "Switched to Dashboard", "info");
+            }
+            if (e.key === "F4") {
+                if (state.currentView === "pos") {
+                    e.preventDefault();
+                    clearCart();
+                    showToast(state.language === "ar" ? "تم تفريغ السلة" : "Cart cleared", "warning");
+                }
+            }
+            if (e.key === "Escape") {
+                document.querySelectorAll(".modal-overlay.active, .modal-backdrop.active").forEach(m => {
+                    m.classList.remove("active", "show");
+                });
+            }
+        } catch(err) {
+            console.error("Keyboard shortcut error:", err);
         }
     });
 
-    // Close modal when clicking on dark overlay backdrop
     document.querySelectorAll(".modal-overlay").forEach(overlay => {
         overlay.addEventListener("click", (e) => {
             if (e.target === overlay) {
@@ -238,13 +293,15 @@ function setupKeyboardShortcuts() {
 function setupLiveTime() {
     const timeEl = document.getElementById("live-time");
     const updateTime = () => {
-        const now = new Date();
-        const timeStr = now.toLocaleTimeString(state.language === "ar" ? "ar-EG" : "en-US", {
-            hour: "2-digit", minute: "2-digit", second: "2-digit"
-        });
-        if (timeEl && timeEl.querySelector("span")) {
-            timeEl.querySelector("span").textContent = timeStr;
-        }
+        try {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString(state.language === "ar" ? "ar-EG" : "en-US", {
+                hour: "2-digit", minute: "2-digit", second: "2-digit"
+            });
+            if (timeEl && timeEl.querySelector("span")) {
+                timeEl.querySelector("span").textContent = timeStr;
+            }
+        } catch(e) {}
     };
     updateTime();
     setInterval(updateTime, 1000);
@@ -261,7 +318,6 @@ function applyLanguage() {
     document.documentElement.dir = isRtl ? "rtl" : "ltr";
     document.documentElement.lang = state.language;
 
-    // Update sidebar text
     document.querySelectorAll(".sidebar-menu .menu-item").forEach(item => {
         const view = item.getAttribute("data-view");
         const textSpan = item.querySelector(".menu-text");
@@ -270,7 +326,6 @@ function applyLanguage() {
         }
     });
 
-    // Update static labels with data-en
     document.querySelectorAll("[data-en]").forEach(el => {
         if (state.language === "en") {
             el.setAttribute("data-ar", el.textContent);
@@ -280,7 +335,6 @@ function applyLanguage() {
         }
     });
 
-    // Update search inputs placeholders
     const posSearch = document.getElementById("pos-search-input") || document.getElementById("barcode-input");
     if (posSearch && translations[state.language]) {
         posSearch.placeholder = translations[state.language].searchPlaceholder || "امسح الباركود أو ابحث باسم المنتج...";
@@ -323,7 +377,6 @@ function setupNavigation() {
             e.preventDefault();
             const targetView = el.getAttribute("data-go-to");
             if (targetView) switchView(targetView);
-            // Auto filter low stock if heading to inventory from low stock alerts card
             if (targetView === "inventory" && el.closest(".alerts-card")) {
                 const filter = document.getElementById("inventory-stock-filter");
                 if (filter) {
@@ -336,7 +389,6 @@ function setupNavigation() {
 
     addListenerSafe("quick-pos-btn", "click", () => switchView("pos"));
 
-    // Dynamic stats cards click handling
     const statCards = document.querySelectorAll("#view-dashboard .stats-grid .stat-card");
     if (statCards.length >= 4) {
         statCards[0].addEventListener("click", () => switchView("reports"));
@@ -363,83 +415,80 @@ function setupNavigation() {
 function switchView(viewName) {
     if (!viewName) return;
 
-    // Auto-close any lingering modals when switching view tabs
-    document.querySelectorAll(".modal-overlay.active, .modal-backdrop.active, .modal-overlay.show, .modal-backdrop.show").forEach(m => {
-        m.classList.remove("active", "show");
-    });
+    try {
+        document.querySelectorAll(".modal-overlay.active, .modal-backdrop.active, .modal-overlay.show, .modal-backdrop.show").forEach(m => {
+            m.classList.remove("active", "show");
+        });
 
-    // Normalize view name (handle pos vs pos-view)
-    const cleanViewName = viewName.replace("-view", "");
-    state.currentView = cleanViewName;
-    saveState();
+        const cleanViewName = viewName.replace("-view", "");
+        state.currentView = cleanViewName;
+        saveState();
 
-    // Update active nav button
-    document.querySelectorAll(".nav-btn, .menu-item, .mobile-nav-item, .mobile-drawer-btn").forEach(item => {
-        const itemTarget = (item.getAttribute("data-view") || "").replace("-view", "");
-        if (itemTarget === cleanViewName) {
-            item.classList.add("active");
-        } else {
-            item.classList.remove("active");
+        document.querySelectorAll(".nav-btn, .menu-item, .mobile-nav-item, .mobile-drawer-btn").forEach(item => {
+            const itemTarget = (item.getAttribute("data-view") || "").replace("-view", "");
+            if (itemTarget === cleanViewName) {
+                item.classList.add("active");
+            } else {
+                item.classList.remove("active");
+            }
+        });
+
+        document.querySelectorAll(".view-section").forEach(sec => {
+            sec.classList.remove("active");
+        });
+
+        const targetSec = document.getElementById(`${cleanViewName}-view`) || document.getElementById(`view-${cleanViewName}`);
+        if (targetSec) targetSec.classList.add("active");
+
+        const titleEl = document.getElementById("current-view-title");
+        const subtitleEl = document.getElementById("current-view-subtitle");
+
+        if (titleEl && translations[state.language] && translations[state.language][cleanViewName]) {
+            titleEl.textContent = translations[state.language][cleanViewName];
         }
-    });
 
-    // Update active section
-    document.querySelectorAll(".view-section").forEach(sec => {
-        sec.classList.remove("active");
-    });
+        if (cleanViewName === "dashboard") {
+            if (subtitleEl) subtitleEl.textContent = state.language === "ar" ? "مرحباً بك مجدداً، إليك نظرة عامة على أداء اليوم." : "Welcome back, here is today's overview.";
+            renderDashboard();
+        } else if (cleanViewName === "pos") {
+            if (subtitleEl) subtitleEl.textContent = state.language === "ar" ? "شاشة الكاشير السريعة لإتمام عمليات البيع." : "Quick cashier screen to complete sales.";
+            renderPOS();
+        } else if (cleanViewName === "inventory") {
+            if (subtitleEl) subtitleEl.textContent = state.language === "ar" ? "إدارة وتحديث المنتجات والأسعار والكميات المتاحة." : "Manage and update products, prices, and stock levels.";
+            renderInventory();
+        } else if (cleanViewName === "purchases") {
+            if (subtitleEl) subtitleEl.textContent = state.language === "ar" ? "سجل فواتير الشراء والتوريد ودخول المنتجات للمخازن." : "Purchase invoice logs and stock entries.";
+            renderPurchases();
+        } else if (cleanViewName === "expenses") {
+            if (subtitleEl) subtitleEl.textContent = state.language === "ar" ? "إدارة وتسجيل المصروفات التشغيلية اليومية والشهرية." : "Operational expenses management.";
+            renderExpenses();
+        } else if (cleanViewName === "waste") {
+            if (subtitleEl) subtitleEl.textContent = state.language === "ar" ? "إسقاط وتجميع المنتجات التالفة ومتابعة الخسائر." : "Waste and damage management.";
+            renderWaste();
+        } else if (cleanViewName === "reports") {
+            if (subtitleEl) subtitleEl.textContent = state.language === "ar" ? "تقارير المبيعات والأرباح التفصيلية للفترات المختلفة." : "Detailed sales and profit reports for different periods.";
+            renderReports();
+        } else if (cleanViewName === "customers") {
+            if (subtitleEl) subtitleEl.textContent = state.language === "ar" ? "إدارة قاعدة بيانات العملاء ونقاط الولاء." : "Manage customer database and loyalty points.";
+            renderCustomers();
+        } else if (cleanViewName === "suppliers") {
+            if (subtitleEl) subtitleEl.textContent = state.language === "ar" ? "إدارة الموردين وحسابات التوريد والآجل." : "Manage suppliers, restock purchases, and credit balances.";
+            renderSuppliers();
+        } else if (cleanViewName === "settings") {
+            if (subtitleEl) subtitleEl.textContent = state.language === "ar" ? "تخصيص إعدادات النظام والنسخ الاحتياطي." : "Customize system settings and backups.";
+            renderSettings();
+        } else if (cleanViewName === "users") {
+            renderUsers();
+        }
 
-    const targetSec = document.getElementById(`${cleanViewName}-view`) || document.getElementById(`view-${cleanViewName}`);
-    if (targetSec) targetSec.classList.add("active");
-
-    // Update header title
-    const titleEl = document.getElementById("current-view-title");
-    const subtitleEl = document.getElementById("current-view-subtitle");
-
-    if (titleEl && translations[state.language] && translations[state.language][cleanViewName]) {
-        titleEl.textContent = translations[state.language][cleanViewName];
+        if (window.lucide) lucide.createIcons();
+    } catch(err) {
+        console.error(`Error rendering view ${viewName}:`, err);
     }
-
-    if (cleanViewName === "dashboard") {
-        if (subtitleEl) subtitleEl.textContent = state.language === "ar" ? "مرحباً بك مجدداً، إليك نظرة عامة على أداء اليوم." : "Welcome back, here is today's overview.";
-        renderDashboard();
-    } else if (cleanViewName === "pos") {
-        if (subtitleEl) subtitleEl.textContent = state.language === "ar" ? "شاشة الكاشير السريعة لإتمام عمليات البيع." : "Quick cashier screen to complete sales.";
-        renderPOS();
-    } else if (cleanViewName === "inventory") {
-        if (subtitleEl) subtitleEl.textContent = state.language === "ar" ? "إدارة وتحديث المنتجات والأسعار والكميات المتاحة." : "Manage and update products, prices, and stock levels.";
-        renderInventory();
-    } else if (cleanViewName === "purchases") {
-        if (subtitleEl) subtitleEl.textContent = state.language === "ar" ? "سجل فواتير الشراء والتوريد ودخول المنتجات للمخازن." : "Purchase invoice logs and stock entries.";
-        renderPurchases();
-    } else if (cleanViewName === "expenses") {
-        if (subtitleEl) subtitleEl.textContent = state.language === "ar" ? "إدارة وتسجيل المصروفات التشغيلية اليومية والشهرية." : "Operational expenses management.";
-        renderExpenses();
-    } else if (cleanViewName === "waste") {
-        if (subtitleEl) subtitleEl.textContent = state.language === "ar" ? "إسقاط وتجميع المنتجات التالفة ومتابعة الخسائر." : "Waste and damage management.";
-        renderWaste();
-    } else if (cleanViewName === "reports") {
-        if (subtitleEl) subtitleEl.textContent = state.language === "ar" ? "تقارير المبيعات والأرباح التفصيلية للفترات المختلفة." : "Detailed sales and profit reports for different periods.";
-        renderReports();
-    } else if (cleanViewName === "customers") {
-        if (subtitleEl) subtitleEl.textContent = state.language === "ar" ? "إدارة قاعدة بيانات العملاء ونقاط الولاء." : "Manage customer database and loyalty points.";
-        renderCustomers();
-    } else if (cleanViewName === "suppliers") {
-        if (subtitleEl) subtitleEl.textContent = state.language === "ar" ? "إدارة الموردين وحسابات التوريد والآجل." : "Manage suppliers, restock purchases, and credit balances.";
-        renderSuppliers();
-    } else if (cleanViewName === "settings") {
-        if (subtitleEl) subtitleEl.textContent = state.language === "ar" ? "تخصيص إعدادات النظام والنسخ الاحتياطي." : "Customize system settings and backups.";
-        renderSettings();
-    } else if (cleanViewName === "users") {
-        renderUsers();
-    }
-
-    if (window.lucide) lucide.createIcons();
 }
 window.switchView = switchView;
 
-// Global Event Listeners & Modals
 function setupEventListeners() {
-    // Theme & Language toggles
     addListenerSafe("theme-toggle-btn", "click", () => {
         state.theme = state.theme === "dark" ? "light" : "dark";
         saveState();
@@ -460,8 +509,6 @@ function setupEventListeners() {
         switchView(state.currentView);
     });
 
-    // Modals Open/Close Setup Helper
-    // ── Modal Close Buttons (all modals that have close/cancel buttons) ──────
     const closeModalBtns = [
         ["close-product-modal",  "product-modal"],
         ["cancel-product-modal", "product-modal"],
@@ -486,7 +533,6 @@ function setupEventListeners() {
         if (btn && modal) btn.addEventListener("click", () => modal.classList.remove("active"));
     });
 
-    // ── Modal Open Buttons (call proper init functions, not just show modal) ─
     addListenerSafe("add-product-btn", "click", () => {
         const form = document.getElementById("product-form");
         if (form) form.reset();
@@ -499,9 +545,7 @@ function setupEventListeners() {
     });
 
     addListenerSafe("add-customer-btn", "click", () => openCustomerModal());
-
     addListenerSafe("add-supplier-trigger-btn", "click", () => openSupplierModal());
-
     addListenerSafe("add-purchase-btn", "click", () => openPurchaseModal());
 
     addListenerSafe("manage-categories-btn", "click", () => {
@@ -526,30 +570,26 @@ function setupEventListeners() {
         if (modal) modal.classList.add("active");
     });
 
-
-    // Close receipt modal
     addListenerSafe("close-receipt-modal", "click", () => {
         const receiptModal = document.getElementById("receipt-modal");
         if (receiptModal) receiptModal.classList.remove("active");
     });
+
     addListenerSafe("new-sale-btn", "click", () => {
         const receiptModal = document.getElementById("receipt-modal");
         if (receiptModal) receiptModal.classList.remove("active");
         clearCart();
     });
 
-    // Print receipt
     addListenerSafe("print-receipt-btn", "click", () => {
         window.print();
     });
 
-    // Add Batch Item Button for Purchase Order Session
     addListenerSafe("add-batch-item-btn", "click", (e) => {
         e.preventDefault();
         addBatchItem();
     });
 
-    // Enter key in purchase batch inputs triggers addBatchItem()
     ["pur-qty", "pur-cost", "pur-sell-price"].forEach(id => {
         addListenerSafe(id, "keydown", (e) => {
             if (e.key === "Enter") {
@@ -559,7 +599,6 @@ function setupEventListeners() {
         });
     });
 
-    // Prevent random form submit via scanner ENTER keypress glitch
     document.addEventListener("keydown", (e) => {
         if (e.key === "Enter" && e.target.tagName !== "TEXTAREA" && !e.target.classList.contains("btn-primary")) {
             if (e.target.id === "pos-search-input" || e.target.id === "barcode-input") return;
@@ -567,9 +606,6 @@ function setupEventListeners() {
         }
     });
 
-
-
-    // ── Form Submits ────────────────────────────────────────────────────────
     addListenerSafe("product-form",         "submit", handleProductFormSubmit);
     addListenerSafe("customer-form",        "submit", handleCustomerFormSubmit);
     addListenerSafe("supplier-form",        "submit", handleSupplierFormSubmit);
@@ -582,7 +618,6 @@ function setupEventListeners() {
     addListenerSafe("settle-form",          "submit", handleSettleFormSubmit);
     addListenerSafe("user-form",            "submit", handleUserFormSubmit);
 
-    // Generate Barcode Button
     addListenerSafe("gen-barcode-btn", "click", () => {
         const barcodeInput = document.getElementById("prod-barcode");
         if (barcodeInput) {
@@ -591,12 +626,8 @@ function setupEventListeners() {
         }
     });
 
-    // Barcode auto-fill listener
     addListenerSafe("prod-barcode", "input", checkSmartBarcode);
 
-
-
-    // POS Cart Actions
     addListenerSafe("clear-cart-btn", "click", () => {
         clearCart();
         showToast(state.language === "ar" ? "تم تفريغ السلة" : "Cart cleared", "warning");
@@ -605,14 +636,12 @@ function setupEventListeners() {
     addListenerSafe("cart-discount", "input", updateCartSummary);
     addListenerSafe("checkout-btn", "click", handleCheckout);
 
-    // Purchase payment type toggle (show partial paid amount field)
     addListenerSafe("pur-payment", "change", () => {
         const paymentSel = document.getElementById("pur-payment");
         const wrapper = document.getElementById("pur-paid-amount-wrapper");
         if (!paymentSel || !wrapper) return;
         if (paymentSel.value === "partial") {
             wrapper.style.display = "block";
-            // Auto-compute total to help user
             const qty = parseInt(document.getElementById("pur-qty")?.value) || 1;
             const cost = parseFloat(document.getElementById("pur-cost")?.value) || 0;
             const totalCost = qty * cost;
@@ -622,7 +651,7 @@ function setupEventListeners() {
             wrapper.style.display = "none";
         }
     });
-    // Also update total cap when qty or cost changes
+
     ["pur-qty", "pur-cost"].forEach(id => {
         addListenerSafe(id, "input", () => {
             const paymentSel = document.getElementById("pur-payment");
@@ -636,14 +665,9 @@ function setupEventListeners() {
     });
 
     addListenerSafe("supplier-search-input", "input", renderSuppliersTable);
-
-    // Settle Supplier Form (also wired via HTML onsubmit but add JS listener as safety)
     addListenerSafe("settle-form", "submit", handleSettleFormSubmit);
-
-    // Customer search
     addListenerSafe("customer-search-input", "input", renderCustomers);
 
-    // Inventory Search & Filters
     addListenerSafe("inventory-search-input", "input", renderInventoryTable);
     addListenerSafe("inventory-category-filter", "change", renderInventoryTable);
     addListenerSafe("inventory-stock-filter", "change", renderInventoryTable);
@@ -663,7 +687,6 @@ function setupEventListeners() {
         });
     }
 
-    // Backup & Restore
     addListenerSafe("backup-data-btn", "click", () => {
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
         const downloadAnchor = document.createElement('a');
@@ -713,7 +736,6 @@ function setupEventListeners() {
         }
     });
 
-    // Payment method selection
     document.querySelectorAll(".payment-method").forEach(method => {
         method.addEventListener("click", () => {
             document.querySelectorAll(".payment-method").forEach(m => m.classList.remove("active"));
@@ -723,13 +745,11 @@ function setupEventListeners() {
         });
     });
 
-    // Category Manager Modal Trigger Setup
     addListenerSafe("manage-categories-btn", "click", () => {
         renderCategoriesList();
     });
 }
 
-// Smart Barcode Autofill Checker
 function checkSmartBarcode() {
     const barcodeInput = document.getElementById("prod-barcode");
     if (!barcodeInput) return;
@@ -756,9 +776,7 @@ function checkSmartBarcode() {
     }
 }
 
-// ==========================================================================
-// PWA SERVICE WORKER REGISTRATION & INSTALLATION PROMPT
-// ==========================================================================
+// PWA Service Worker Registration
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js')

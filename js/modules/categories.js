@@ -20,10 +20,11 @@ export function renderCategoriesList() {
     if (!ul) return;
     ul.innerHTML = "";
     state.categories.forEach(c => {
+        const escapedCat = c.replace(/'/g, "\\'");
         const li = document.createElement("li");
         li.innerHTML = `
             <span>${c}</span>
-            <button class="btn btn-icon text-danger btn-sm" onclick="deleteCategory('${c}')">
+            <button class="btn btn-icon text-danger btn-sm" onclick="window.deleteCategory('${escapedCat}')">
                 <i data-lucide="trash-2" style="width: 14px; height: 14px;"></i>
             </button>
         `;
