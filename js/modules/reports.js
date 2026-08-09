@@ -174,7 +174,7 @@ function renderSalesHistoryTable(filteredTxns) {
             
         const statusBadge = isCancelled
             ? `<span class="badge badge-danger">${state.language === "ar" ? "ملغاة" : "Cancelled"}</span>`
-            : `<span class="badge badge-info">${state.language === "ar" ? (t.paymentMethod === "cash" ? "نقدي" : t.paymentMethod === "card" ? "بطاقة" : "محفظة") : t.paymentMethod}</span>`;
+            : `<span class="badge ${t.paymentMethod === 'credit' ? 'badge-danger' : 'badge-info'}">${state.language === "ar" ? (t.paymentMethod === "cash" ? "نقدي" : t.paymentMethod === "card" ? "فيزا/بطاقة" : t.paymentMethod === "credit" ? "آجل (دين)" : "محفظة") : t.paymentMethod}</span>`;
 
         const cancelBtn = isCancelled
             ? ""

@@ -107,7 +107,7 @@ export function renderDashboard() {
                     <td>${customerName}</td>
                     <td>${(t.items || []).reduce((sum, item) => sum + item.qty, 0)}</td>
                     <td><strong ${totalStyle}>${(t.total || 0).toFixed(2)} ${state.settings.currency}</strong></td>
-                    <td><span class="badge badge-info">${state.language === "ar" ? (t.paymentMethod === "cash" ? "نقدي" : t.paymentMethod === "card" ? "بطاقة" : "محفظة") : t.paymentMethod}</span></td>
+                    <td><span class="badge ${t.paymentMethod === 'credit' ? 'badge-danger' : 'badge-info'}">${state.language === "ar" ? (t.paymentMethod === "cash" ? "نقدي" : t.paymentMethod === "card" ? "فيزا/بطاقة" : t.paymentMethod === "credit" ? "آجل (دين)" : "محفظة") : t.paymentMethod}</span></td>
                     <td>${statusBadge}</td>
                     <td>
                         <div style="display: flex; gap: 4px;">

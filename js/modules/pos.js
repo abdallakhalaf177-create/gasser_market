@@ -251,7 +251,7 @@ export function confirmCheckout() {
     const activePaymentCard = document.querySelector(".checkout-payment-card.active");
     const selectedMethod = activePaymentCard ? activePaymentCard.getAttribute("data-method") : "cash";
 
-    document.querySelectorAll('input[name="payment-method"]').forEach(r => {
+    document.querySelectorAll('input[name="checkout-payment-radio"], input[name="payment-method"]').forEach(r => {
         r.checked = (r.value === selectedMethod);
     });
 
@@ -358,7 +358,7 @@ export function handleCheckout() {
     const discountInput = document.getElementById("cart-discount-input");
     const discountPercent = discountInput ? (parseFloat(discountInput.value) || 0) : 0;
 
-    const checkedPaymentEl = document.querySelector('input[name="payment-method"]:checked');
+    const checkedPaymentEl = document.querySelector('input[name="checkout-payment-radio"]:checked') || document.querySelector('input[name="payment-method"]:checked');
     const paymentMethod = checkedPaymentEl ? checkedPaymentEl.value : "cash";
 
     // ---- CREDIT PAYMENT: Must have a registered customer ----

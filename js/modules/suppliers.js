@@ -431,6 +431,8 @@ export function handlePurchaseFormSubmit(e) {
         sup.lastUpdated = new Date().toISOString().split('T')[0];
     }
 
+    const invoiceImg = document.getElementById("pur-invoice-image-data")?.value || "";
+
     // ---- 3. Log Purchase Invoice ----
     if (!state.purchaseInvoices) state.purchaseInvoices = [];
     state.purchaseInvoices.push({
@@ -441,10 +443,18 @@ export function handlePurchaseFormSubmit(e) {
         items: [...currentBatchItems],
         totalCost,
         paymentStatus,
-        paidAmount
+        paidAmount,
+        invoiceImage: invoiceImg
     });
 
     saveState();
+
+    const imgDataField = document.getElementById("pur-invoice-image-data");
+    const imgFileField = document.getElementById("pur-invoice-file");
+    const previewWrapper = document.getElementById("pur-image-preview-wrapper");
+    if (imgDataField) imgDataField.value = "";
+    if (imgFileField) imgFileField.value = "";
+    if (previewWrapper) previewWrapper.style.display = "none";
 
     currentBatchItems = [];
     renderBatchItemsTable();

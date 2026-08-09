@@ -122,7 +122,7 @@ export function updateCartQty(productId, delta) {
     const cartItem = state.cart.find(item => item.productId === productId);
     if (!cartItem) return;
     const prod = state.products.find(p => p.id === productId);
-    if (delta > 0 && cartItem.qty >= prod.stock) { 
+    if (prod && delta > 0 && cartItem.qty >= prod.stock) { 
         if (window.showToast) window.showToast(state.language === "ar" ? "لا يمكن تجاوز الكمية المتاحة في المخزن!" : "Cannot exceed available stock!", "warning"); 
         return; 
     }

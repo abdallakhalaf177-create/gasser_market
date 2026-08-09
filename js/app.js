@@ -1,7 +1,7 @@
 import { state, loadState, saveState, resetToDefault, addToCart, updateCartQty, clearCart, onCartChange, cancelTransaction } from './state.js';
 import { translations, SMART_BARCODE_DATABASE } from './constants.js';
 import { renderDashboard } from './modules/dashboard.js';
-import { renderPOS, renderPOSCategoryDropdowns, renderPOSProducts, renderPOSCustomerDropdown, renderCart, updateCartSummary, handleCheckout, openCheckoutModal, confirmCheckout, viewReceipt, closeReceiptModal, printReceipt } from './modules/pos.js';
+import { renderPOS, renderPOSCategoryDropdowns, renderPOSProducts, renderPOSCustomerDropdown, renderCart, updateCartSummary, handleCheckout, openCheckoutModal, confirmCheckout, updateCheckoutChangeDisplay, viewReceipt, closeReceiptModal, printReceipt } from './modules/pos.js';
 import { renderInventory, renderInventoryTable, handleProductFormSubmit, editProduct, deleteProduct, openPriceHistoryModal } from './modules/inventory.js';
 import { handleCategoryFormSubmit, renderCategoriesList, deleteCategory } from './modules/categories.js';
 import { renderReports, renderReportsData, openLowStockReport, closeLowStockModal, printLowStockReport, exportLowStockCSV, setReportRange, openExpiryReport, closeExpiryModal } from './modules/reports.js';
@@ -19,9 +19,9 @@ import { initAuth, renderUsers, handleUserFormSubmit, editUser, deleteUser } fro
 const REQUIRED_GLOBAL_FUNCTIONS = [
     'dynamicCalculatedExpiry', 'applyDynamicExpiry', 'setQuickExpiry', 'playBeep', 'showToast',
     'openPriceHistoryModal', 'filterPurchaseProductsBySupplier', 'addBatchItem', 'removeBatchItem', 'editBatchItem',
-    'updateCartQty', 'handleCheckout', 'openCheckoutModal', 'confirmCheckout', 'viewReceipt',
+    'updateCartQty', 'handleCheckout', 'openCheckoutModal', 'confirmCheckout', 'updateCheckoutChangeDisplay', 'viewReceipt',
     'editProduct', 'deleteProduct', 'deleteCategory', 'editCustomer', 'deleteCustomer',
-    'editSupplier', 'openSettleModal', 'deleteSupplier', 'cancelTransaction', 'refreshCurrentView',
+    'editSupplier', 'openSettleModal', 'handleSettleFormSubmit', 'deleteSupplier', 'cancelTransaction', 'refreshCurrentView',
     'openCustomerModal', 'openSupplierModal', 'openSupplierHistoryModal', 'previewImageModal', 'switchBaleMode',
     'openPurchaseModal', 'openExpenseModal', 'openWasteModal', 'openShiftModal', 'handleShiftClosingSubmit',
     'handleExpenseFormSubmit', 'handleWasteFormSubmit', 'openCustomerSettleModal', 'handleCustomerSettleFormSubmit',
@@ -132,6 +132,7 @@ window.updateCartQty = updateCartQty;
 window.handleCheckout = handleCheckout;
 window.openCheckoutModal = openCheckoutModal;
 window.confirmCheckout = confirmCheckout;
+window.updateCheckoutChangeDisplay = updateCheckoutChangeDisplay;
 window.viewReceipt = viewReceipt;
 window.editProduct = editProduct;
 window.deleteProduct = deleteProduct;
@@ -140,6 +141,7 @@ window.editCustomer = editCustomer;
 window.deleteCustomer = deleteCustomer;
 window.editSupplier = editSupplier;
 window.openSettleModal = openSettleModal;
+window.handleSettleFormSubmit = handleSettleFormSubmit;
 window.deleteSupplier = deleteSupplier;
 window.cancelTransaction = cancelTransaction;
 window.showToast = showToast;
@@ -634,7 +636,88 @@ function setupEventListeners() {
     });
     addListenerSafe("cart-discount-input", "input", updateCartSummary);
     addListenerSafe("cart-discount", "input", updateCartSummary);
-    addListenerSafe("checkout-btn", "click", handleCheckout);
+    addListenerSafe("checkout-btn", "click", openCheckoutModal);
+    addListenerSafe("confirm-checkout-btn", "click", confirmCheckout);
+
+    // Paid amount live calculation for checkout modal
+    const paidInputEl = document.getElementById("paid-amount-input");
+    if (paidInputEl) {
+        paidInputEl.addEventListener("input", () => updateCheckoutChangeDisplay());
+    }
+
+    // Quick cash preset chips in checkout modal
+    document.querySelectorAll(".btn-quick-cash").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const amountType = btn.getAttribute("data-amount");
+            const paidInput = document.getElementById("paid-amount-input");
+            if (!paidInput) return;
+            if (amountType === "exact") {
+                let subtotal = 0;
+                (state.cart || []).forEach(item => {
+                    const prod = (state.products || []).find(p => p.id === item.productId);
+                    if (prod) subtotal += prod.price * item.qty;
+                });
+                const discountInput = document.getElementById("cart-discount-input");
+                const discountPercent = discountInput ? (parseFloat(discountInput.value) || 0) : 0;
+                const discountAmount = subtotal * (discountPercent / 100);
+                const taxableAmount = subtotal - discountAmount;
+                const taxAmount = taxableAmount * ((state.settings.taxRate || 0) / 100);
+                const finalTotal = taxableAmount + taxAmount;
+                paidInput.value = finalTotal.toFixed(2);
+            } else {
+                paidInput.value = amountType;
+            }
+            updateCheckoutChangeDisplay();
+        });
+    });
+
+    // Checkout payment method card selector
+    document.querySelectorAll(".checkout-payment-card").forEach(card => {
+        card.addEventListener("click", () => {
+            document.querySelectorAll(".checkout-payment-card").forEach(c => c.classList.remove("active"));
+            card.classList.add("active");
+            const radio = card.querySelector('input[type="radio"]');
+            if (radio) radio.checked = true;
+
+            const method = card.getAttribute("data-method");
+            const cashDetails = document.getElementById("cash-payment-details");
+            if (cashDetails) {
+                cashDetails.style.display = (method === "cash") ? "block" : "none";
+            }
+        });
+    });
+
+    // Bale / Carton pricing calculator
+    const updateCostFromBale = () => {
+        const p = parseFloat(document.getElementById("pur-bale-price")?.value) || 0;
+        const q = parseInt(document.getElementById("pur-bale-qty")?.value) || 1;
+        if (p > 0 && q > 0) {
+            const costInp = document.getElementById("pur-cost");
+            if (costInp) costInp.value = (p / q).toFixed(2);
+        }
+    };
+    addListenerSafe("pur-bale-price", "input", updateCostFromBale);
+    addListenerSafe("pur-bale-qty", "input", updateCostFromBale);
+
+    // Paper Invoice Image FileReader
+    const fileInp = document.getElementById("pur-invoice-file");
+    if (fileInp) {
+        fileInp.addEventListener("change", (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                const dataUrl = ev.target.result;
+                const imgDataField = document.getElementById("pur-invoice-image-data");
+                const previewWrapper = document.getElementById("pur-image-preview-wrapper");
+                const previewImg = document.getElementById("pur-image-preview");
+                if (imgDataField) imgDataField.value = dataUrl;
+                if (previewImg) previewImg.src = dataUrl;
+                if (previewWrapper) previewWrapper.style.display = "block";
+            };
+            reader.readAsDataURL(file);
+        });
+    }
 
     addListenerSafe("pur-payment", "change", () => {
         const paymentSel = document.getElementById("pur-payment");
