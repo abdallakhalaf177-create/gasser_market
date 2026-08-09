@@ -188,7 +188,7 @@ window.renderUsers = renderUsers;
 // ==========================================================================
 // APPLICATION INITIALIZATION & EVENT LISTENERS
 // ==========================================================================
-document.addEventListener("DOMContentLoaded", async () => {
+const initApp = async () => {
     try {
         await loadState();
         try { initAuth(); } catch (e) { console.error("initAuth error:", e); }
@@ -211,7 +211,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         console.error("Critical Application Startup Error:", globalErr);
         if (window.showToast) window.showToast("حدث خطأ أثناء تحميل التطبيق، يرجى تحديث الصفحة", "danger");
     }
-});
+};
+
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", initApp);
+} else {
+    initApp();
+}
 
 // Idempotent event listener attaching helper (Hot Reload & Exception Guard)
 const boundListenersRegistry = [];
@@ -360,6 +366,22 @@ function setupNavigation() {
         });
     });
 
+    addListenerSafe("sidebar-toggle-btn", "click", () => {
+        const sidebar = document.getElementById("app-sidebar");
+        if (sidebar) sidebar.classList.toggle("collapsed");
+    });
+
+    const sidebarSearch = document.getElementById("sidebar-menu-search");
+    if (sidebarSearch) {
+        sidebarSearch.addEventListener("input", (e) => {
+            const query = e.target.value.toLowerCase().trim();
+            document.querySelectorAll("#sidebar-nav-menu .nav-btn").forEach(btn => {
+                const text = btn.textContent.toLowerCase();
+                btn.style.display = text.includes(query) ? "flex" : "none";
+            });
+        });
+    }
+
     const drawer = document.getElementById("mobile-drawer");
     const drawerToggle = document.getElementById("mobile-drawer-toggle");
     const mobileMenuBtn = document.getElementById("mobile-menu-btn");
@@ -391,7 +413,7 @@ function setupNavigation() {
 
     addListenerSafe("quick-pos-btn", "click", () => switchView("pos"));
 
-    const statCards = document.querySelectorAll("#view-dashboard .stats-grid .stat-card");
+    const statCards = document.querySelectorAll("#dashboard-view .stats-grid .stat-card");
     if (statCards.length >= 4) {
         statCards[0].addEventListener("click", () => switchView("reports"));
         statCards[1].addEventListener("click", () => switchView("reports"));

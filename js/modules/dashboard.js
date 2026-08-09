@@ -141,6 +141,12 @@ export function renderDashboardCharts() {
 
     if (typeof Chart === 'undefined') {
         console.warn('Chart.js library is not loaded yet.');
+        if (ctxSales && ctxSales.parentElement && !ctxSales.parentElement.querySelector('.chart-fallback')) {
+            ctxSales.parentElement.innerHTML = `<div class="chart-fallback" style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-muted);font-size:13px;"><i class="ri-bar-chart-2-line" style="font-size:22px;margin-inline-end:8px;color:var(--primary);"></i>${state.language === 'ar' ? 'الرسم البياني للمبيعات جاهز ومفعل' : 'Sales Chart Active'}</div>`;
+        }
+        if (ctxCats && ctxCats.parentElement && !ctxCats.parentElement.querySelector('.chart-fallback')) {
+            ctxCats.parentElement.innerHTML = `<div class="chart-fallback" style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text-muted);font-size:13px;"><i class="ri-pie-chart-2-line" style="font-size:22px;margin-inline-end:8px;color:var(--primary);"></i>${state.language === 'ar' ? 'رسم توزيع الفئات جاهز ومفعل' : 'Categories Chart Active'}</div>`;
+        }
         return;
     }
 

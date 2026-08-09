@@ -7,10 +7,10 @@
 $port = 3000
 $rootDir = $PSScriptRoot   # directory of this script
 
-# Start listener on all interfaces (0.0.0.0) and localhost
+# Start listener on localhost & 127.0.0.1
 $listener = [System.Net.HttpListener]::new()
 $listener.Prefixes.Add("http://localhost:${port}/")
-$listener.Prefixes.Add("http://+:${port}/")   # bind to all IPs
+$listener.Prefixes.Add("http://127.0.0.1:${port}/")
 $listener.Start()
 
 # Get local network IP for mobile access info
