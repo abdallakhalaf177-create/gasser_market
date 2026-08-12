@@ -1461,3 +1461,166 @@ body.light-mode .badge-secondary {
         padding: 10px;
     }
 }
+
+/* ==========================================================================
+   FORCE GLOBAL TABLE STYLES OVERRIDE
+   ========================================================================== */
+
+/* 1. رؤوس الجداول */
+table th, 
+.data-table th {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+    color: #a0aec0 !important;
+    font-weight: 700 !important;
+    padding: 12px 14px !important;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1) !important;
+    text-align: right !important;
+}
+
+/* 2. خلايا وصفوف البيانات */
+table td, 
+.data-table td {
+    padding: 12px 14px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    vertical-align: middle !important;
+    color: #e2e8f0 !important;
+}
+
+table tbody tr:hover, 
+.data-table tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.03) !important;
+}
+
+/* 3. أزرار الإجراءات في الجدول */
+.action-btn, 
+table button, 
+.data-table button {
+    border-radius: 6px !important;
+    padding: 6px 10px !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: #fff !important;
+    transition: all 0.2s ease !important;
+    cursor: pointer !important;
+}
+
+.action-btn:hover, 
+table button:hover, 
+.data-table button:hover {
+    background: rgba(255, 255, 255, 0.15) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* ==========================================================================
+   GLOBAL BUTTONS & CONTROLS REDESIGN
+   ========================================================================== */
+
+button, 
+.btn, 
+input[type="button"], 
+input[type="submit"] {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    background-color: var(--bg-card, #1e293b) !important;
+    color: var(--text-primary, #f8fafc) !important;
+    border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12)) !important;
+    border-radius: 8px !important;
+    padding: 8px 16px !important;
+    font-family: inherit !important;
+    font-size: 0.88rem !important;
+    font-weight: 500 !important;
+    cursor: pointer !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+    outline: none !important;
+    white-space: nowrap !important;
+}
+
+/* تأثير التحويم (Hover State) */
+button:hover, 
+.btn:hover, 
+input[type="button"]:hover, 
+input[type="submit"]:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    border-color: rgba(255, 255, 255, 0.25) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* تأثير الضغط (Active State) */
+button:active, 
+.btn:active {
+    transform: translateY(0) !important;
+}
+
+/* Button Variants Overrides (ألوان وتصنيفات الأزرار) */
+.btn-primary, 
+button.btn-primary,
+input[type="submit"].btn-primary {
+    background: linear-gradient(135deg, var(--primary, #38bdf8), var(--primary-hover, #0284c7)) !important;
+    color: #ffffff !important;
+    border: none !important;
+    font-weight: 700 !important;
+}
+
+.btn-primary:hover, 
+button.btn-primary:hover {
+    background: linear-gradient(135deg, var(--primary-hover, #0284c7), #0369a1) !important;
+    box-shadow: var(--shadow-glow, 0 0 15px rgba(56, 189, 248, 0.35)) !important;
+}
+
+.btn-danger, 
+button.btn-danger {
+    background: rgba(239, 68, 68, 0.15) !important;
+    color: #ef4444 !important;
+    border: 1px solid rgba(239, 68, 68, 0.3) !important;
+}
+
+.btn-danger:hover, 
+button.btn-danger:hover {
+    background: rgba(239, 68, 68, 0.25) !important;
+    border-color: rgba(239, 68, 68, 0.5) !important;
+}
+
+.btn-success, 
+button.btn-success {
+    background: rgba(16, 185, 129, 0.15) !important;
+    color: #10b981 !important;
+    border: 1px solid rgba(16, 185, 129, 0.3) !important;
+}
+
+.btn-success:hover, 
+button.btn-success:hover {
+    background: rgba(16, 185, 129, 0.25) !important;
+    border-color: rgba(16, 185, 129, 0.5) !important;
+}
+
+/* أزرار الإغلاق Modal Close (X) */
+.close-btn, 
+.modal-close, 
+.btn-close, 
+button.close-btn {
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+    padding: 0 !important;
+    border-radius: 50% !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: var(--text-muted, #94a3b8) !important;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    font-size: 1.2rem !important;
+    line-height: 1 !important;
+}
+
+.close-btn:hover, 
+.modal-close:hover, 
+.btn-close:hover {
+    background: rgba(239, 68, 68, 0.2) !important;
+    color: #ef4444 !important;
+    border-color: rgba(239, 68, 68, 0.4) !important;
+}
