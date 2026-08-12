@@ -68,18 +68,19 @@ export function calculateShiftMetrics() {
 /**
  * Open shift modal — if no active shift, prompt to open a new one
  */
-export function openShiftModal() {
+export async function openShiftModal() {
     const modal = document.getElementById("shift-modal");
-    if (!modal) return;
 
     // If no shift or shift is closed, open new shift first
     if (!state.currentShift || state.currentShift.status === "closed") {
-        const openingRaw = prompt(
-            state.language === "ar"
-                ? "🔓 لا توجد وردية مفتوحة حالياً.\n\nأدخل مبلغ النقدية الافتتاحية في الدرج لفتح وردية جديدة (ج.م):"
-                : "No active shift. Enter opening cash balance to start a new shift (EGP):",
-            "0.00"
-        );
+        const msg = state.language === "ar"
+            ? "🔓 لا توجد وردية مفتوحة حالياً.\n\nأدخل مبلغ النقدية الافتتاحية في الدرج لفتح وردية جديدة (ج.م):"
+            : "No active shift. Enter opening cash balance to start a new shift (EGP):";
+        
+        const openingRaw = window.customPrompt
+            ? await window.customPrompt(msg, "0.00", state.language === "ar" ? "فتح وردية جديدة" : "Open New Shift")
+            : prompt(msg, "0.00");
+
         if (openingRaw === null) return; // user cancelled
 
         const openingBalance = parseFloat(openingRaw) || 0;

@@ -33,8 +33,10 @@ export function renderCategoriesList() {
     if (window.lucide) window.lucide.createIcons();
 }
 
-export function deleteCategory(catName) {
-    if (confirm(state.language === "ar" ? `هل أنت متأكد من حذف فئة "${catName}"؟` : `Are you sure you want to delete category "${catName}"?`)) {
+export async function deleteCategory(catName) {
+    const msg = state.language === "ar" ? `هل أنت متأكد من حذف فئة "${catName}"؟` : `Are you sure you want to delete category "${catName}"?`;
+    const confirmed = window.customConfirm ? await window.customConfirm(msg) : confirm(msg);
+    if (confirmed) {
         state.categories = state.categories.filter(c => c !== catName);
         saveState();
         renderCategoriesList();

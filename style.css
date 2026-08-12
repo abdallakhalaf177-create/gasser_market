@@ -1624,3 +1624,168 @@ button.close-btn {
     color: #ef4444 !important;
     border-color: rgba(239, 68, 68, 0.4) !important;
 }
+
+/* ==========================================================================
+   POS UI ENHANCEMENTS & PAYMENT METHOD MODAL
+   ========================================================================== */
+
+/* Top Search & Camera Bar */
+.pos-search-camera-wrapper {
+    display: flex !important;
+    gap: 12px !important;
+    align-items: center !important;
+    width: 100% !important;
+}
+
+.search-input-with-icon {
+    flex: 1 !important;
+    position: relative !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+.search-input-with-icon .search-icon {
+    position: absolute !important;
+    inset-inline-start: 16px !important;
+    font-size: 20px !important;
+    color: var(--text-muted) !important;
+    pointer-events: none !important;
+}
+
+.pos-barcode-input {
+    width: 100% !important;
+    height: 48px !important;
+    min-height: 48px !important;
+    padding: 0 16px !important;
+    padding-inline-start: 48px !important;
+    background-color: var(--bg-input) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 10px !important;
+    color: var(--text-primary) !important;
+    font-size: 0.95rem !important;
+    font-weight: 600 !important;
+    outline: none !important;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease !important;
+}
+
+.pos-barcode-input:focus {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 3px var(--primary-glow) !important;
+}
+
+.pos-camera-btn {
+    height: 48px !important;
+    min-height: 48px !important;
+    padding: 0 20px !important;
+    border-radius: 10px !important;
+    font-size: 0.92rem !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+}
+
+/* Checkout Summary Card */
+.pos-checkout-summary-card {
+    background: var(--bg-card) !important;
+    padding: 16px 20px !important;
+    border-radius: 12px !important;
+    border: 1px solid var(--border-color) !important;
+    box-shadow: var(--shadow-sm) !important;
+    margin-bottom: 14px !important;
+}
+
+.summary-line {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    margin-bottom: 10px !important;
+}
+
+.summary-line:last-child {
+    margin-bottom: 0 !important;
+}
+
+.summary-label {
+    font-size: 0.92rem !important;
+    color: var(--text-secondary) !important;
+    font-weight: 600 !important;
+}
+
+.summary-value {
+    font-size: 1rem !important;
+    font-weight: 700 !important;
+    color: var(--text-primary) !important;
+}
+
+.discount-input-wrapper {
+    display: flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+}
+
+.pos-discount-input {
+    width: 80px !important;
+    height: 36px !important;
+    background: var(--bg-input) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: 6px !important;
+    padding: 0 8px !important;
+    color: var(--text-primary) !important;
+    text-align: center !important;
+    font-weight: 700 !important;
+    font-size: 0.9rem !important;
+    outline: none !important;
+}
+
+.pos-discount-input:focus {
+    border-color: var(--primary) !important;
+}
+
+.net-total-line {
+    margin-top: 12px !important;
+    padding-top: 12px !important;
+    border-top: 1px solid var(--border-color) !important;
+}
+
+.net-label {
+    font-size: 1.05rem !important;
+    font-weight: 800 !important;
+    color: var(--text-primary) !important;
+}
+
+.net-total-value {
+    color: #10b981 !important;
+    font-weight: 800 !important;
+    font-size: 1.4rem !important;
+    text-shadow: 0 0 10px rgba(16, 185, 129, 0.2) !important;
+}
+
+/* Payment Method Cards in Modal */
+.payment-methods-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 10px !important;
+    margin-bottom: 18px !important;
+}
+
+.payment-method-card {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    padding: 14px 10px !important;
+    background: var(--bg-card) !important;
+    border: 2px solid var(--border-color) !important;
+    border-radius: 10px !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease !important;
+    text-align: center !important;
+}
+
+.payment-method-card:hover,
+.payment-method-card.active {
+    border-color: var(--primary) !important;
+    background: var(--primary-glow) !important;
+    transform: translateY(-2px) !important;
+}

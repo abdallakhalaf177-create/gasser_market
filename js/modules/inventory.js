@@ -198,12 +198,18 @@ export function editProduct(id) {
     if (modal) modal.classList.add("active");
 }
 
-export function deleteProduct(id) {
-    if (confirm(state.language === "ar" ? "هل أنت متأكد من حذف هذا المنتج؟" : "Are you sure you want to delete this product?")) {
-        state.products = state.products.filter(p => p.id !== id);
-        saveState();
-        renderInventory();
-    }
+export async function deleteProduct(id) {
+    const prod = (state.products || []).find(p => p.id === id);
+    if (!prod) return;
+
+    const msg = state.language === "ar" ? `هل أنت متأكد من حذف المنتج "${prod.name}"؟` : `Are you sure you want to delete product "${prod.name}"?`;
+    const confirmed = window.customConfirm ? await window.customConfirm(msg) : confirm(msg);
+    if (!confirmed) return;
+
+    state.products = state.products.filter(p => p.id !== id);
+    saveState();
+    if (window.showToast) window.showToast(state.language === "ar" ? "تم حذف المنتج بنجاح" : "Product deleted successfully", "info");
+    renderInventoryTable();
 }
 
 export function openPriceHistoryModal(productId) {

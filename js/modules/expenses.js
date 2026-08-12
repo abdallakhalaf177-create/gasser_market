@@ -110,12 +110,14 @@ export function renderExpensesTable() {
     if (window.lucide) window.lucide.createIcons();
 }
 
-export function deleteExpense(id) {
-    if (!confirm(state.language === "ar" ? "هل أنت متأكد من حذف هذا المصروف؟" : "Delete this expense?")) return;
+export async function deleteExpense(id) {
+    const msg = state.language === "ar" ? "هل أنت متأكد من حذف هذا المصروف؟" : "Delete this expense?";
+    const confirmed = window.customConfirm ? await window.customConfirm(msg) : confirm(msg);
+    if (!confirmed) return;
+
     state.expenses = (state.expenses || []).filter(e => e.id !== id);
     saveState();
+    if (window.showToast) window.showToast(state.language === "ar" ? "تم حذف المصروف بنجاح" : "Expense deleted successfully", "info");
     renderExpenses();
-    if (window.showToast) window.showToast("تم حذف المصروف بنجاح وتحديث الحسابات.", "warning");
     if (window.refreshCurrentView) window.refreshCurrentView();
 }
-

@@ -817,8 +817,10 @@ function setupEventListeners() {
         });
     }
 
-    addListenerSafe("reset-data-btn", "click", () => {
-        if (confirm(state.language === "ar" ? "هل أنت متأكد من مسح كافة البيانات وإعادة تهيئة النظام؟" : "Are you sure you want to reset all data?")) {
+    addListenerSafe("reset-data-btn", "click", async () => {
+        const msg = state.language === "ar" ? "هل أنت متأكد من مسح كافة البيانات وإعادة تهيئة النظام؟" : "Are you sure you want to reset all data?";
+        const confirmed = window.customConfirm ? await window.customConfirm(msg) : confirm(msg);
+        if (confirmed) {
             resetToDefault();
             showToast(state.language === "ar" ? "تمت تهيئة النظام بالكامل" : "System reset complete", "danger");
             setTimeout(() => window.location.reload(), 1000);
@@ -917,3 +919,65 @@ window.addEventListener('error', (e) => {
 window.addEventListener('unhandledrejection', (e) => {
     console.error('Unhandled Promise Rejection:', e.reason);
 });
+
+// ============================================================
+// CUSTOM UI DIALOG SYSTEM (Replacing native alert/prompt/confirm)
+// ============================================================
+export function showCustomDialog({ title = "تنبيه", message = "", isPrompt = false, defaultValue = "", confirmText = "تأكيد", cancelText = "إلغاء", showCancel = true }) {
+    return new Promise((resolve) => {
+        const modal = document.getElementById("custom-dialog-modal");
+        const titleEl = document.getElementById("custom-dialog-title");
+        const msgEl = document.getElementById("custom-dialog-message");
+        const inputWrapper = document.getElementById("custom-dialog-input-wrapper");
+        const inputEl = document.getElementById("custom-dialog-input");
+        const confirmBtn = document.getElementById("custom-dialog-confirm-btn");
+        const cancelBtn = document.getElementById("custom-dialog-cancel-btn");
+        const closeBtn = document.getElementById("custom-dialog-close");
+
+        if (!modal) {
+            resolve(isPrompt ? defaultValue : true);
+            return;
+        }
+
+        if (titleEl) titleEl.textContent = title;
+        if (msgEl) msgEl.textContent = message;
+        if (confirmBtn) confirmBtn.textContent = confirmText;
+        if (cancelBtn) {
+            cancelBtn.textContent = cancelText;
+            cancelBtn.style.display = showCancel ? "inline-flex" : "none";
+        }
+
+        if (isPrompt && inputWrapper && inputEl) {
+            inputWrapper.style.display = "block";
+            inputEl.value = defaultValue || "";
+            setTimeout(() => inputEl.focus(), 100);
+        } else if (inputWrapper) {
+            inputWrapper.style.display = "none";
+        }
+
+        modal.classList.add("active");
+
+        const cleanup = (val) => {
+            modal.classList.remove("active");
+            confirmBtn.onclick = null;
+            cancelBtn.onclick = null;
+            if (closeBtn) closeBtn.onclick = null;
+            resolve(val);
+        };
+
+        confirmBtn.onclick = () => {
+            if (isPrompt) {
+                cleanup(inputEl ? inputEl.value : defaultValue);
+            } else {
+                cleanup(true);
+            }
+        };
+
+        cancelBtn.onclick = () => cleanup(isPrompt ? null : false);
+        if (closeBtn) closeBtn.onclick = () => cleanup(isPrompt ? null : false);
+    });
+}
+
+window.customAlert = (msg, title) => showCustomDialog({ title: title || (state.language === "ar" ? "تنبيه" : "Notice"), message: msg, showCancel: false });
+window.customConfirm = (msg, title) => showCustomDialog({ title: title || (state.language === "ar" ? "تأكيد العملية" : "Confirm Action"), message: msg, showCancel: true });
+window.customPrompt = (msg, defaultValue = "", title) => showCustomDialog({ title: title || (state.language === "ar" ? "إدخال بيانات" : "Input Required"), message: msg, isPrompt: true, defaultValue, showCancel: true });

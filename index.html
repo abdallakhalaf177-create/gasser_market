@@ -244,12 +244,14 @@
                     <!-- Front & Center Prominent Barcode & Product Search Bar -->
                     <div class="pos-invoice-header prominent-header">
                         <div class="search-autocomplete-wrapper full-width-search">
-                            <div class="search-bar-container prominent-barcode-search">
-                                <i class="ri-barcode-line search-icon"></i>
-                                <input type="text" id="barcode-input" placeholder="امسح الباركود أو ابحث باسم المنتج..."
-                                    autofocus autocomplete="off">
-                                <button id="btn-camera-scan" class="btn btn-primary" title="مسح الباركود بالكاميرا">
-                                    <i class="ri-camera-line"></i> مسح بالكاميرا
+                            <div class="pos-search-camera-wrapper">
+                                <div class="search-input-with-icon">
+                                    <i class="ri-barcode-line search-icon"></i>
+                                    <input type="text" id="barcode-input" class="pos-barcode-input" placeholder="امسح الباركود أو ابحث باسم المنتج..."
+                                        autofocus autocomplete="off">
+                                </div>
+                                <button id="btn-camera-scan" class="btn btn-primary pos-camera-btn" title="مسح الباركود بالكاميرا">
+                                    <i class="ri-camera-line"></i> <span>مسح بالكاميرا</span>
                                 </button>
                             </div>
                             <!-- Autocomplete Suggestions Dropdown -->
@@ -290,23 +292,24 @@
 
                     <!-- Invoice Summary & Action Buttons Bar -->
                     <div class="invoice-footer-wrapper">
-                        <div class="invoice-summary-grid">
-                            <div class="summary-card">
+                        <div class="pos-checkout-summary-card">
+                            <div class="summary-line">
                                 <span class="summary-label">إجمالي المبيعات الفرعي:</span>
                                 <span id="cart-subtotal" class="summary-value">0.00 ج.م</span>
                             </div>
-                            <div class="summary-card">
+                            <div class="summary-line">
                                 <span class="summary-label">الخصم (%):</span>
-                                <input type="number" id="cart-discount-input" value="0" min="0" max="100" step="1"
-                                    class="input-sm discount-input">
+                                <div class="discount-input-wrapper">
+                                    <input type="number" id="cart-discount-input" value="0" min="0" max="100" step="1" class="pos-discount-input">
+                                </div>
                             </div>
-                            <div class="summary-card">
+                            <div class="summary-line">
                                 <span class="summary-label">الضريبة (%):</span>
                                 <span id="cart-tax" class="summary-value">0.00 ج.م</span>
                             </div>
-                            <div class="summary-card net-total-card">
-                                <span class="summary-label">الصافي النهائي المطلوب:</span>
-                                <span id="cart-total" class="summary-value highlight">0.00 ج.م</span>
+                            <div class="summary-line net-total-line">
+                                <span class="summary-label net-label">الصافي النهائي المطلوب:</span>
+                                <span id="cart-total" class="summary-value net-total-value">0.00 ج.م</span>
                             </div>
                         </div>
 
@@ -1796,6 +1799,88 @@
                 <span id="expiry-summary-text" style="font-weight:700; color:var(--text-secondary);">إجمالي التنبيهات: 0
                     منتج</span>
                 <button class="btn btn-secondary" onclick="window.closeExpiryModal()">إغلاق</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Payment Method Modal (نافذة طرق الدفع) -->
+    <div id="payment-modal" class="modal-overlay">
+        <div class="modal-container payment-modal-container" style="max-width: 540px;">
+            <div class="modal-header">
+                <h3 class="modal-title"><i class="ri-secure-payment-line" style="color:var(--primary);"></i> إنهاء العملية وطرق الدفع</h3>
+                <button id="close-payment-modal" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 20px;">
+                <!-- Display Total Due -->
+                <div class="payment-total-box" style="background: var(--bg-input); padding: 14px 18px; border-radius: 10px; border: 1px solid var(--border-color); text-align: center; margin-bottom: 18px;">
+                    <span style="font-size: 0.9rem; color: var(--text-muted); font-weight: 600; display: block; margin-bottom: 4px;">إجمالي المبلغ المستحق:</span>
+                    <span id="payment-modal-total-due" style="font-size: 1.8rem; font-weight: 900; color: #10b981;">0.00 ج.م</span>
+                </div>
+
+                <!-- Payment Methods Grid -->
+                <div class="payment-methods-grid">
+                    <label class="payment-method-card active" data-method="cash">
+                        <input type="radio" name="modal-payment-method" value="cash" checked style="display:none;">
+                        <i class="ri-money-dollar-box-line" style="font-size: 26px; color: #10b981;"></i>
+                        <span style="font-weight: 700; font-size: 0.9rem;">كاش (Cash)</span>
+                    </label>
+                    <label class="payment-method-card" data-method="card">
+                        <input type="radio" name="modal-payment-method" value="card" style="display:none;">
+                        <i class="ri-bank-card-line" style="font-size: 26px; color: var(--primary);"></i>
+                        <span style="font-weight: 700; font-size: 0.9rem;">فيزا / كارت</span>
+                    </label>
+                    <label class="payment-method-card" data-method="wallet">
+                        <input type="radio" name="modal-payment-method" value="wallet" style="display:none;">
+                        <i class="ri-smartphone-line" style="font-size: 26px; color: #818cf8;"></i>
+                        <span style="font-weight: 700; font-size: 0.85rem;">محفظة / InstaPay</span>
+                    </label>
+                </div>
+
+                <!-- Cash Section -->
+                <div id="payment-cash-section" class="payment-details-section">
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <label style="font-weight: 700; font-size: 0.88rem; color: var(--text-secondary);">المبلغ المدفوع من العميل (ج.م):</label>
+                        <input type="number" id="payment-cash-paid" class="payment-input" placeholder="أدخل المبلغ المدفوع..." step="0.5" style="width: 100%; height: 44px; padding: 0 14px; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); font-size: 1.1rem; font-weight: 700;">
+                        <div class="cash-change-box" style="display: flex; justify-content: space-between; align-items: center; background: rgba(16, 185, 129, 0.1); padding: 12px 14px; border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.3); margin-top: 6px;">
+                            <span style="font-weight: 700; color: var(--text-primary);">الباقي للعميل:</span>
+                            <span id="payment-cash-change" style="font-size: 1.2rem; font-weight: 900; color: #10b981;">0.00 ج.م</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- InstaPay / Wallet Reference Section -->
+                <div id="payment-wallet-section" class="payment-details-section" style="display: none;">
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <label style="font-weight: 700; font-size: 0.88rem; color: var(--text-secondary);">رقم المعاملة / المرجع (اختياري):</label>
+                        <input type="text" id="payment-reference-no" class="payment-input" placeholder="مثال: TXN-984019..." style="width: 100%; height: 44px; padding: 0 14px; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); font-size: 0.95rem; font-weight: 600;">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="display: flex; gap: 12px; justify-content: flex-end; padding: 14px 20px; border-top: 1px solid var(--border-color);">
+                <button id="cancel-payment-btn" class="btn btn-secondary" style="height: 44px; padding: 0 20px;">إلغاء</button>
+                <button id="confirm-payment-btn" class="btn btn-success" style="height: 44px; padding: 0 24px; font-weight: 800; font-size: 0.95rem;">
+                    <i class="ri-printer-line"></i> تأكيد وطباعة (F2)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Generic Custom Dialog Modal (Alert / Confirm / Prompt) -->
+    <div id="custom-dialog-modal" class="modal-overlay">
+        <div class="modal-container custom-dialog-container" style="max-width: 460px;">
+            <div class="modal-header">
+                <h3 id="custom-dialog-title" class="modal-title">تنبيه</h3>
+                <button id="custom-dialog-close" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body" style="padding: 20px;">
+                <p id="custom-dialog-message" style="margin: 0; font-size: 0.95rem; line-height: 1.5; color: var(--text-primary); font-weight: 600;"></p>
+                <div id="custom-dialog-input-wrapper" style="display: none; margin-top: 14px;">
+                    <input type="text" id="custom-dialog-input" style="width: 100%; height: 44px; padding: 0 14px; background: var(--bg-input); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); font-size: 1rem; font-weight: 700; outline: none;">
+                </div>
+            </div>
+            <div class="modal-footer" style="display: flex; gap: 10px; justify-content: flex-end; padding: 14px 20px; border-top: 1px solid var(--border-color);">
+                <button id="custom-dialog-cancel-btn" class="btn btn-secondary" style="height: 40px; padding: 0 18px;">إلغاء</button>
+                <button id="custom-dialog-confirm-btn" class="btn btn-primary" style="height: 40px; padding: 0 22px; font-weight: 700;">تأكيد</button>
             </div>
         </div>
     </div>

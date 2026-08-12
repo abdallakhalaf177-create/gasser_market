@@ -136,12 +136,15 @@ export function editCustomer(id) {
     if (modal) modal.classList.add("active");
 }
 
-export function deleteCustomer(id) {
-    if (!confirm(state.language === "ar" ? "هل أنت متأكد من حذف هذا العميل وجميع سجلاته؟" : "Delete this customer?")) return;
+export async function deleteCustomer(id) {
+    const msg = state.language === "ar" ? "هل أنت متأكد من حذف هذا العميل وجميع سجلاته؟" : "Delete this customer?";
+    const confirmed = window.customConfirm ? await window.customConfirm(msg) : confirm(msg);
+    if (!confirmed) return;
+
     state.customers = (state.customers || []).filter(c => c.id !== id);
     saveState();
+    if (window.showToast) window.showToast(state.language === "ar" ? "تم حذف العميل بنجاح" : "Customer deleted successfully", "info");
     renderCustomers();
-    if (window.showToast) window.showToast("تم حذف العميل بنجاح.", "warning");
 }
 
 export function openCustomerSettleModal(id) {

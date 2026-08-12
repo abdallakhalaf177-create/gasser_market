@@ -179,7 +179,8 @@ export function deleteUser(id) {
         if (window.showToast) window.showToast("لا يمكنك حذف حسابك أثناء تسجيل الدخول!", "danger");
         return;
     }
-    if (confirm("هل أنت متأكد من حذف هذا المستخدم نهائياً؟")) {
+    const confirmed = window.customConfirm ? await window.customConfirm("هل أنت متأكد من حذف هذا المستخدم نهائياً؟") : confirm("هل أنت متأكد من حذف هذا المستخدم نهائياً؟");
+    if (confirmed) {
         state.users = state.users.filter(u => u.id !== id);
         saveState();
         renderUsers();

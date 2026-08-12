@@ -365,12 +365,15 @@ export function editSupplier(id) {
     if (modal) modal.classList.add("active");
 }
 
-export function deleteSupplier(id) {
-    if (!confirm(state.language === "ar" ? "هل أنت متأكد من حذف هذا المورد؟" : "Delete this supplier?")) return;
+export async function deleteSupplier(id) {
+    const msg = state.language === "ar" ? "هل أنت متأكد من حذف هذا المورد؟" : "Delete this supplier?";
+    const confirmed = window.customConfirm ? await window.customConfirm(msg) : confirm(msg);
+    if (!confirmed) return;
+
     state.suppliers = (state.suppliers || []).filter(s => s.id !== id);
     saveState();
-    renderSuppliers();
-    if (window.showToast) window.showToast("تم حذف المورد بنجاح.", "warning");
+    if (window.showToast) window.showToast(state.language === "ar" ? "تم حذف المورد بنجاح" : "Supplier deleted successfully", "info");
+    renderSuppliersTable();
 }
 
 export function handlePurchaseFormSubmit(e) {
