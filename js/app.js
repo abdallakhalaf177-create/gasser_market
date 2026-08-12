@@ -119,6 +119,7 @@ export function showToast(message, type = 'info') {
 }
 
 // Bind all module functions to window scope for HTML inline handlers & global availability
+window.updateLiveTimeDisplay = updateLiveTimeDisplay;
 window.dynamicCalculatedExpiry = dynamicCalculatedExpiry;
 window.applyDynamicExpiry = applyDynamicExpiry;
 window.setQuickExpiry = setQuickExpiry;
@@ -188,21 +189,55 @@ window.renderUsers = renderUsers;
 // ==========================================================================
 // APPLICATION INITIALIZATION & EVENT LISTENERS
 // ==========================================================================
+export function updateLiveTimeDisplay() {
+    try {
+        const timeEl = document.getElementById("live-time");
+        if (!timeEl) return;
+        const now = new Date();
+        const lang = (state && state.language === "ar") ? "ar-EG" : "en-US";
+        const timeStr = now.toLocaleTimeString(lang, {
+            hour: "2-digit", minute: "2-digit", second: "2-digit"
+        });
+        const span = timeEl.querySelector("span");
+        if (span) {
+            span.textContent = timeStr;
+        } else {
+            timeEl.textContent = timeStr;
+        }
+    } catch (e) {
+        console.error("Live time update error:", e);
+    }
+}
+
+let liveTimeTimer = null;
+function setupLiveTime() {
+    updateLiveTimeDisplay();
+    if (!liveTimeTimer) {
+        liveTimeTimer = setInterval(updateLiveTimeDisplay, 1000);
+    }
+}
+
 const initApp = async () => {
     try {
-        await loadState();
+        // 1. Clock protection: update clock immediately
+        try { setupLiveTime(); } catch (e) { console.error("setupLiveTime error:", e); }
+
+        // 2. Load state & auth
+        try { await loadState(); } catch (e) { console.error("loadState error:", e); }
         try { initAuth(); } catch (e) { console.error("initAuth error:", e); }
         try { applyTheme(); } catch (e) { console.error("applyTheme error:", e); }
         try { applyLanguage(); } catch (e) { console.error("applyLanguage error:", e); }
+
+        // 3. Setup Navigation & Event Listeners
         try { setupNavigation(); } catch (e) { console.error("setupNavigation error:", e); }
         try { setupEventListeners(); } catch (e) { console.error("setupEventListeners error:", e); }
-        try { setupLiveTime(); } catch (e) { console.error("setupLiveTime error:", e); }
         try { setupKeyboardShortcuts(); } catch (e) { console.error("setupKeyboardShortcuts error:", e); }
 
         onCartChange(() => {
             try { renderCart(); } catch (e) { console.error("renderCart error:", e); }
         });
 
+        // 4. Initial View Render
         try { switchView(state.currentView || "pos"); } catch (e) { console.error("switchView error:", e); }
         if (window.lucide) {
             try { lucide.createIcons(); } catch (e) { }
