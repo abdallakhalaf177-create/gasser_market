@@ -1,14 +1,6 @@
 import { state, saveState } from '../state.js';
 
 export function initAuth() {
-    // Migration v5 — clear once if schema outdated to ensure fresh start
-    if (!localStorage.getItem('supermarket_migration_v5')) {
-        localStorage.clear();
-        localStorage.setItem('supermarket_migration_v5', 'true');
-        window.location.reload();
-        return;
-    }
-
     if (!state.users || !Array.isArray(state.users)) {
         state.users = [];
     }

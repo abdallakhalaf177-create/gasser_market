@@ -138,7 +138,7 @@ export function clearCart() {
     notifyCartChange(); 
 }
 
-export function cancelTransaction(transactionId) {
+export async function cancelTransaction(transactionId) {
     const t = state.transactions.find(x => x.id === transactionId);
     if (!t) return;
     if (t.status === "cancelled") { 
@@ -146,7 +146,8 @@ export function cancelTransaction(transactionId) {
         return; 
     }
     const msg = state.language === "ar" ? `هل أنت متأكد من إلغاء الفاتورة #${transactionId}؟ سيتم إرجاع المنتجات للمخزن.` : `Cancel sale #${transactionId}? Stock will be restored.`;
-    if (!confirm(msg)) return;
+    const confirmed = window.customConfirm ? await window.customConfirm(msg) : confirm(msg);
+    if (!confirmed) return;
     t.status = "cancelled";
     t.items.forEach(item => { 
         const prod = state.products.find(p => p.id === item.productId); 

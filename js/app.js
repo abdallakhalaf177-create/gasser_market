@@ -264,7 +264,11 @@ function setupKeyboardShortcuts() {
             }
             if (e.key === "F2") {
                 e.preventDefault();
-                switchView(state.currentView);
+                if (state.currentView === "pos") {
+                    handleCheckout();
+                } else {
+                    switchView("pos");
+                }
             }
             if (e.key === "F3") {
                 e.preventDefault();
