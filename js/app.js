@@ -354,20 +354,18 @@ function applyLanguage() {
 
 // Navigation Setup
 function setupNavigation() {
-    document.querySelectorAll(".nav-btn, .sidebar-menu .menu-item, .mobile-nav-item[data-view], .mobile-drawer-btn[data-view]").forEach(item => {
+    document.querySelectorAll(".sidebar-nav .nav-btn, .nav-btn[data-view]").forEach(item => {
         item.addEventListener("click", (e) => {
             e.preventDefault();
             const view = item.getAttribute("data-view");
             if (view) {
                 switchView(view);
-                const drawer = document.getElementById("mobile-drawer");
-                if (drawer) drawer.classList.remove("active");
             }
         });
     });
 
     addListenerSafe("sidebar-toggle-btn", "click", () => {
-        const sidebar = document.getElementById("app-sidebar");
+        const sidebar = document.getElementById("app-sidebar") || document.querySelector(".app-sidebar");
         if (sidebar) sidebar.classList.toggle("collapsed");
     });
 
@@ -379,20 +377,6 @@ function setupNavigation() {
                 const text = btn.textContent.toLowerCase();
                 btn.style.display = text.includes(query) ? "flex" : "none";
             });
-        });
-    }
-
-    const drawer = document.getElementById("mobile-drawer");
-    const drawerToggle = document.getElementById("mobile-drawer-toggle");
-    const mobileMenuBtn = document.getElementById("mobile-menu-btn");
-    const closeDrawerBtn = document.getElementById("close-mobile-drawer");
-
-    if (drawerToggle) drawerToggle.addEventListener("click", () => drawer && drawer.classList.add("active"));
-    if (mobileMenuBtn) mobileMenuBtn.addEventListener("click", () => drawer && drawer.classList.add("active"));
-    if (closeDrawerBtn) closeDrawerBtn.addEventListener("click", () => drawer && drawer.classList.remove("active"));
-    if (drawer) {
-        drawer.addEventListener("click", (e) => {
-            if (e.target === drawer) drawer.classList.remove("active");
         });
     }
 
@@ -448,7 +432,7 @@ function switchView(viewName) {
         state.currentView = cleanViewName;
         saveState();
 
-        document.querySelectorAll(".nav-btn, .menu-item, .mobile-nav-item, .mobile-drawer-btn").forEach(item => {
+        document.querySelectorAll(".sidebar-nav .nav-btn, .nav-btn[data-view]").forEach(item => {
             const itemTarget = (item.getAttribute("data-view") || "").replace("-view", "");
             if (itemTarget === cleanViewName) {
                 item.classList.add("active");
