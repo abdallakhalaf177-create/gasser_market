@@ -613,8 +613,10 @@ body.storekeeper-mode .hide-for-storekeeper {
 }
 
 /* ==========================================================================
-   5. INVENTORY & DATA TABLE UI COMPONENTS
+   5. INVENTORY & UNIFIED DATA TABLE DESIGN SYSTEM
    ========================================================================== */
+
+/* Layout Container Wrappers */
 #inventory-view.view-section.active {
     display: flex;
     flex-direction: column;
@@ -628,81 +630,540 @@ body.storekeeper-mode .hide-for-storekeeper {
     gap: 12px;
 }
 
-.inventory-toolbar {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    padding: 10px 14px;
-    box-shadow: var(--shadow-sm);
-    flex-shrink: 0;
+/* --------------------------------------------------------------------------
+   5.1 TOP CONTROLS & FILTERS BAR (أشرطة البحث والتحكم العليا)
+   -------------------------------------------------------------------------- */
+.inventory-toolbar,
+.reports-toolbar,
+.top-controls,
+.toolbar,
+.filters-bar,
+.controls-bar {
+    display: flex !important;
+    gap: 12px !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border-color) !important;
+    border-radius: var(--radius-md) !important;
+    padding: 10px 14px !important;
+    box-shadow: var(--shadow-sm) !important;
+    flex-shrink: 0 !important;
+    width: 100% !important;
 }
 
-.search-input-wrapper {
-    flex: 1;
-    position: relative;
-    min-width: 200px;
+.toolbar-left,
+.toolbar-right {
+    display: flex !important;
+    gap: 12px !important;
+    align-items: center !important;
 }
 
-.search-input-wrapper .search-icon {
-    position: absolute;
-    top: 50%;
-    inset-inline-end: 12px;
-    transform: translateY(-50%);
-    color: var(--text-muted);
-    font-size: 15px;
-    pointer-events: none;
+.search-input-wrapper,
+.search-bar-wrapper {
+    flex: 1 !important;
+    position: relative !important;
+    min-width: 220px !important;
 }
 
-.inventory-toolbar input.search-input {
-    width: 100%;
-    padding: 8px 12px;
-    padding-inline-end: 36px;
-    background: var(--bg-input);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-md);
-    color: var(--text-primary);
-    font-size: 13px;
-    outline: none;
+.search-input-wrapper .search-icon,
+.search-bar-wrapper .search-icon {
+    position: absolute !important;
+    top: 50% !important;
+    inset-inline-end: 14px !important;
+    transform: translateY(-50%) !important;
+    color: var(--text-muted) !important;
+    font-size: 15px !important;
+    pointer-events: none !important;
 }
 
-.inventory-table-wrapper {
+/* Unified Height & Uniform Input / Select / Button Styling */
+.inventory-toolbar input,
+.inventory-toolbar select,
+.inventory-toolbar .btn,
+.reports-toolbar input,
+.reports-toolbar select,
+.reports-toolbar .btn,
+.top-controls input,
+.top-controls select,
+.top-controls .btn,
+.toolbar input,
+.toolbar select,
+.toolbar .btn,
+.filters-bar input,
+.filters-bar select,
+.filters-bar .btn,
+.controls-bar input,
+.controls-bar select,
+.controls-bar .btn,
+.search-input-wrapper input,
+.search-bar-wrapper input {
+    height: 42px !important;
+    min-height: 42px !important;
+    max-height: 42px !important;
+    border-radius: var(--radius-md) !important;
+    font-size: 0.88rem !important;
+    font-family: var(--font-ar) !important;
+    box-sizing: border-box !important;
+}
+
+.inventory-toolbar input.search-input,
+.search-input-wrapper input,
+.search-bar-wrapper input,
+.toolbar input[type="text"],
+.toolbar input[type="search"],
+.filters-bar input {
+    width: 100% !important;
+    padding: 0 14px !important;
+    padding-inline-end: 38px !important;
+    background: var(--bg-input) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-primary) !important;
+    outline: none !important;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast) !important;
+}
+
+.inventory-toolbar input.search-input:focus,
+.search-input-wrapper input:focus,
+.search-bar-wrapper input:focus,
+.toolbar input:focus,
+.filters-bar input:focus {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 3px var(--primary-glow) !important;
+}
+
+.inventory-toolbar select,
+.reports-toolbar select,
+.top-controls select,
+.toolbar select,
+.filters-bar select {
+    background-color: var(--bg-input) !important;
+    border: 1px solid var(--border-color) !important;
+    color: var(--text-primary) !important;
+    padding: 0 14px !important;
+    outline: none !important;
+    cursor: pointer !important;
+    font-weight: 600 !important;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast) !important;
+}
+
+.inventory-toolbar select:focus,
+.reports-toolbar select:focus,
+.top-controls select:focus,
+.toolbar select:focus,
+.filters-bar select:focus {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 3px var(--primary-glow) !important;
+}
+
+/* Primary Action Buttons in Top Controls Bar ("+ إضافة") */
+.inventory-toolbar .btn-primary,
+.reports-toolbar .btn-primary,
+.top-controls .btn-primary,
+.toolbar .btn-primary,
+.filters-bar .btn-primary,
+.controls-bar .btn-primary,
+.inventory-toolbar .btn-success,
+.reports-toolbar .btn-success,
+.top-controls .btn-success,
+.toolbar .btn-success {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    padding: 0 18px !important;
+    background: linear-gradient(135deg, var(--primary), var(--primary-hover)) !important;
+    color: #ffffff !important;
+    border: none !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+    cursor: pointer !important;
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast) !important;
+}
+
+.inventory-toolbar .btn-primary:hover,
+.reports-toolbar .btn-primary:hover,
+.top-controls .btn-primary:hover,
+.toolbar .btn-primary:hover,
+.filters-bar .btn-primary:hover,
+.controls-bar .btn-primary:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: var(--shadow-glow) !important;
+}
+
+
+/* --------------------------------------------------------------------------
+   5.2 DATA TABLE & WRAPPERS (تنسيق الحاويات والجداول)
+   -------------------------------------------------------------------------- */
+.inventory-table-wrapper,
+.table-wrapper,
+.table-container,
+.cart-table-wrapper,
+.batch-table-wrapper,
+.table-responsive {
     flex: 1;
     overflow-y: auto;
+    overflow-x: auto;
     background: var(--bg-card);
     border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    -webkit-overflow-scrolling: touch;
 }
 
-.table {
+.table,
+.data-table,
+.cart-table,
+.receipt-table,
+table {
     width: 100%;
     border-collapse: collapse;
     text-align: start;
+    font-family: var(--font-ar);
 }
 
-.table th {
-    padding: 14px 16px;
-    font-size: 12.5px;
-    font-weight: 700;
-    color: var(--text-muted);
-    border-bottom: 2px solid var(--border-color);
-    background-color: var(--bg-card);
-    position: sticky;
-    top: 0;
-    z-index: 10;
+
+/* --------------------------------------------------------------------------
+   5.3 TABLE HEADER (رأس الجدول - TH)
+   -------------------------------------------------------------------------- */
+.table th,
+.data-table th,
+.cart-table th,
+.receipt-table th,
+.table-wrapper th,
+.table-container th,
+table th {
+    padding: 12px 14px !important;
+    font-size: 0.85rem !important;
+    font-weight: 700 !important;
+    color: #a0aec0 !important;
+    background-color: rgba(255, 255, 255, 0.04) !important;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1) !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 10 !important;
+    white-space: nowrap !important;
+    letter-spacing: 0.3px !important;
+    line-height: 1.4 !important;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
-.table td {
-    padding: 14px 16px;
-    font-size: 13.5px;
-    border-bottom: 1px solid var(--border-color);
-    color: var(--text-primary);
+body.light-mode .table th,
+body.light-mode .data-table th,
+body.light-mode table th {
+    background-color: rgba(0, 0, 0, 0.03) !important;
+    color: #475569 !important;
+    border-bottom: 2px solid rgba(0, 0, 0, 0.08) !important;
 }
 
-.table tr:hover td {
-    background-color: var(--bg-hover);
+
+/* --------------------------------------------------------------------------
+   5.4 TABLE ROWS & CELLS (صفوف وخلايا البيانات - TR & TD)
+   -------------------------------------------------------------------------- */
+.table td,
+.data-table td,
+.cart-table td,
+.receipt-table td,
+.table-wrapper td,
+.table-container td,
+table td {
+    padding: 12px 14px !important;
+    font-size: 0.88rem !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    color: var(--text-primary) !important;
+    vertical-align: middle !important;
+    line-height: 1.4 !important;
+}
+
+body.light-mode .table td,
+body.light-mode .data-table td,
+body.light-mode table td {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Hover Effect (تأثير التحويم على الصفوف) */
+.table tr:hover,
+.data-table tr:hover,
+.cart-table tr:hover,
+table tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.02) !important;
+    transition: background-color 0.15s ease !important;
+}
+
+body.light-mode .table tr:hover,
+body.light-mode .data-table tr:hover,
+body.light-mode table tbody tr:hover {
+    background-color: rgba(0, 0, 0, 0.025) !important;
+}
+
+/* Row hover cells fallback */
+.table tr:hover td,
+.data-table tr:hover td,
+table tbody tr:hover td {
+    background-color: rgba(255, 255, 255, 0.02) !important;
+}
+
+body.light-mode .table tr:hover td,
+body.light-mode .data-table tr:hover td,
+body.light-mode table tbody tr:hover td {
+    background-color: rgba(0, 0, 0, 0.025) !important;
+}
+
+/* Centered alignment for numbers, prices, dates, quantities, barcodes, badges, and actions */
+.table td.text-center,
+.data-table td.text-center,
+.table th.text-center,
+.data-table th.text-center {
+    text-align: center !important;
+}
+
+/* Auto-align numeric & status & action cells centered for effortless fast reading */
+.table td:has(.badge),
+.data-table td:has(.badge),
+.table td:has(code),
+.data-table td:has(code),
+.table td:has(.btn),
+.data-table td:has(.btn),
+.table td:last-child,
+.data-table td:last-child,
+.table th:last-child,
+.data-table th:last-child {
+    text-align: center !important;
+}
+
+/* Structural column default alignments */
+.data-table td:nth-child(1),
+.data-table td:nth-child(4),
+.data-table td:nth-child(5),
+.data-table td:nth-child(6),
+.data-table td:nth-child(7),
+.data-table td:nth-child(8),
+.data-table td:nth-child(9),
+.data-table th:nth-child(1),
+.data-table th:nth-child(4),
+.data-table th:nth-child(5),
+.data-table th:nth-child(6),
+.data-table th:nth-child(7),
+.data-table th:nth-child(8),
+.data-table th:nth-child(9) {
+    text-align: center;
+}
+
+
+/* --------------------------------------------------------------------------
+   5.5 RE-DESIGNED ACTION BUTTONS (أزرار الإجراءات - التعديل/الحذف/الخيارات)
+   -------------------------------------------------------------------------- */
+/* Cell Action Wrapper */
+td:last-child > div,
+.actions-cell,
+.table-actions {
+    display: inline-flex !important;
+    gap: 6px !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* Action Icon Buttons */
+td .btn,
+tr .btn,
+.data-table td .btn,
+.table td .btn,
+.actions-cell .btn,
+.btn-action,
+.btn-icon,
+td .btn-sm,
+tr .btn-sm {
+    border-radius: 6px !important;
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    min-height: 32px !important;
+    max-width: 32px !important;
+    max-height: 32px !important;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: transparent !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    color: var(--text-secondary) !important;
+    cursor: pointer !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    font-size: 0.9rem !important;
+    box-shadow: none !important;
+    line-height: 1 !important;
+}
+
+body.light-mode td .btn,
+body.light-mode tr .btn,
+body.light-mode .actions-cell .btn {
+    border-color: rgba(0, 0, 0, 0.1) !important;
+    color: var(--text-secondary) !important;
+}
+
+td .btn i,
+td .btn svg,
+tr .btn i,
+tr .btn svg {
+    font-size: 15px !important;
+    width: 15px !important;
+    height: 15px !important;
+    pointer-events: none !important;
+}
+
+/* Red Hover Effect for Delete / Cancel (أحمر للحذف والإلغاء) */
+td .btn-danger:hover,
+tr .btn-danger:hover,
+td .btn[title*="حذف"]:hover,
+td .btn[title*="إلغاء"]:hover,
+td .btn[title*="Cancel"]:hover,
+td .btn[title*="Delete"]:hover {
+    background-color: rgba(239, 68, 68, 0.15) !important;
+    color: #ef4444 !important;
+    border-color: rgba(239, 68, 68, 0.35) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.25) !important;
+}
+
+/* Blue / Cyan Hover Effect for Edit / History / View (أزرق للتعديل والتفاصيل والسجل) */
+td .btn-secondary:hover,
+td .btn-info:hover,
+td .btn-primary:hover,
+td .btn[title*="تعديل"]:hover,
+td .btn[title*="سجل"]:hover,
+td .btn[title*="عرض"]:hover,
+td .btn[title*="كشف"]:hover,
+td .btn[title*="Edit"]:hover,
+td .btn[title*="View"]:hover {
+    background-color: rgba(56, 189, 248, 0.15) !important;
+    color: #38bdf8 !important;
+    border-color: rgba(56, 189, 248, 0.35) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(56, 189, 248, 0.25) !important;
+}
+
+/* Green Hover Effect for Settle / Success (أخضر للتسوية والتحصيل) */
+td .btn-success:hover,
+tr .btn-success:hover,
+td .btn[title*="تسوية"]:hover,
+td .btn[title*="Settle"]:hover,
+td .btn[title*="Pay"]:hover {
+    background-color: rgba(16, 185, 129, 0.15) !important;
+    color: #10b981 !important;
+    border-color: rgba(16, 185, 129, 0.35) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25) !important;
+}
+
+
+/* --------------------------------------------------------------------------
+   5.6 MODERN STATUS BADGES (Pill Badges - شارات الحالة)
+   -------------------------------------------------------------------------- */
+.badge,
+.status-badge,
+.shift-badge {
+    padding: 4px 10px !important;
+    border-radius: 20px !important;
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 5px !important;
+    line-height: 1.2 !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+    letter-spacing: 0.2px !important;
+    transition: all 0.2s ease !important;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+/* In Stock / Success / Paid (متوفر / مدفوع / مكتمل) */
+.badge-success,
+.badge-paid,
+.stock-available {
+    background-color: rgba(16, 185, 129, 0.12) !important;
+    color: #34d399 !important;
+    border: 1px solid rgba(16, 185, 129, 0.25) !important;
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.1) !important;
+}
+
+/* Low Stock / Warning / Partial (منخفض / جزئي / قريب الانتهاء) */
+.badge-warning,
+.badge-partial,
+.stock-low {
+    background-color: rgba(245, 158, 11, 0.12) !important;
+    color: #fbbf24 !important;
+    border: 1px solid rgba(245, 158, 11, 0.25) !important;
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.1) !important;
+}
+
+/* Out of Stock / Danger / Cancelled / Debt (غير متوفر / نافد / آجل / ملغي) */
+.badge-danger,
+.badge-cancelled,
+.badge-credit,
+.stock-out {
+    background-color: rgba(239, 68, 68, 0.12) !important;
+    color: #f87171 !important;
+    border: 1px solid rgba(239, 68, 68, 0.25) !important;
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.1) !important;
+}
+
+/* Info / Category / Primary (معلومات / قسم / أساسي) */
+.badge-info,
+.badge-primary {
+    background-color: rgba(56, 189, 248, 0.12) !important;
+    color: #38bdf8 !important;
+    border: 1px solid rgba(56, 189, 248, 0.25) !important;
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.1) !important;
+}
+
+/* Neutral / Secondary (محايد) */
+.badge-secondary {
+    background-color: rgba(148, 163, 184, 0.12) !important;
+    color: #cbd5e1 !important;
+    border: 1px solid rgba(148, 163, 184, 0.25) !important;
+}
+
+/* Light mode overrides for status badges */
+body.light-mode .badge-success,
+body.light-mode .badge-paid,
+body.light-mode .stock-available {
+    background-color: rgba(5, 150, 105, 0.12) !important;
+    color: #047857 !important;
+    border-color: rgba(5, 150, 105, 0.3) !important;
+}
+
+body.light-mode .badge-warning,
+body.light-mode .badge-partial,
+body.light-mode .stock-low {
+    background-color: rgba(217, 119, 6, 0.12) !important;
+    color: #b45309 !important;
+    border-color: rgba(217, 119, 6, 0.3) !important;
+}
+
+body.light-mode .badge-danger,
+body.light-mode .badge-cancelled,
+body.light-mode .badge-credit,
+body.light-mode .stock-out {
+    background-color: rgba(220, 38, 38, 0.12) !important;
+    color: #b91c1c !important;
+    border-color: rgba(220, 38, 38, 0.3) !important;
+}
+
+body.light-mode .badge-info,
+body.light-mode .badge-primary {
+    background-color: rgba(2, 132, 199, 0.12) !important;
+    color: #0369a1 !important;
+    border-color: rgba(2, 132, 199, 0.3) !important;
+}
+
+body.light-mode .badge-secondary {
+    background-color: rgba(71, 85, 105, 0.12) !important;
+    color: #334155 !important;
+    border-color: rgba(71, 85, 105, 0.3) !important;
 }
 
 /* ==========================================================================
