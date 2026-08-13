@@ -150,7 +150,8 @@ export function handleProductFormSubmit(e) {
             state.products[index] = { id, barcode, name, category, cost, price, stock, minStock, expiry, image, priceHistory: history };
         }
     } else {
-        const newId = (state.products.length + 1).toString();
+        const maxId = (state.products || []).reduce((max, p) => Math.max(max, parseInt(p.id) || 0), 0);
+        const newId = (maxId + 1).toString();
         const newProd = { id: newId, barcode, name, category, cost, price, stock, minStock, expiry, image, priceHistory: [] };
         logPriceChange(newProd, cost, price, "سعر الإضافة الأولي");
         state.products.push(newProd);

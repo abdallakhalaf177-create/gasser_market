@@ -336,23 +336,6 @@ function setupKeyboardShortcuts() {
     });
 }
 
-// Live Time Clock
-function setupLiveTime() {
-    const timeEl = document.getElementById("live-time");
-    const updateTime = () => {
-        try {
-            const now = new Date();
-            const timeStr = now.toLocaleTimeString(state.language === "ar" ? "ar-EG" : "en-US", {
-                hour: "2-digit", minute: "2-digit", second: "2-digit"
-            });
-            if (timeEl && timeEl.querySelector("span")) {
-                timeEl.querySelector("span").textContent = timeStr;
-            }
-        } catch (e) { }
-    };
-    updateTime();
-    setInterval(updateTime, 1000);
-}
 
 // Theme Application
 function applyTheme() {
@@ -875,9 +858,7 @@ function setupEventListeners() {
         });
     });
 
-    addListenerSafe("manage-categories-btn", "click", () => {
-        renderCategoriesList();
-    });
+
 }
 
 function checkSmartBarcode() {

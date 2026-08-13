@@ -93,19 +93,34 @@ app.get('/api/data', (req, res) => {
     });
 });
 
-// API: Save all data
+// API: Save all data (Atomic Write to prevent JSON corruption)
 app.post('/api/data', (req, res) => {
     const data = req.body;
     if (!data || typeof data !== 'object') {
         return res.status(400).json({ error: "Invalid data format" });
     }
     
-    fs.writeFile(DB_FILE, JSON.stringify(data, null, 2), 'utf8', (err) => {
+    const tempFile = `${DB_FILE}.tmp`;
+    const jsonStr = JSON.stringify(data, null, 2);
+
+    fs.writeFile(tempFile, jsonStr, 'utf8', (err) => {
         if (err) {
-            return res.status(500).json({ error: "Failed to write database file" });
+            return res.status(500).json({ error: "Failed to write temporary database file" });
         }
-        return res.json({ success: true });
+        fs.rename(tempFile, DB_FILE, (renameErr) => {
+            if (renameErr) {
+                return res.status(500).json({ error: "Failed to update database file" });
+            }
+            return res.json({ success: true });
+        });
     });
+});
+
+process.on('uncaughtException', (err) => {
+    console.error('[Server Warning] Uncaught Exception:', err);
+});
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('[Server Warning] Unhandled Rejection at:', promise, 'reason:', reason);
 });
 
 app.listen(PORT, () => {

@@ -159,7 +159,7 @@ export function editUser(id) {
     if (userModal) userModal.classList.add('active');
 }
 
-export function deleteUser(id) {
+export async function deleteUser(id) {
     const user = state.users.find(u => u.id === id);
     if (!user) return;
 

@@ -64,7 +64,35 @@ while ($listener.IsListening) {
         $safePath = $urlPath.TrimStart('/').Replace('/', '\').Replace('..', '')
         $filePath = Join-Path $rootDir $safePath
 
-        if (Test-Path $filePath -PathType Leaf) {
+        # API Route handling: /api/data
+        if ($urlPath -eq '/api/data') {
+            $dbFile = Join-Path $rootDir 'db.json'
+            $res.AddHeader("Access-Control-Allow-Origin", "*")
+            $res.AddHeader("Cache-Control", "no-cache, no-store, must-revalidate")
+
+            if ($req.HttpMethod -eq 'GET') {
+                if (-not (Test-Path $dbFile)) {
+                    $defaultJson = [System.IO.File]::ReadAllText((Join-Path $rootDir 'server.js'))
+                }
+                if (Test-Path $dbFile) {
+                    $jsonBytes = [System.IO.File]::ReadAllBytes($dbFile)
+                    $res.ContentType = "application/json; charset=utf-8"
+                    $res.ContentLength64 = $jsonBytes.Length
+                    $res.OutputStream.Write($jsonBytes, 0, $jsonBytes.Length)
+                } else {
+                    $res.StatusCode = 404
+                }
+            } elseif ($req.HttpMethod -eq 'POST') {
+                $reader = [System.IO.StreamReader]::new($req.InputStream, $req.ContentEncoding)
+                $body = $reader.ReadToEnd()
+                [System.IO.File]::WriteAllText($dbFile, $body, [System.Text.Encoding]::UTF8)
+                
+                $responseBytes = [System.Text.Encoding]::UTF8.GetBytes('{"success":true}')
+                $res.ContentType = "application/json; charset=utf-8"
+                $res.ContentLength64 = $responseBytes.Length
+                $res.OutputStream.Write($responseBytes, 0, $responseBytes.Length)
+            }
+        } elseif (Test-Path $filePath -PathType Leaf) {
             $bytes             = [System.IO.File]::ReadAllBytes($filePath)
             $ext               = [System.IO.Path]::GetExtension($filePath)
             $res.ContentType   = Get-MimeType $ext
